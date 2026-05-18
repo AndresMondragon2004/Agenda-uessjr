@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { CheckCircle2 } from 'lucide-react'
+import { CheckCircle2, Loader2 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { supabase } from '../../services/supabase'
+import { generateConstanciaPDF } from '../../utils/pdfGenerator'
 
 const TIPO_COLORS = {
   inauguracion: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300',
@@ -38,6 +39,8 @@ export default function MyAgenda() {
   const [inscripciones, setInscripciones] = useState([])
   const [asistencias,   setAsistencias]   = useState([])
   const [loading,       setLoading]       = useState(true)
+  const [generating,    setGenerating]    = useState(false)
+  const [jornada,       setJornada]       = useState(null)
   const [cancelando,    setCancelando]    = useState(null)
   const [confirmando,   setConfirmando]   = useState(null)
   const [toast,         setToast]         = useState(null)
@@ -59,6 +62,10 @@ export default function MyAgenda() {
     try {
       setLoading(true)
       
+      // 0. Cargar jornada activa
+      const { data: jor } = await supabase.from('jornadas').select('*').eq('estado', 'activa').maybeSingle()
+      setJornada(jor)
+
       // 1. Cargar inscripciones
       const { data: insc, error: iErr } = await supabase
         .from('inscripciones')
@@ -90,6 +97,20 @@ export default function MyAgenda() {
       console.error('Error cargando agenda:', err)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleDescargarConstancia = async () => {
+    if (!jornada || !estudiante) return
+    try {
+      setGenerating(true)
+      await generateConstanciaPDF(estudiante, jornada)
+      showToast('Constancia generada con éxito')
+    } catch (err) {
+      console.error(err)
+      alert('Error al generar la constancia')
+    } finally {
+      setGenerating(false)
     }
   }
 
@@ -176,18 +197,35 @@ export default function MyAgenda() {
         ) : (
           <>
             {/* Summary bar */}
-            <div className="bg-white dark:bg-[#122A1C] rounded-xl shadow-sm p-5 mb-8 flex items-center justify-between border border-transparent dark:border-emerald-900/40">
-              <div>
-                <p className="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wide">Total de inscripciones</p>
-                <p className="text-2xl font-bold text-[#1B4332] dark:text-emerald-400">{inscripciones.length}</p>
+            <div className="bg-white dark:bg-[#122A1C] rounded-xl shadow-sm p-5 mb-8 flex flex-col sm:flex-row items-center justify-between border border-transparent dark:border-emerald-900/40 gap-4">
+              <div className="flex gap-8">
+                <div>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wide">Inscripciones</p>
+                  <p className="text-2xl font-bold text-[#1B4332] dark:text-emerald-400">{inscripciones.length}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wide">Asistencias</p>
+                  <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{asistencias.length}</p>
+                </div>
               </div>
-              <Link
-                to="/agenda"
-                className="px-5 py-2.5 text-sm font-semibold text-[#1B4332] border border-[#1B4332]
-                           rounded-lg hover:bg-emerald-50 transition-colors"
-              >
-                + Agregar sesiones
-              </Link>
+
+              <div className="flex gap-2 w-full sm:w-auto">
+                {asistencias.length > 0 && (
+                  <button
+                    onClick={handleDescargarConstancia}
+                    disabled={generating}
+                    className="flex-1 sm:flex-none px-5 py-2.5 bg-emerald-600 text-white text-sm font-bold rounded-lg hover:bg-emerald-700 transition-all shadow-md shadow-emerald-900/10 flex items-center justify-center gap-2"
+                  >
+                    {generating ? <Loader2 size={16} className="animate-spin" /> : '🎓 Descargar Constancia'}
+                  </button>
+                )}
+                <Link
+                  to="/agenda"
+                  className="flex-1 sm:flex-none px-5 py-2.5 text-sm font-semibold text-[#1B4332] dark:text-emerald-400 border border-[#1B4332] dark:border-emerald-900/50 rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors text-center"
+                >
+                  + Agregar sesiones
+                </Link>
+              </div>
             </div>
 
             {/* Sessions grouped by day */}

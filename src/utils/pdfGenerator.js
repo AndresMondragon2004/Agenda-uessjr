@@ -375,3 +375,89 @@ export async function generateAgendaPDF(jornada, sesiones, options = {}) {
   const safeNombre = (jornada.nombre || 'Jornada').replace(/\s+/g, '-').replace(/[^\w-]/g, '')
   doc.save(`Programa-${safeNombre}-UESSJR.pdf`)
 }
+
+export async function generateConstanciaPDF(estudiante, jornada) {
+  const { jsPDF } = await import('jspdf')
+  const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'landscape' })
+  
+  const [imgUES, imgUMB] = await Promise.all([
+    tryLoadImage('/images/logos/ues-sjr.png'),
+    tryLoadImage('/images/logos/umb.png')
+  ])
+
+  const cx = 297 / 2
+  const cy = 210 / 2
+
+  // Fondo elegante
+  doc.setFillColor(252, 251, 247)
+  doc.rect(0, 0, 297, 210, 'F')
+  
+  // Marco institucional
+  doc.setDrawColor(27, 67, 50)
+  doc.setLineWidth(1)
+  doc.rect(10, 10, 277, 190)
+  doc.setDrawColor(212, 160, 23)
+  doc.setLineWidth(0.5)
+  doc.rect(12, 12, 273, 186)
+
+  // Logos
+  if (imgUMB) doc.addImage(imgUMB, 'PNG', 25, 20, 45, 22)
+  if (imgUES) doc.addImage(imgUES, 'PNG', 227, 20, 45, 22)
+
+  // Textos
+  doc.setFont('times', 'bold')
+  doc.setFontSize(22)
+  doc.setTextColor(27, 67, 50)
+  doc.text('UNIVERSIDAD MEXIQUENSE DEL BICENTENARIO', cx, 45, { align: 'center' })
+  
+  doc.setFontSize(14)
+  doc.text('UNIDAD DE ESTUDIOS SUPERIORES SAN JOSÉ DEL RINCÓN', cx, 52, { align: 'center' })
+
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(32)
+  doc.setTextColor(212, 160, 23)
+  doc.text('CONSTANCIA', cx, 85, { align: 'center' })
+
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(14)
+  doc.setTextColor(75, 85, 99)
+  doc.text('Se otorga la presente a:', cx, 105, { align: 'center' })
+
+  doc.setFont('times', 'bolditalic')
+  doc.setFontSize(28)
+  doc.setTextColor(17, 24, 39)
+  doc.text(`${estudiante.nombre} ${estudiante.apellidos}`.toUpperCase(), cx, 120, { align: 'center' })
+
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(14)
+  doc.setTextColor(75, 85, 99)
+  const texto = `Por su valiosa participación en la ${jornada?.edicion || '12va'} Jornada Académica y Cultural titulada:`
+  doc.text(texto, cx, 135, { align: 'center' })
+
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(16)
+  doc.setTextColor(27, 67, 50)
+  const lema = `"${jornada?.lema || 'Cultura que inspira, conocimiento que transforma'}"`
+  doc.text(lema, cx, 145, { align: 'center' })
+
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(11)
+  doc.setTextColor(107, 114, 128)
+  const fechaStr = `Llevada a cabo del ${new Date(jornada?.fecha_inicio + 'T12:00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'long' })} al ${new Date(jornada?.fecha_fin + 'T12:00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' })}.`
+  doc.text(fechaStr, cx, 155, { align: 'center' })
+
+  // Firmas (Simuladas)
+  doc.setDrawColor(200, 200, 200)
+  doc.line(cx - 50, 185, cx + 50, 185)
+  doc.setFontSize(10)
+  doc.text('DIRECCIÓN ACADÉMICA', cx, 190, { align: 'center' })
+  doc.text('UES SAN JOSÉ DEL RINCÓN', cx, 195, { align: 'center' })
+
+  // Código de validación único
+  const validCode = `VERIFY-${estudiante.id.slice(0,8)}-${jornada?.id.slice(0,4)}`.toUpperCase()
+  doc.setFontSize(7)
+  doc.setTextColor(200, 200, 200)
+  doc.text(`Código de verificación: ${validCode}`, 20, 200)
+
+  doc.save(`Constancia-${estudiante.nombre.replace(/\s+/g, '_')}-UESSJR.pdf`)
+}
