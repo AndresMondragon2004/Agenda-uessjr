@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { Clock, MapPin, CalendarDays, Users, Share2, ChevronRight, CheckCircle2, Download } from 'lucide-react'
+import { Clock, MapPin, CalendarDays, Users, Share2, ChevronRight, CheckCircle2, Download, Star } from 'lucide-react'
 import { sesionesService } from '../../services/sesiones.service'
 import { inscripcionesService } from '../../services/inscripciones.service'
 import { useAuth }         from '../../context/AuthContext'
@@ -51,6 +51,10 @@ export default function SessionDetail() {
   const [error,          setError]          = useState(null)
   const [totalInscritos, setTotalInscritos] = useState(0)
   const [yaInscrito,     setYaInscrito]     = useState(false)
+  const [yaAsistio,      setYaAsistio]      = useState(false)
+  const [yaValoro,       setYaValoro]       = useState(false)
+  const [valoracion,     setValoracion]     = useState({ estrellas: 0, comentario: '' })
+  const [enviandoVal,    setEnviandoVal]    = useState(false)
   const [inscribiendo,   setInscribiendo]   = useState(false)
   const [finalizada,     setFinalizada]     = useState(false)
   const [toast,          setToast]          = useState(null)
@@ -86,6 +90,7 @@ export default function SessionDetail() {
         setTotalInscritos(sesionConteo ? Number(sesionConteo.total) : 0)
 
         if (estudiante?.id) {
+          // 1. Verificar Inscripción
           const { data: insc } = await supabase
             .from('inscripciones')
             .select('id')
@@ -93,6 +98,27 @@ export default function SessionDetail() {
             .eq('estudiante_id', estudiante.id)
             .maybeSingle()
           setYaInscrito(!!insc)
+
+          // 2. Verificar Asistencia (Check-in Staff)
+          const { data: asist } = await supabase
+            .from('asistencias')
+            .select('id')
+            .eq('sesion_id', id)
+            .eq('estudiante_id', estudiante.id)
+            .maybeSingle()
+          setYaAsistio(!!asist)
+
+          // 3. Verificar si ya calificó
+          const { data: val } = await supabase
+            .from('valoraciones')
+            .select('*')
+            .eq('sesion_id', id)
+            .eq('estudiante_id', estudiante.id)
+            .maybeSingle()
+          if (val) {
+            setYaValoro(true)
+            setValoracion({ estrellas: val.estrellas, comentario: val.comentario })
+          }
         }
       } catch (err) {
         setError(err.message)
@@ -102,6 +128,31 @@ export default function SessionDetail() {
     }
     cargar()
   }, [id, estudiante])
+
+  const handleValorar = async () => {
+    if (valoracion.estrellas === 0) {
+      showToast('Por favor selecciona una calificación', 'error')
+      return
+    }
+    try {
+      setEnviandoVal(true)
+      const { error: vErr } = await supabase
+        .from('valoraciones')
+        .insert([{
+          estudiante_id: estudiante.id,
+          sesion_id:     id,
+          estrellas:     valoracion.estrellas,
+          comentario:    valoracion.comentario
+        }])
+      if (vErr) throw vErr
+      setYaValoro(true)
+      showToast('¡Gracias por tu opinión!')
+    } catch (err) {
+      showToast(err.message, 'error')
+    } finally {
+      setEnviandoVal(false)
+    }
+  }
 
   const handleInscribirse = async () => {
     if (!isLoggedIn || !estudiante) { navigate('/login'); return }
@@ -309,9 +360,69 @@ export default function SessionDetail() {
                       </p>
                     )}
                   </div>
-                </div>
-              </div>
-            )}
+
+                  {/* ── SECCIÓN DE FEEDBACK (PRO) ── */}
+                  {yaAsistio && (
+                    <div className="mt-12 bg-white dark:bg-[#122A1C] rounded-[2.5rem] p-8 sm:p-12 shadow-sm border border-gray-100 dark:border-emerald-900/30 anim-fade-up">
+                      <div className="max-w-2xl">
+                        <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-2">Califica esta sesión</h2>
+                        <p className="text-gray-500 dark:text-gray-400 mb-8 font-medium">Tu opinión ayuda a mejorar futuras jornadas académicas.</p>
+
+                        {yaValoro ? (
+                          <div className="p-6 bg-emerald-50 dark:bg-emerald-950/40 rounded-3xl border border-emerald-100 dark:border-emerald-900/30 text-center sm:text-left">
+                            <div className="flex items-center gap-1 mb-3 justify-center sm:justify-start">
+                              {[1,2,3,4,5].map(n => (
+                                <Star key={n} size={20} className={n <= valoracion.estrellas ? 'text-amber-400 fill-amber-400' : 'text-gray-200'} />
+                              ))}
+                            </div>
+                            <p className="text-[#1B4332] dark:text-emerald-400 font-bold">¡Valoración enviada!</p>
+                            <p className="text-emerald-600 dark:text-emerald-500 text-sm italic mt-2">"{valoracion.comentario}"</p>
+                          </div>
+                        ) : (
+                          <div className="space-y-6">
+                            {/* Estrellas */}
+                            <div className="flex items-center gap-3">
+                              {[1,2,3,4,5].map(n => (
+                                <button 
+                                  key={n} 
+                                  onClick={() => setValoracion(p => ({ ...p, estrellas: n }))}
+                                  className="transition-transform hover:scale-125 focus:scale-110 outline-none"
+                                >
+                                  <Star size={32} className={n <= valoracion.estrellas ? 'text-amber-400 fill-amber-400' : 'text-gray-200 dark:text-emerald-900/50'} />
+                                </button>
+                              ))}
+                              <span className="ml-2 text-xs font-black text-gray-400 uppercase tracking-widest">
+                                {['Pobre','Regular','Buena','Muy buena','Excelente'][valoracion.estrellas - 1] || 'Toca para calificar'}
+                              </span>
+                            </div>
+
+                            {/* Comentario */}
+                            <div>
+                              <textarea 
+                                value={valoracion.comentario}
+                                onChange={e => setValoracion(p => ({ ...p, comentario: e.target.value }))}
+                                placeholder="Escribe un comentario opcional sobre la sesión, el ponente o el contenido..."
+                                className="w-full p-5 bg-gray-50 dark:bg-[#0F2018] border border-gray-100 dark:border-emerald-900/50 rounded-[2rem] outline-none focus:border-[#1B4332] text-sm font-medium dark:text-gray-200 resize-none h-32"
+                              />
+                            </div>
+
+                            <button 
+                              onClick={handleValorar}
+                              disabled={enviandoVal || valoracion.estrellas === 0}
+                              className="px-10 py-4 bg-[#1B4332] text-white font-black uppercase text-xs tracking-widest rounded-2xl hover:bg-emerald-800 transition-all shadow-lg shadow-emerald-900/20 disabled:opacity-50"
+                            >
+                              {enviandoVal ? 'Enviando...' : 'Enviar Calificación'}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  </div>
+                  </div>
+                  )
+                  }
+
 
             {/* Descripción */}
             {sesion.descripcion && (
@@ -440,6 +551,13 @@ export default function SessionDetail() {
                     <p className="text-emerald-700 dark:text-emerald-300 font-bold text-sm">✓ Estás inscrito(a)</p>
                     <p className="text-emerald-600 dark:text-emerald-400 text-xs mt-0.5">Recibirás confirmación por correo</p>
                   </div>
+                  {yaAsistio && (
+                    <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/50 rounded-xl text-center">
+                      <p className="text-blue-700 dark:text-blue-300 font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2">
+                        <CheckCircle2 size={12} /> Asistencia Verificada
+                      </p>
+                    </div>
+                  )}
                   <button
                     onClick={handleCancelar}
                     disabled={inscribiendo}
