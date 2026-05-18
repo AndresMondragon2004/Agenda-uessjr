@@ -27,19 +27,22 @@ const FORM_DEFAULT = {
 // ─── ToggleSwitch ──────────────────────────────────────────────────────────
 function ToggleSwitch({ checked, onChange, label, hint }) {
   return (
-    <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-emerald-900/30">
+    <div className="flex items-center justify-between py-4 border-b border-gray-100 dark:border-emerald-900/30">
       <div>
-        <span className="text-gray-700 dark:text-gray-300 font-medium">{label}</span>
-        {hint && <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{hint}</p>}
+        <span className="text-sm text-gray-700 dark:text-gray-200 font-bold">{label}</span>
+        {hint && <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-0.5">{hint}</p>}
       </div>
       <button
         type="button"
         onClick={() => onChange(!checked)}
-        className={`relative w-12 h-6 rounded-full transition-colors shrink-0 ml-4
-          ${checked ? 'bg-[#004F31]' : 'bg-gray-300'}`}
+        className={`relative w-11 h-6 rounded-full transition-all duration-300 shrink-0 ml-4 border-2
+          ${checked ? 'bg-[#1B4332] border-[#1B4332]' : 'bg-gray-200 dark:bg-emerald-950/50 border-gray-200 dark:border-emerald-900/50'}`}
       >
-        <span className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform shadow
-          ${checked ? 'translate-x-6' : 'translate-x-0'}`} />
+        <span className={`absolute top-0.5 left-0.5 bg-white rounded-full
+          transition-all duration-300 shadow-sm
+          ${checked ? 'translate-x-5' : 'translate-x-0'}`} 
+          style={{ width: '16px', height: '16px' }}
+        />
       </button>
     </div>
   )
@@ -479,9 +482,10 @@ export default function ScenariosManagement() {
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleToggleDisponible(esc)}
-                          className={`relative w-10 h-5 rounded-full transition-all ${esc.disponible ? 'bg-emerald-500' : 'bg-gray-200'}`}
+                          className={`relative w-10 h-5 rounded-full transition-all border
+                            ${esc.disponible ? 'bg-emerald-500 border-emerald-500' : 'bg-gray-200 dark:bg-emerald-950/50 border-gray-200 dark:border-emerald-900/50'}`}
                         >
-                          <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-all ${esc.disponible ? 'translate-x-5' : 'translate-x-0'}`} />
+                          <div className={`absolute top-0.5 left-0.5 w-3.5 h-3.5 bg-white rounded-full transition-all ${esc.disponible ? 'translate-x-5' : 'translate-x-0'}`} />
                         </button>
                         <span className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">
                           {esc.disponible ? 'Activo' : 'Inactivo'}

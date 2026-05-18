@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, Check, ChevronRight } from 'lucide-react'
+import { ArrowRight, Check, ChevronRight, Rocket } from 'lucide-react'
 import { jornadaService }    from '../../services/jornada.service'
 import { propuestasService } from '../../services/propuestas.service'
+import PublicLayout from '../../components/layout/PublicLayout'
 
 // ─── Constantes ───────────────────────────────────────────────────────────────
 const TIPOS = [
@@ -98,6 +99,7 @@ export default function ProposeActivity() {
   const [success,  setSuccess]  = useState(false)
   const [error,    setError]    = useState(null)
   const [step,     setStep]     = useState(1) // 1 | 2 | 3
+  const [finalizada, setFinalizada] = useState(false)
 
   useEffect(() => {
     if (error) window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -125,14 +127,24 @@ export default function ProposeActivity() {
   useEffect(() => {
     async function cargar() {
       try {
+        setLoading(true)
         const j = await jornadaService.getActiva()
         setJornada(j)
-        const diasOrdenados = (j.dias_jornada || [])
-          .sort((a, b) => new Date(a.fecha) - new Date(b.fecha))
-        setDias(diasOrdenados)
-        setForm(prev => ({ ...prev, jornada_id: j.id }))
+        if (j) {
+          const diasOrdenados = (j.dias_jornada || [])
+            .sort((a, b) => new Date(a.fecha) - new Date(b.fecha))
+          setDias(diasOrdenados)
+          setForm(prev => ({ ...prev, jornada_id: j.id }))
+
+          // Verificar si ya terminó
+          const hoy = new Date()
+          const fin = new Date(j.fecha_fin + 'T23:59:59')
+          if (hoy > fin) setFinalizada(true)
+        }
       } catch (err) {
         console.error(err)
+      } finally {
+        setLoading(false)
       }
     }
     cargar()
@@ -257,6 +269,38 @@ export default function ProposeActivity() {
             Ver la agenda de la jornada
           </Link>
         </div>
+      </div>
+    </div>
+  )
+
+  if (finalizada) return (
+    <div className="max-w-4xl mx-auto px-4 py-32 text-center min-h-[70vh] flex flex-col items-center justify-center">
+      <div className="w-24 h-24 bg-amber-50 dark:bg-amber-950/30 rounded-3xl flex items-center justify-center mx-auto mb-8 border-2 border-amber-200 dark:border-amber-900/50 shadow-xl shadow-amber-900/10 anim-scale-in">
+        <Rocket className="w-12 h-12 text-amber-500" />
+      </div>
+      
+      <h1 className="text-4xl sm:text-5xl font-black text-gray-900 dark:text-white mb-6 uppercase tracking-tight anim-fade-up">
+        Convocatoria <span className="text-[#1B4332] dark:text-emerald-500">Cerrada</span>
+      </h1>
+      
+      <p className="text-gray-500 dark:text-gray-400 text-lg sm:text-xl mb-12 max-w-2xl mx-auto leading-relaxed anim-fade-up anim-delay-100">
+        La recepción de propuestas para la 12va Jornada Académica y Cultural ha finalizado oficialmente. 
+        Agradecemos a todos los que compartieron su conocimiento en esta edición.
+      </p>
+      
+      <div className="bg-white dark:bg-[#122A1C] p-10 rounded-[2.5rem] border border-gray-100 dark:border-emerald-900/30 inline-block shadow-2xl shadow-emerald-900/5 anim-fade-up anim-delay-200">
+        <div className="inline-flex items-center gap-2 bg-emerald-50 dark:bg-emerald-950/50 px-4 py-1.5 rounded-full mb-4">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <p className="text-[10px] font-black text-[#1B4332] dark:text-emerald-400 uppercase tracking-widest">Próxima Edición</p>
+        </div>
+        <p className="text-gray-900 dark:text-white font-black text-xl">Mayo 2027</p>
+        <p className="text-gray-400 dark:text-gray-500 text-xs mt-1">Te esperamos con más innovación y cultura.</p>
+      </div>
+
+      <div className="mt-16 anim-fade-up anim-delay-300">
+        <Link to="/" className="inline-flex items-center gap-2 bg-[#0D2B1D] text-white px-8 py-4 rounded-2xl font-black uppercase text-xs tracking-[0.2em] hover:bg-emerald-900 transition-all shadow-lg hover:-translate-y-1">
+          Ir al resumen del evento <ArrowRight size={16} />
+        </Link>
       </div>
     </div>
   )

@@ -252,14 +252,14 @@ export default function Agenda() {
             <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
               {/* Filtro por día */}
               <div className="md:col-span-4">
-                <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] mb-2">Día</p>
+                <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] mb-2.5">Día de la jornada</p>
                 <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
                   <button
                     onClick={() => setDiaFiltro('todos')}
-                    className={`px-3 py-1.5 rounded-lg text-[11px] font-bold whitespace-nowrap transition-all ${
+                    className={`px-4 py-2 rounded-xl text-[11px] font-bold whitespace-nowrap transition-all border-2 ${
                       diaFiltro === 'todos'
-                        ? 'bg-gray-800 text-white'
-                        : 'bg-gray-100 dark:bg-emerald-950/20 text-gray-500 dark:text-gray-400 hover:bg-gray-200'
+                        ? 'bg-[#1B4332] text-white border-[#1B4332] shadow-md'
+                        : 'bg-white dark:bg-[#0F2018] text-gray-500 dark:text-gray-400 border-gray-100 dark:border-emerald-900/30 hover:border-[#1B4332] dark:hover:border-emerald-700'
                     }`}
                   >
                     Todos
@@ -267,10 +267,10 @@ export default function Agenda() {
                   {dias.map(dia => (
                     <button key={dia.id}
                       onClick={() => setDiaFiltro(dia.id)}
-                      className={`px-3 py-1.5 rounded-lg text-[11px] font-bold whitespace-nowrap transition-all ${
+                      className={`px-4 py-2 rounded-xl text-[11px] font-bold whitespace-nowrap transition-all border-2 ${
                         diaFiltro === dia.id
-                          ? 'bg-gray-800 text-white'
-                          : 'bg-gray-100 dark:bg-emerald-950/20 text-gray-500 dark:text-gray-400 hover:bg-gray-200'
+                          ? 'bg-[#1B4332] text-white border-[#1B4332] shadow-md'
+                          : 'bg-white dark:bg-[#0F2018] text-gray-500 dark:text-gray-400 border-gray-100 dark:border-emerald-900/30 hover:border-[#1B4332] dark:hover:border-emerald-700'
                       }`}
                     >
                       {formatShortDay(dia)}

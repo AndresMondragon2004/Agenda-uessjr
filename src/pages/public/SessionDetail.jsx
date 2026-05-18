@@ -52,6 +52,7 @@ export default function SessionDetail() {
   const [totalInscritos, setTotalInscritos] = useState(0)
   const [yaInscrito,     setYaInscrito]     = useState(false)
   const [inscribiendo,   setInscribiendo]   = useState(false)
+  const [finalizada,     setFinalizada]     = useState(false)
   const [toast,          setToast]          = useState(null)
 
   useEffect(() => {
@@ -69,6 +70,16 @@ export default function SessionDetail() {
         const data  = await sesionesService.getById(id)
         setSesion(data)
         
+        // Verificar si la jornada ya terminó
+        if (data.dias_jornada?.fecha) {
+          const { data: jor } = await supabase.from('jornadas').select('fecha_fin').eq('id', data.jornada_id).single()
+          if (jor) {
+            const hoy = new Date()
+            const fin = new Date(jor.fecha_fin + 'T23:59:59')
+            setFinalizada(hoy > fin)
+          }
+        }
+
         // Usar RPC para obtener el conteo real (bypass RLS)
         const { data: conteos } = await supabase.rpc('get_inscritos_por_jornada', { jornada_uuid: data.jornada_id })
         const sesionConteo = (conteos || []).find(c => c.sesion_id === id)
@@ -195,18 +206,20 @@ export default function SessionDetail() {
       {/* Hero banner — thematic background */}
       <div className="relative pt-24 pb-12 overflow-hidden">
         {/* Background Layer */}
-        <div className="absolute inset-0 bg-[#0D2B1D]" />
+        <div className="absolute inset-0 bg-[#0A1A11]" />
         {(sesion.dias_jornada?.imagen_url || IMAGENES_POR_DIA[sesion.dias_jornada?.nombre_dia]) ? (
           <img 
             src={sesion.dias_jornada?.imagen_url || IMAGENES_POR_DIA[sesion.dias_jornada?.nombre_dia]} 
             alt="" 
-            className="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-overlay"
+            className="absolute inset-0 w-full h-full object-cover opacity-50 transition-opacity duration-700"
           />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-r from-[#0D2B1D] to-[#1B4332]" />
         )}
-        {/* Readability Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0D2B1D]/40 to-[#0D2B1D]/90" />
+        
+        {/* Glassmorphism/Readability Overlay: Más claro en el centro para ver la foto */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0A1A11]/60 via-[#0A1A11]/30 to-[#0A1A11]" />
+        <div className="absolute inset-0 bg-black/20" /> {/* Filtro extra de contraste */}
 
         <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2 text-sm text-white/50 mb-6">
@@ -415,8 +428,13 @@ export default function SessionDetail() {
                 </div>
               )}
 
-              {/* Ya inscrito */}
-              {yaInscrito ? (
+              {/* Ya inscrito o Finalizada */}
+              {finalizada ? (
+                <div className="p-4 bg-gray-100 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl text-center">
+                  <p className="text-gray-600 dark:text-gray-400 font-bold text-sm">Esta sesión ha finalizado</p>
+                  <p className="text-gray-500 dark:text-gray-500 text-xs mt-0.5">La jornada académica concluyó exitosamente.</p>
+                </div>
+              ) : yaInscrito ? (
                 <div className="space-y-3">
                   <div className="p-4 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800/50 rounded-xl text-center">
                     <p className="text-emerald-700 dark:text-emerald-300 font-bold text-sm">✓ Estás inscrito(a)</p>
@@ -446,7 +464,7 @@ export default function SessionDetail() {
                 </button>
               )}
 
-              {!isLoggedIn && !yaInscrito && (
+              {!isLoggedIn && !yaInscrito && !finalizada && (
                 <div className="mb-3 p-3 bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/40 rounded-xl text-center">
                   <p className="text-blue-700 dark:text-blue-300 text-xs font-medium">
                     <Link to="/login" className="underline font-bold">Inicia sesión</Link> o{' '}

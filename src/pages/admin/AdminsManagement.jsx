@@ -599,25 +599,27 @@ export default function AdminsManagement() {
               </div>
 
               <div>
-                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Rol</label>
-                <div className="flex gap-2">
+                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-3">Asignar Rol de Acceso</label>
+                <div className="flex gap-2 p-1 bg-gray-100 dark:bg-[#0F2018] rounded-2xl border border-gray-200 dark:border-emerald-900/30">
                   <button
+                    type="button"
                     onClick={() => setNuevoRol('admin')}
                     disabled={creando}
-                    className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-1.5
+                    className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2
                       ${nuevoRol === 'admin'
-                        ? 'bg-emerald-600 text-white'
-                        : 'bg-gray-100 dark:bg-[#0F2018] text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-emerald-900/20'}`}
+                        ? 'bg-white dark:bg-[#1B4332] text-[#1B4332] dark:text-white shadow-sm'
+                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
                   >
                     <Shield size={12} /> Admin
                   </button>
                   <button
+                    type="button"
                     onClick={() => setNuevoRol('superadmin')}
                     disabled={creando}
-                    className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-1.5
+                    className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2
                       ${nuevoRol === 'superadmin'
-                        ? 'bg-amber-500 text-white'
-                        : 'bg-gray-100 dark:bg-[#0F2018] text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-emerald-900/20'}`}
+                        ? 'bg-white dark:bg-[#1B4332] text-[#1B4332] dark:text-white shadow-sm'
+                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
                   >
                     <ShieldCheck size={12} /> Superadmin
                   </button>

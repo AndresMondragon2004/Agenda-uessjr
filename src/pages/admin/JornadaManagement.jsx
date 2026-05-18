@@ -159,12 +159,14 @@ function Toggle({ checked, onChange }) {
     <button
       type="button"
       onClick={() => onChange(!checked)}
-      className={`relative w-12 h-6 rounded-full transition-colors shrink-0
-        ${checked ? 'bg-[#1B4332]' : 'bg-gray-300'}`}
+      className={`relative w-11 h-6 rounded-full transition-all duration-300 shrink-0 border-2
+        ${checked ? 'bg-[#1B4332] border-[#1B4332]' : 'bg-gray-200 dark:bg-emerald-950/50 border-gray-200 dark:border-emerald-900/50'}`}
     >
-      <span className={`absolute top-1 w-4 h-4 bg-white rounded-full
-        transition-transform shadow
-        ${checked ? 'translate-x-7' : 'translate-x-1'}`} />
+      <span className={`absolute top-0.5 left-0.5 bg-white rounded-full
+        transition-all duration-300 shadow-sm
+        ${checked ? 'translate-x-5' : 'translate-x-0'}`} 
+        style={{ width: '16px', height: '16px' }}
+      />
     </button>
   )
 }
@@ -371,29 +373,34 @@ function JornadaModal({ jornadaActiva, jornadaEditando, onClose, onSaved }) {
 
           {/* Estado */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Estado
+            <label className="block text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] mb-3">
+              Estado del Evento
             </label>
-            <div className="flex gap-6">
-              {['borrador', 'activa', 'finalizada'].map(est => (
-                <label key={est}
-                       className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio" name="estado" value={est}
-                    checked={form.estado === est} onChange={handleChange}
-                    className="accent-[#1B4332]"
-                  />
-                  <span className="text-sm capitalize text-gray-700 dark:text-gray-300">{est}</span>
-                </label>
-              ))}
+            <div className="grid grid-cols-3 gap-2 bg-gray-100 dark:bg-[#0F2018] p-1 rounded-xl border border-gray-200 dark:border-emerald-900/30">
+              {['borrador', 'activa', 'finalizada'].map(est => {
+                const isActive = form.estado === est
+                return (
+                  <button
+                    key={est}
+                    type="button"
+                    onClick={() => setForm(prev => ({ ...prev, estado: est }))}
+                    className={`py-2 px-3 rounded-lg text-xs font-bold capitalize transition-all
+                      ${isActive 
+                        ? 'bg-white dark:bg-[#1B4332] text-[#1B4332] dark:text-white shadow-sm ring-1 ring-black/5 dark:ring-white/10' 
+                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
+                  >
+                    {est}
+                  </button>
+                )
+              })}
             </div>
             {form.estado === 'activa' &&
              jornadaActiva &&
              jornadaActiva.id !== jornadaEditando?.id && (
-              <div className="mt-2 p-3 bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-400
-                              text-amber-700 dark:text-amber-300 text-xs rounded">
-                ⚠️ Esto desactivará la jornada activa actual:{' '}
-                <strong>{jornadaActiva.nombre}</strong>
+              <div className="mt-3 p-3 bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-400
+                              text-amber-700 dark:text-amber-300 text-[10px] font-bold rounded-r-xl leading-relaxed">
+                <span className="mr-1">⚠️</span> Esto desactivará automáticamente la jornada activa actual:{' '}
+                <span className="underline">{jornadaActiva.nombre}</span>
               </div>
             )}
           </div>

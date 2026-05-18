@@ -10,19 +10,22 @@ import { supabase } from '../../services/supabase'
 // ─── Toggle reutilizable ───────────────────────────────────────────────────
 function ToggleSwitch({ checked, onChange, label, hint }) {
   return (
-    <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-emerald-900/30">
+    <div className="flex items-center justify-between py-4 border-b border-gray-100 dark:border-emerald-900/30">
       <div>
-        <span className="text-gray-700 dark:text-gray-300 font-medium">{label}</span>
-        {hint && <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{hint}</p>}
+        <span className="text-sm text-gray-700 dark:text-gray-200 font-bold">{label}</span>
+        {hint && <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-0.5">{hint}</p>}
       </div>
       <button
         type="button"
         onClick={() => onChange(!checked)}
-        className={`relative w-12 h-6 rounded-full transition-colors shrink-0 ml-4
-          ${checked ? 'bg-[#1B4332]' : 'bg-gray-300'}`}
+        className={`relative w-11 h-6 rounded-full transition-all duration-300 shrink-0 ml-4 border-2
+          ${checked ? 'bg-[#1B4332] border-[#1B4332]' : 'bg-gray-200 dark:bg-emerald-950/50 border-gray-200 dark:border-emerald-900/50'}`}
       >
-        <span className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform shadow
-          ${checked ? 'translate-x-7' : 'translate-x-1'}`} />
+        <span className={`absolute top-0.5 left-0.5 bg-white rounded-full
+          transition-all duration-300 shadow-sm
+          ${checked ? 'translate-x-5' : 'translate-x-0'}`} 
+          style={{ width: '16px', height: '16px' }}
+        />
       </button>
     </div>
   )
@@ -473,24 +476,27 @@ export default function SessionForm() {
 
                     {/* Tipo */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                      <label className="block text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-4">
                         Tipo de sesión *
                       </label>
                       <div className="flex flex-wrap gap-2">
-                        {TIPOS.map(({ value, label }) => (
-                          <button
-                            type="button"
-                            key={value}
-                            onClick={() => setFormData(prev => ({ ...prev, tipo: value }))}
-                            className={`px-4 py-2 rounded-full text-sm font-semibold
-                              transition-all border
-                              ${formData.tipo === value
-                                ? 'bg-[#1B4332] text-white border-[#1B4332]'
-                                : 'bg-white dark:bg-[#0F2018] text-gray-700 dark:text-gray-300 border-gray-300 dark:border-emerald-900/40 hover:border-[#1B4332] dark:hover:border-emerald-700 hover:text-[#1B4332] dark:hover:text-emerald-400'}`}
-                          >
-                            {label}
-                          </button>
-                        ))}
+                        {TIPOS.map(({ value, label }) => {
+                          const isActive = formData.tipo === value
+                          return (
+                            <button
+                              type="button"
+                              key={value}
+                              onClick={() => setFormData(prev => ({ ...prev, tipo: value }))}
+                              className={`px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider
+                                transition-all border-2
+                                ${isActive
+                                  ? 'bg-[#1B4332] text-white border-[#1B4332] shadow-lg shadow-emerald-900/20'
+                                  : 'bg-white dark:bg-[#0F2018] text-gray-500 dark:text-gray-400 border-gray-100 dark:border-emerald-900/30 hover:border-[#1B4332] dark:hover:border-emerald-700 hover:text-[#1B4332]'}`}
+                            >
+                              {label}
+                            </button>
+                          )
+                        })}
                       </div>
                     </div>
 

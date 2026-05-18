@@ -430,24 +430,24 @@ export default function SessionsManagement() {
 
               {/* Búsqueda + tipo */}
               <div className="flex flex-col md:flex-row gap-4">
-                <div className="relative flex-1">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
+                <div className="relative flex-1 group">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-[#1B4332] transition-colors" />
                   <input
                     type="text"
                     placeholder="Buscar sesión o ponente..."
                     value={busqueda}
                     onChange={e => setBusqueda(e.target.value)}
-                    className="w-full pl-11 pr-4 py-3 rounded-2xl border border-gray-100 dark:border-emerald-900/50
+                    className="w-full pl-11 pr-4 py-3.5 rounded-2xl border border-gray-100 dark:border-emerald-900/50
                                bg-gray-50/50 dark:bg-[#0F2018] focus:bg-white dark:focus:bg-[#0F2018] focus:border-[#1B4332]
-                               outline-none transition-all text-sm font-bold dark:text-gray-300 dark:placeholder-gray-600"
+                               outline-none transition-all text-sm font-bold text-gray-900 dark:text-gray-100 dark:placeholder-gray-500"
                   />
                 </div>
                 <select
                   value={tipoFiltro}
                   onChange={e => setTipoFiltro(e.target.value)}
-                  className="px-4 py-3 rounded-2xl border border-gray-100 dark:border-emerald-900/50 bg-gray-50/50 dark:bg-[#0F2018]
-                             focus:bg-white dark:focus:bg-[#0F2018] outline-none text-xs font-black uppercase
-                             tracking-widest cursor-pointer min-w-[160px] dark:text-gray-300"
+                  className="px-4 py-3.5 rounded-2xl border border-gray-100 dark:border-emerald-900/50 bg-gray-50/50 dark:bg-[#0F2018]
+                             focus:bg-white dark:focus:bg-[#0F2018] focus:border-[#1B4332] outline-none text-[10px] font-black uppercase
+                             tracking-[0.15em] cursor-pointer min-w-[180px] text-gray-700 dark:text-gray-300 transition-all"
                 >
                   <option value="todos">Todos los tipos</option>
                   {Object.entries(TIPO_LABELS).map(([v, l]) => (
@@ -457,30 +457,33 @@ export default function SessionsManagement() {
               </div>
 
               {/* Pills de días */}
-              <div className="flex items-center gap-2 overflow-x-auto pb-1">
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
                 <button
                   onClick={() => setDiaFiltro('todos')}
-                  className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase
-                              tracking-widest transition-all whitespace-nowrap shrink-0
+                  className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase
+                              tracking-widest transition-all whitespace-nowrap shrink-0 border-2
                               ${diaFiltro === 'todos'
-                                ? 'bg-[#1B4332] text-white shadow-md'
-                                : 'bg-gray-50 dark:bg-emerald-950/50 text-gray-400 dark:text-gray-500 border border-transparent hover:border-gray-200 dark:hover:border-emerald-900/40'}`}
+                                ? 'bg-[#1B4332] text-white border-[#1B4332] shadow-lg shadow-emerald-900/20'
+                                : 'bg-white dark:bg-[#0F2018] text-gray-400 dark:text-gray-500 border-gray-100 dark:border-emerald-900/30 hover:border-[#1B4332] dark:hover:border-emerald-700'}`}
                 >
-                  Todos los días
+                  Ver todos los días
                 </button>
-                {dias.map(dia => (
-                  <button
-                    key={dia.id}
-                    onClick={() => setDiaFiltro(dia.id)}
-                    className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase
-                                tracking-widest transition-all whitespace-nowrap shrink-0 border
-                                ${diaFiltro === dia.id
-                                  ? 'bg-[#1B4332] text-white border-[#1B4332]'
-                                  : 'bg-white dark:bg-emerald-950/50 text-gray-400 dark:text-gray-500 border-gray-100 dark:border-emerald-900/40 hover:border-emerald-100 dark:hover:border-emerald-800'}`}
-                  >
-                    {formatShortDay(dia.fecha)}
-                  </button>
-                ))}
+                {dias.map(dia => {
+                  const isActive = diaFiltro === dia.id
+                  return (
+                    <button
+                      key={dia.id}
+                      onClick={() => setDiaFiltro(dia.id)}
+                      className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase
+                                  tracking-widest transition-all whitespace-nowrap shrink-0 border-2
+                                  ${isActive
+                                    ? 'bg-[#1B4332] text-white border-[#1B4332] shadow-lg shadow-emerald-900/20'
+                                    : 'bg-white dark:bg-[#0F2018] text-gray-400 dark:text-gray-500 border-gray-100 dark:border-emerald-900/30 hover:border-[#1B4332] dark:hover:border-emerald-700'}`}
+                    >
+                      {formatShortDay(dia.fecha)}
+                    </button>
+                  )
+                })}
               </div>
             </div>
 
