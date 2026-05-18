@@ -1,0 +1,513 @@
+import { useState, useEffect } from 'react'
+import { useParams, Link, useNavigate } from 'react-router-dom'
+import { Clock, MapPin, CalendarDays, Users, Share2, ChevronRight, CheckCircle2, Download } from 'lucide-react'
+import { sesionesService } from '../../services/sesiones.service'
+import { inscripcionesService } from '../../services/inscripciones.service'
+import { useAuth }         from '../../context/AuthContext'
+import { supabase }        from '../../services/supabase'
+
+const TIPO_COLORS = {
+  inauguracion: 'bg-blue-100   text-blue-800   dark:bg-blue-900/40   dark:text-blue-300',
+  conferencia:  'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300',
+  taller:       'bg-amber-100  text-amber-800  dark:bg-amber-900/40  dark:text-amber-300',
+  cultural:     'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300',
+  protocolo:    'bg-gray-100   text-gray-700   dark:bg-gray-800/50   dark:text-gray-300',
+  competencia:  'bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300',
+  cierre:       'bg-rose-100   text-rose-800   dark:bg-rose-900/40   dark:text-rose-300',
+}
+
+const TIPO_LABELS = {
+  inauguracion: 'Inauguración',
+  conferencia:  'Conferencia',
+  taller:       'Taller',
+  cultural:     'Cultural',
+  protocolo:    'Protocolo',
+  competencia:  'Competencia',
+  cierre:       'Cierre',
+}
+
+const PROGRAMA_LABELS = {
+  sistemas:            'Ing. sistemas',
+  innovacion_agricola: 'Innovación agrícola',
+  contaduria:          'Contaduría',
+  publico_general:     'Público en general',
+}
+
+const IMAGENES_POR_DIA = {
+  'Lunes':     '/images/imagenes_reporte/ajolote_lunes.jpg',
+  'Martes':    '/images/imagenes_reporte/software_martes.jpg',
+  'Miércoles': '/images/imagenes_reporte/manualidades_miercoles.jpg',
+  'Jueves':    '/images/imagenes_reporte/computacion_jueves.jpg',
+  'Viernes':   '/images/imagenes_reporte/robots_viernes.jpg',
+}
+
+export default function SessionDetail() {
+  const { id }     = useParams()
+  const navigate   = useNavigate()
+  const { estudiante, isLoggedIn } = useAuth()
+
+  const [sesion,         setSesion]         = useState(null)
+  const [loading,        setLoading]        = useState(true)
+  const [error,          setError]          = useState(null)
+  const [totalInscritos, setTotalInscritos] = useState(0)
+  const [yaInscrito,     setYaInscrito]     = useState(false)
+  const [inscribiendo,   setInscribiendo]   = useState(false)
+  const [toast,          setToast]          = useState(null)
+
+  useEffect(() => {
+    if (error) window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [error])
+
+  const showToast = (msg, type = 'success') => {
+    setToast({ msg, type })
+    setTimeout(() => setToast(null), 3000)
+  }
+
+  useEffect(() => {
+    async function cargar() {
+      try {
+        const data  = await sesionesService.getById(id)
+        setSesion(data)
+        
+        // Usar RPC para obtener el conteo real (bypass RLS)
+        const { data: conteos } = await supabase.rpc('get_inscritos_por_jornada', { jornada_uuid: data.jornada_id })
+        const sesionConteo = (conteos || []).find(c => c.sesion_id === id)
+        setTotalInscritos(sesionConteo ? Number(sesionConteo.total) : 0)
+
+        if (estudiante?.id) {
+          const { data: insc } = await supabase
+            .from('inscripciones')
+            .select('id')
+            .eq('sesion_id', id)
+            .eq('estudiante_id', estudiante.id)
+            .maybeSingle()
+          setYaInscrito(!!insc)
+        }
+      } catch (err) {
+        setError(err.message)
+      } finally {
+        setLoading(false)
+      }
+    }
+    cargar()
+  }, [id, estudiante])
+
+  const handleInscribirse = async () => {
+    if (!isLoggedIn || !estudiante) { navigate('/login'); return }
+    try {
+      setInscribiendo(true)
+      await inscripcionesService.inscribir(estudiante.id, id)
+      setYaInscrito(true)
+      setTotalInscritos(prev => prev + 1) // Actualización optimista local
+      showToast('¡Inscripción exitosa!')
+    } catch (err) {
+      showToast(err.message, 'error')
+    } finally {
+      setInscribiendo(false)
+    }
+  }
+
+  const handleCancelar = async () => {
+    try {
+      setInscribiendo(true)
+      const { error: err } = await supabase
+        .from('inscripciones')
+        .delete()
+        .eq('sesion_id', id)
+        .eq('estudiante_id', estudiante.id)
+      if (err) throw err
+      setYaInscrito(false)
+      setTotalInscritos(prev => Math.max(0, prev - 1)) // Actualización optimista local
+      showToast('Inscripción cancelada')
+    } catch (err) {
+      showToast('Error al cancelar', 'error')
+    } finally {
+      setInscribiendo(false)
+    }
+  }
+
+  const handleDownloadICS = () => {
+    if (!sesion.dias_jornada?.fecha || !sesion.hora_inicio) return
+
+    const fecha = sesion.dias_jornada.fecha.replace(/-/g, '')
+    const hi    = (sesion.hora_inicio || '09:00:00').slice(0, 5).replace(':', '') + '00'
+    const hf    = (sesion.hora_fin    || '10:00:00').slice(0, 5).replace(':', '') + '00'
+    
+    const icsContent = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//UESSJR//Agenda//ES',
+      'BEGIN:VEVENT',
+      `DTSTART;TZID=America/Mexico_City:${fecha}T${hi}`,
+      `DTEND;TZID=America/Mexico_City:${fecha}T${hf}`,
+      `SUMMARY:${sesion.nombre}`,
+      `DESCRIPTION:${sesion.descripcion || ''}`,
+      `LOCATION:${sesion.escenarios?.nombre || 'UES SJR'}`,
+      'END:VEVENT',
+      'END:VCALENDAR'
+    ].join('\r\n')
+
+    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' })
+    const link = document.createElement('a')
+    link.href = window.URL.createObjectURL(blob)
+    link.setAttribute('download', `sesion-${sesion.id}.ics`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#0A1A11]">
+      <div className="flex flex-col items-center gap-4">
+        <div className="w-12 h-12 rounded-full border-4 border-[#1B4332]/20 dark:border-emerald-900/50 border-t-[#1B4332] dark:border-t-emerald-500 animate-spin" />
+        <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">Cargando sesión...</p>
+      </div>
+    </div>
+  )
+
+  if (error || !sesion) return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#0A1A11] px-4">
+      <div className="text-center py-16 max-w-sm">
+        <div className="w-20 h-20 bg-gray-100 dark:bg-[#122A1C] rounded-full flex items-center justify-center mx-auto mb-4">
+          <CalendarDays className="w-10 h-10 text-gray-300 dark:text-emerald-900" />
+        </div>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">Sesión no encontrada</h2>
+        <p className="text-gray-500 dark:text-gray-400 mb-6">Esta sesión no existe o fue eliminada.</p>
+        <Link to="/agenda" className="px-6 py-2.5 bg-[#1B4332] text-white font-semibold rounded-xl hover:bg-emerald-800 transition-colors">
+          Ver agenda
+        </Link>
+      </div>
+    </div>
+  )
+
+  const fechaFormateada = sesion.dias_jornada?.fecha
+    ? new Date(sesion.dias_jornada.fecha + 'T12:00:00')
+        .toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+    : null
+
+  const cupo  = sesion.escenarios?.capacidad_maxima || 0
+  const pct   = cupo ? Math.min((totalInscritos / cupo) * 100, 100) : 0
+  const lleno = cupo > 0 && totalInscritos >= cupo
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0A1A11] pb-12">
+
+      {/* Hero banner — thematic background */}
+      <div className="relative pt-24 pb-12 overflow-hidden">
+        {/* Background Layer */}
+        <div className="absolute inset-0 bg-[#0D2B1D]" />
+        {(sesion.dias_jornada?.imagen_url || IMAGENES_POR_DIA[sesion.dias_jornada?.nombre_dia]) ? (
+          <img 
+            src={sesion.dias_jornada?.imagen_url || IMAGENES_POR_DIA[sesion.dias_jornada?.nombre_dia]} 
+            alt="" 
+            className="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-overlay"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0D2B1D] to-[#1B4332]" />
+        )}
+        {/* Readability Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0D2B1D]/40 to-[#0D2B1D]/90" />
+
+        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-2 text-sm text-white/50 mb-6">
+            <Link to="/" className="hover:text-white/80 transition-colors">Inicio</Link>
+            <ChevronRight size={12} />
+            <Link to="/agenda" className="hover:text-white/80 transition-colors">Agenda</Link>
+            <ChevronRight size={12} />
+            <span className="text-white/70 truncate max-w-xs">{sesion.nombre}</span>
+          </div>
+
+          <div className="flex items-center gap-3 mb-4">
+            <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${TIPO_COLORS[sesion.tipo] || 'bg-gray-100 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300'}`}>
+              {TIPO_LABELS[sesion.tipo] || sesion.tipo}
+            </span>
+          </div>
+
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-white leading-snug max-w-2xl mb-6">
+            {sesion.nombre}
+          </h1>
+
+          <div className="flex flex-wrap gap-4 text-sm text-white/70">
+            {fechaFormateada && (
+              <div className="flex items-center gap-2">
+                <CalendarDays size={14} className="text-amber-400 shrink-0" />
+                <span className="capitalize">{fechaFormateada}</span>
+              </div>
+            )}
+            {sesion.hora_inicio && (
+              <div className="flex items-center gap-2">
+                <Clock size={14} className="text-amber-400 shrink-0" />
+                <span>{sesion.hora_inicio.slice(0, 5)} — {sesion.hora_fin?.slice(0, 5)} hrs</span>
+              </div>
+            )}
+            {sesion.escenarios?.nombre && (
+              <div className="flex items-center gap-2">
+                <MapPin size={14} className="text-amber-400 shrink-0" />
+                <span>{sesion.escenarios.nombre}</span>
+              </div>
+            )}
+            {(sesion.programa_academico || []).length > 0 && (
+              <div className="flex items-center gap-2">
+                <Users size={14} className="text-amber-400 shrink-0" />
+                <span>{sesion.programa_academico.map(p => PROGRAMA_LABELS[p] || p).join(', ')}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Body */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+          {/* LEFT — Main content */}
+          <div className="lg:col-span-2 space-y-5 order-2 lg:order-1">
+
+            {/* Ponente card */}
+            {sesion.ponente_nombre && (
+              <div className="bg-white dark:bg-[#122A1C] rounded-2xl shadow-sm border border-gray-100 dark:border-emerald-900/40 p-6">
+                <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-4">Ponente</p>
+                <div className="flex items-start gap-5">
+                  {sesion.ponente_foto_url ? (
+                    <img src={sesion.ponente_foto_url} alt={sesion.ponente_nombre}
+                         className="w-16 h-16 rounded-full object-cover border-2 border-emerald-100 dark:border-emerald-900/50 shrink-0" />
+                  ) : (
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#1B4332] to-emerald-600 flex items-center justify-center shrink-0">
+                      <span className="text-white text-2xl font-bold">
+                        {sesion.ponente_nombre.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                  )}
+                  <div>
+                    <p className="font-bold text-gray-900 dark:text-gray-100 text-lg leading-tight">
+                      {sesion.ponente_grado && (
+                        <span className="text-[#1B4332] dark:text-emerald-400">{sesion.ponente_grado} </span>
+                      )}
+                      {sesion.ponente_nombre}
+                    </p>
+                    {sesion.ponente_institucion && (
+                      <span className="inline-block mt-1.5 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300 text-xs px-3 py-0.5 rounded-full font-semibold">
+                        {sesion.ponente_institucion}
+                      </span>
+                    )}
+                    {sesion.ponente_perfil_publico && (
+                      <p className="text-gray-600 dark:text-gray-400 text-sm mt-3 leading-relaxed">
+                        {sesion.ponente_perfil_publico}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Descripción */}
+            {sesion.descripcion && (
+              <div className="bg-white dark:bg-[#122A1C] rounded-2xl shadow-sm border border-gray-100 dark:border-emerald-900/40 p-6">
+                <h2 className="font-bold text-gray-900 dark:text-gray-100 text-lg border-l-4 border-[#1B4332] dark:border-emerald-600 pl-3 mb-4">
+                  Acerca de esta sesión
+                </h2>
+                <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{sesion.descripcion}</p>
+              </div>
+            )}
+
+            {/* Materiales */}
+            {sesion.requiere_materiales && sesion.materiales_requeridos && (
+              <div className="bg-amber-50 dark:bg-amber-950/30 rounded-2xl border border-amber-200 dark:border-amber-900/40 p-6">
+                <h2 className="font-bold text-amber-900 dark:text-amber-300 text-base mb-4 flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-amber-500 inline-block" />
+                  Materiales requeridos para participar
+                </h2>
+                <ul className="space-y-2">
+                  {sesion.materiales_requeridos.split('\n').filter(m => m.trim()).map((mat, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm text-amber-800 dark:text-amber-400">
+                      <CheckCircle2 size={16} className="shrink-0 mt-0.5 text-amber-500" />
+                      <span>{mat.replace(/^-/, '').trim()}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Detalles */}
+            <div className="bg-white dark:bg-[#122A1C] rounded-2xl shadow-sm border border-gray-100 dark:border-emerald-900/40 p-6">
+              <h2 className="font-bold text-gray-900 dark:text-gray-100 text-base mb-4 border-l-4 border-[#1B4332] dark:border-emerald-600 pl-3">
+                Detalles de la sesión
+              </h2>
+              <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {fechaFormateada && (
+                  <div className="flex items-start gap-3">
+                    <CalendarDays size={16} className="text-[#1B4332] dark:text-emerald-500 shrink-0 mt-0.5" />
+                    <div>
+                      <dt className="text-xs text-gray-400 dark:text-gray-500 uppercase font-bold tracking-wide mb-0.5">Día</dt>
+                      <dd className="text-sm font-semibold text-gray-800 dark:text-gray-200 capitalize">{fechaFormateada}</dd>
+                    </div>
+                  </div>
+                )}
+                {sesion.hora_inicio && (
+                  <div className="flex items-start gap-3">
+                    <Clock size={16} className="text-[#1B4332] dark:text-emerald-500 shrink-0 mt-0.5" />
+                    <div>
+                      <dt className="text-xs text-gray-400 dark:text-gray-500 uppercase font-bold tracking-wide mb-0.5">Horario</dt>
+                      <dd className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                        {sesion.hora_inicio.slice(0, 5)} — {sesion.hora_fin?.slice(0, 5)} hrs
+                      </dd>
+                    </div>
+                  </div>
+                )}
+                {sesion.escenarios?.nombre && (
+                  <div className="flex items-start gap-3">
+                    <MapPin size={16} className="text-[#1B4332] dark:text-emerald-500 shrink-0 mt-0.5" />
+                    <div>
+                      <dt className="text-xs text-gray-400 dark:text-gray-500 uppercase font-bold tracking-wide mb-0.5">Escenario</dt>
+                      <dd className="text-sm font-semibold text-gray-800 dark:text-gray-200">{sesion.escenarios.nombre}</dd>
+                    </div>
+                  </div>
+                )}
+                {(sesion.programa_academico || []).length > 0 && (
+                  <div className="flex items-start gap-3">
+                    <Users size={16} className="text-[#1B4332] dark:text-emerald-500 shrink-0 mt-0.5" />
+                    <div>
+                      <dt className="text-xs text-gray-400 dark:text-gray-500 uppercase font-bold tracking-wide mb-0.5">Dirigido a</dt>
+                      <dd className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                        {sesion.programa_academico.map(p => PROGRAMA_LABELS[p] || p).join(', ')}
+                      </dd>
+                    </div>
+                  </div>
+                )}
+              </dl>
+            </div>
+          </div>
+
+          {/* RIGHT — Sidebar inscripción */}
+          <div className="lg:col-span-1 order-1 lg:order-2">
+            <div className="bg-white dark:bg-[#122A1C] rounded-2xl shadow-md border border-gray-100 dark:border-emerald-900/40 p-6">
+              <h3 className="font-bold text-gray-900 dark:text-gray-100 text-lg mb-5">Inscripción</h3>
+
+              {/* Cupo */}
+              {cupo > 0 && (
+                <div className="mb-5">
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="text-gray-600 dark:text-gray-400 font-medium">Lugares</span>
+                    <span className={`font-bold ${lleno ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-gray-100'}`}>
+                      {totalInscritos} / {cupo}
+                    </span>
+                  </div>
+                  <div className="bg-gray-100 dark:bg-emerald-950/50 rounded-full h-2.5 overflow-hidden">
+                    <div
+                      className={`rounded-full h-2.5 transition-all ${
+                        lleno ? 'bg-red-500' : pct >= 80 ? 'bg-amber-500' : 'bg-[#1B4332]'
+                      }`}
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                  {lleno && (
+                    <p className="text-xs text-red-600 dark:text-red-400 font-semibold mt-2 flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-red-500 inline-block" />
+                      Cupo lleno
+                    </p>
+                  )}
+                  {!lleno && pct >= 70 && (
+                    <p className="text-xs text-amber-600 dark:text-amber-400 font-semibold mt-2 flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 inline-block" />
+                      Pocos lugares disponibles
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Ya inscrito */}
+              {yaInscrito ? (
+                <div className="space-y-3">
+                  <div className="p-4 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800/50 rounded-xl text-center">
+                    <p className="text-emerald-700 dark:text-emerald-300 font-bold text-sm">✓ Estás inscrito(a)</p>
+                    <p className="text-emerald-600 dark:text-emerald-400 text-xs mt-0.5">Recibirás confirmación por correo</p>
+                  </div>
+                  <button
+                    onClick={handleCancelar}
+                    disabled={inscribiendo}
+                    className="w-full py-2.5 text-red-500 dark:text-red-400 font-semibold border border-red-200 dark:border-red-900/40 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/30 transition-all text-sm disabled:opacity-50"
+                  >
+                    {inscribiendo ? 'Cancelando...' : 'Cancelar inscripción'}
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={handleInscribirse}
+                  disabled={inscribiendo || lleno}
+                  className="w-full py-3.5 bg-[#1B4332] text-white font-bold rounded-xl hover:bg-emerald-800 transition-all mb-3 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                >
+                  {inscribiendo
+                    ? 'Procesando...'
+                    : lleno
+                    ? 'Cupo agotado'
+                    : isLoggedIn
+                    ? 'Inscribirse a esta sesión'
+                    : 'Inicia sesión para inscribirte'}
+                </button>
+              )}
+
+              {!isLoggedIn && !yaInscrito && (
+                <div className="mb-3 p-3 bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/40 rounded-xl text-center">
+                  <p className="text-blue-700 dark:text-blue-300 text-xs font-medium">
+                    <Link to="/login" className="underline font-bold">Inicia sesión</Link> o{' '}
+                    <Link to="/registro" className="underline font-bold">regístrate</Link> para inscribirte
+                  </p>
+                </div>
+              )}
+
+              {/* Calendarios */}
+              {sesion.dias_jornada?.fecha && sesion.hora_inicio && (
+                <div className="space-y-2 mb-3">
+                  <a
+                    href={(() => {
+                      const fecha = sesion.dias_jornada.fecha.replace(/-/g, '')
+                      const hi    = (sesion.hora_inicio || '09:00:00').slice(0, 5).replace(':', '') + '00'
+                      const hf    = (sesion.hora_fin    || '10:00:00').slice(0, 5).replace(':', '') + '00'
+                      const p     = new URLSearchParams({
+                        action: 'TEMPLATE', text: sesion.nombre,
+                        dates:  `${fecha}T${hi}/${fecha}T${hf}`,
+                        location: sesion.escenarios?.nombre || 'UES SJR',
+                        details: sesion.descripcion || '',
+                      })
+                      return `https://calendar.google.com/calendar/render?${p}`
+                    })()}
+                    target="_blank" rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 w-full py-2.5 border-2 border-[#1B4332] dark:border-emerald-700 text-[#1B4332] dark:text-emerald-400 font-semibold rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all text-sm"
+                  >
+                    <CalendarDays size={14} /> Añadir a Google Calendar
+                  </a>
+                  <button
+                    onClick={handleDownloadICS}
+                    className="flex items-center justify-center gap-2 w-full py-2.5 border-2 border-gray-200 dark:border-emerald-900/50 text-gray-600 dark:text-gray-300 font-semibold rounded-xl hover:bg-gray-50 dark:hover:bg-emerald-900/20 transition-all text-sm"
+                  >
+                    <Download size={14} /> Descargar evento (.ics)
+                  </button>
+                </div>
+              )}
+
+              {/* Compartir */}
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(window.location.href)
+                  showToast('Enlace copiado al portapapeles')
+                }}
+                className="flex items-center justify-center gap-2 w-full text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors py-2"
+              >
+                <Share2 size={14} /> Copiar enlace
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Toast */}
+      {toast && (
+        <div className={`fixed bottom-6 right-6 z-50 px-6 py-3.5 rounded-2xl shadow-xl text-sm font-semibold flex items-center gap-2 anim-fade-up ${
+          toast.type === 'error' ? 'bg-red-600 text-white' : 'bg-[#1B4332] text-white'
+        }`}>
+          {toast.type === 'error' ? '⚠️' : '✓'} {toast.msg}
+        </div>
+      )}
+    </div>
+  )
+}
