@@ -210,7 +210,7 @@ function EditModal({ estudiante, onClose, onSaved }) {
             </div>
           </div>
           <div>
-            <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">WhatsApp / Teléfono</label>
+            <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Telegram ID / Teléfono</label>
             <input type="text" name="telefono" value={form.telefono} onChange={handleChange}
               className="w-full py-2 border-0 border-b border-gray-200 dark:border-emerald-900/40 text-sm bg-transparent dark:text-gray-200 outline-none focus:border-b-[#1B4332] transition-colors" />
           </div>

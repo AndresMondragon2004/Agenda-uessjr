@@ -5,7 +5,7 @@
 
 const GAS_URL = import.meta.env.VITE_GAS_URL;
 
-export const whatsappService = { // Mantenemos el nombre de exportación temporalmente para evitar errores en otros archivos
+export const telegramService = {
   /**
    * Envía la orden de envío de mensaje a nuestro proxy en GAS (Google Apps Script)
    * Ahora GAS se encargará de entregarlo a Telegram.

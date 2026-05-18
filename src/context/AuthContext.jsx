@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { supabase } from '../services/supabase'
 import { gasService } from '../services/gas.service'
-import { whatsappService } from '../services/telegram.service'
+import { telegramService } from '../services/telegram.service'
 
 const AuthContext = createContext(null)
 
@@ -146,7 +146,7 @@ export function AuthProvider({ children }) {
         matricula: datosEstudiante.matricula
       };
       
-      whatsappService.sendWelcomeQR(estudianteData);
+      telegramService.sendWelcomeQR(estudianteData);
       gasService.sendEmail({
         to: correo,
         subject: '¡Bienvenido a la 12va Jornada Académica!',

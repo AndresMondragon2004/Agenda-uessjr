@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Eye, EyeOff, Info, User, Mail, BookOpen, Lock, Sun, Moon, Phone } from 'lucide-react'
+import { Eye, EyeOff, Info, User, Mail, BookOpen, Lock, Sun, Moon, Send } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import AuthLayout from '../../components/layout/AuthLayout'
 

@@ -1,6 +1,6 @@
 import { supabase } from './supabase'
 import { gasService } from './gas.service'
-import { whatsappService } from './telegram.service'
+import { telegramService } from './telegram.service'
 
 export const inscripcionesService = {
 
@@ -112,8 +112,8 @@ export const inscripcionesService = {
         .single();
 
       if (est) {
-        // Enviar WhatsApp
-        whatsappService.sendSessionConfirmation(est, sesion);
+        // Enviar Telegram
+        telegramService.sendSessionConfirmation(est, sesion);
 
         // Enviar Correo vía GAS
         gasService.sendEmail({

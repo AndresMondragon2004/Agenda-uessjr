@@ -120,7 +120,7 @@ export default function AIKnowledgeBase() {
           <div className="relative z-10 max-w-2xl">
             <h2 className="text-2xl font-black mb-3">La memoria de tu Asistente</h2>
             <p className="text-emerald-100/70 text-sm leading-relaxed">
-              Lo que escribas aquí será utilizado por el bot de Telegram/WhatsApp para responder a los alumnos. 
+              Lo que escribas aquí será utilizado por el bot de Telegram para responder a los alumnos. 
               Puedes añadir información sobre logística, servicios del campus o reglas del evento que no están en la agenda oficial.
             </p>
           </div>
