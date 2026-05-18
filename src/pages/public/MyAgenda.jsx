@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { CheckCircle2, Loader2 } from 'lucide-react'
+import { CheckCircle2, Loader2, Users } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { supabase } from '../../services/supabase'
 import { generateConstanciaPDF } from '../../utils/pdfGenerator'
@@ -136,6 +136,28 @@ export default function MyAgenda() {
     return asistencias.some(a => a.sesion_id === sesionId)
   }
 
+  // ─── Estadísticas de Progreso ───
+  const statsProgreso = (() => {
+    if (inscripciones.length === 0) return { asistidos: 0, total: 0, porcentaje: 0, programas: 0 }
+    const asistidos = asistencias.length
+    const total = inscripciones.length
+    const porcentaje = Math.round((asistidos / total) * 100)
+    
+    const programas = new Set()
+    inscripciones.forEach(i => {
+      if (checkAsistencia(i.sesion_id) && i.sesiones?.programa_academico) {
+        // Asumiendo que programa_academico es un array o un string
+        if (Array.isArray(i.sesiones.programa_academico)) {
+          i.sesiones.programa_academico.forEach(p => programas.add(p))
+        } else {
+          programas.add(i.sesiones.programa_academico)
+        }
+      }
+    })
+
+    return { asistidos, total, porcentaje, programas: programas.size }
+  })()
+
   // Agrupar inscripciones por día
   const agrupadas = inscripciones.reduce((acc, insc) => {
     const fecha = insc.sesiones?.dias_jornada?.fecha || 'sin-fecha'
@@ -196,34 +218,81 @@ export default function MyAgenda() {
           </div>
         ) : (
           <>
-            {/* Summary bar */}
-            <div className="bg-white dark:bg-[#122A1C] rounded-xl shadow-sm p-5 mb-8 flex flex-col sm:flex-row items-center justify-between border border-transparent dark:border-emerald-900/40 gap-4">
-              <div className="flex gap-8">
-                <div>
-                  <p className="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wide">Inscripciones</p>
-                  <p className="text-2xl font-bold text-[#1B4332] dark:text-emerald-400">{inscripciones.length}</p>
+            {/* ─── PROGRESO DASHBOARD (PRO) ─── */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
+              {/* Tarjeta de Porcentaje */}
+              <div className="lg:col-span-2 bg-[#1B4332] rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-xl shadow-emerald-950/20">
+                <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full -translate-y-20 translate-x-20" />
+                <div className="relative z-10">
+                  <div className="flex items-center justify-between mb-8">
+                    <div>
+                      <h2 className="text-2xl font-black tracking-tight">Tu Progreso</h2>
+                      <p className="text-emerald-200/70 text-[10px] font-black uppercase tracking-widest mt-1">Jornada Académica 2026</p>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-5xl font-black leading-none">{statsProgreso?.porcentaje}%</span>
+                    </div>
+                  </div>
+                  
+                  {/* Progress Bar */}
+                  <div className="space-y-3">
+                    <div className="h-3 w-full bg-white/10 rounded-full overflow-hidden border border-white/5">
+                      <div 
+                        className="h-full bg-amber-400 shadow-[0_0_15px_rgba(251,191,36,0.5)] transition-all duration-1000"
+                        style={{ width: `${statsProgreso?.porcentaje}%` }}
+                      />
+                    </div>
+                    <div className="flex justify-between items-center text-[9px] font-black uppercase tracking-widest text-emerald-100/60">
+                      <span>Iniciado</span>
+                      <span>{statsProgreso?.asistidos} de {statsProgreso?.total} sesiones completadas</span>
+                      <span>Objetivo 100%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Tarjeta de Diversidad */}
+              <div className="bg-white dark:bg-[#122A1C] rounded-[2.5rem] p-8 border border-gray-100 dark:border-emerald-900/30 shadow-sm flex flex-col justify-center text-center">
+                <div className="w-14 h-14 bg-emerald-50 dark:bg-emerald-950/40 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Users className="text-[#1B4332] dark:text-emerald-400" size={24} />
+                </div>
+                <p className="text-3xl font-black text-gray-900 dark:text-white leading-none mb-1">{statsProgreso?.programas}</p>
+                <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Áreas Cubiertas</p>
+                <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-4 leading-tight font-medium">Has explorado sesiones de {statsProgreso?.programas} programas diferentes.</p>
+              </div>
+            </div>
+
+            {/* Summary bar (Compacta) */}
+            <div className="bg-white dark:bg-[#122A1C] rounded-3xl shadow-sm p-6 mb-12 flex flex-col sm:flex-row items-center justify-between border border-gray-100 dark:border-emerald-900/30 gap-6">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-emerald-50 dark:bg-emerald-900/30 rounded-2xl flex items-center justify-center shrink-0">
+                  <CheckCircle2 className="text-emerald-500" size={24} />
                 </div>
                 <div>
-                  <p className="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wide">Asistencias</p>
-                  <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{asistencias.length}</p>
+                  <p className="text-sm font-black text-gray-900 dark:text-white leading-tight">Certificación Digital</p>
+                  <p className="text-[11px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Estado: {asistencias.length > 0 ? 'Disponible' : 'No elegible'}</p>
                 </div>
               </div>
 
               <div className="flex gap-2 w-full sm:w-auto">
-                {asistencias.length > 0 && (
+                {asistencias.length > 0 ? (
                   <button
                     onClick={handleDescargarConstancia}
                     disabled={generating}
-                    className="flex-1 sm:flex-none px-5 py-2.5 bg-emerald-600 text-white text-sm font-bold rounded-lg hover:bg-emerald-700 transition-all shadow-md shadow-emerald-900/10 flex items-center justify-center gap-2"
+                    className="flex-1 sm:flex-none px-8 py-3.5 bg-[#e2a868] hover:bg-[#d49757] text-[#0d261a] text-xs font-black uppercase tracking-[0.2em] rounded-2xl transition-all shadow-xl shadow-amber-900/10 flex items-center justify-center gap-2 transform hover:-translate-y-0.5 active:scale-95"
                   >
-                    {generating ? <Loader2 size={16} className="animate-spin" /> : '🎓 Descargar Constancia'}
+                    {generating ? <Loader2 size={16} className="animate-spin" /> : 'Descargar Constancia'}
                   </button>
+                ) : (
+                  <div className="px-5 py-3.5 bg-gray-50 dark:bg-[#0F2018] rounded-2xl text-[9px] font-black uppercase tracking-widest text-gray-400 border border-gray-100 dark:border-emerald-900/20 text-center flex items-center">
+                    Asiste a tus sesiones para habilitar
+                  </div>
                 )}
                 <Link
                   to="/agenda"
-                  className="flex-1 sm:flex-none px-5 py-2.5 text-sm font-semibold text-[#1B4332] dark:text-emerald-400 border border-[#1B4332] dark:border-emerald-900/50 rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors text-center"
+                  className="flex-1 sm:flex-none px-8 py-3.5 text-xs font-black uppercase tracking-[0.2em] text-[#1B4332] dark:text-emerald-400 border-2 border-[#1B4332] dark:border-emerald-900/50 rounded-2xl hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all text-center"
                 >
-                  + Agregar sesiones
+                  Explorar
                 </Link>
               </div>
             </div>

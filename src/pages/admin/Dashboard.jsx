@@ -3,10 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import {
   CalendarDays, Clock, Users, Inbox,
   ChevronRight, Plus, UserPlus, FileSearch,
-  BarChart2, Bell, FileText, ChevronLeft, Camera
+  BarChart2, Bell, FileText, ChevronLeft, Camera, Send
 } from 'lucide-react'
 import { jornadaService } from '../../services/jornada.service'
 import { sesionesService } from '../../services/sesiones.service'
+import { notificacionesService } from '../../services/notificaciones.service'
 import { supabase } from '../../services/supabase'
 
 // ─── Stat Card ────────────────────────────────────────────────────────────────
@@ -407,6 +408,59 @@ function ProgramChart({ data = {} }) {
   )
 }
 
+// ─── Broadcast Section ────────────────────────────────────────────────────────
+function BroadcastSection({ onSent }) {
+  const [msg, setMsg] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  const send = async () => {
+    if (!msg.trim()) return
+    try {
+      setLoading(true)
+      await notificacionesService.create({
+        titulo: 'Aviso de la Organización',
+        mensaje: msg,
+        tipo: 'info'
+      })
+      setMsg('')
+      onSent('Aviso enviado correctamente a todos los alumnos')
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="bg-white dark:bg-[#122A1C] rounded-[2rem] p-8 border border-gray-100 dark:border-emerald-900/40 shadow-sm flex-1">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600">
+          <Bell size={20} />
+        </div>
+        <div>
+          <h3 className="font-black text-gray-900 dark:text-gray-100 leading-none">Comunicado Global</h3>
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1.5">Emitir aviso a todos los alumnos</p>
+        </div>
+      </div>
+      <div className="relative">
+        <textarea
+          value={msg}
+          onChange={e => setMsg(e.target.value)}
+          placeholder="Escribe un aviso importante para la comunidad académica (ej. cambio de salón, recordatorio de clausura...)"
+          className="w-full p-5 bg-gray-50 dark:bg-[#0F2018] border border-gray-100 dark:border-emerald-900/50 rounded-2xl outline-none focus:border-[#1B4332] text-sm font-medium dark:text-gray-200 resize-none h-28 mb-4 transition-all"
+        />
+        <button
+          onClick={send}
+          disabled={loading || !msg.trim()}
+          className="w-full py-4 bg-[#1B4332] text-white font-black uppercase text-xs tracking-widest rounded-xl hover:bg-emerald-800 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+        >
+          {loading ? 'Enviando...' : <><Send size={14} /> Emitir Notificación Real-time</>}
+        </button>
+      </div>
+    </div>
+  )
+}
+
 // ─── Main ─────────────────────────────────────────────────────────────────────
 export default function Dashboard() {
   const navigate = useNavigate()
@@ -684,16 +738,21 @@ export default function Dashboard() {
               />
             </div>
 
-            {/* Gráfica + Acciones rápidas */}
+            {/* Gráfica Semanal (Métricas de Carga) */}
             <div className="flex flex-col lg:flex-row gap-6">
               <WeeklyChart sesiones={todasSesiones} />
-              <QuickActions navigate={navigate} />
             </div>
 
             {/* Populares + Carreras */}
             <div className="flex flex-col lg:flex-row gap-6">
               <PopularSessions ranking={popularRanking} />
               <ProgramChart data={progStats} />
+            </div>
+
+            {/* Broadcast + Acciones rápidas (Comunicación Real-time) */}
+            <div className="flex flex-col lg:flex-row gap-6">
+              <BroadcastSection onSent={(m) => alert(m)} />
+              <QuickActions navigate={navigate} />
             </div>
 
             {/* Sesiones de hoy + Calendario */}

@@ -80,7 +80,7 @@ function ViewEstudianteModal({ estudiante, onClose, onEdit, onDelete, loadingDet
                     </a>
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">WhatsApp / Teléfono</span>
+                    <span className="text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">ID de Telegram</span>
                     <span className="text-sm font-black text-gray-800 dark:text-gray-200">{estudiante.telefono || 'No registrado'}</span>
                   </div>
                   <div className="flex flex-col">

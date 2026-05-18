@@ -11,6 +11,7 @@ import Speakers from '../pages/public/Speakers'
 import ProposeActivity from '../pages/public/ProposeActivity'
 import MyAgenda from '../pages/public/MyAgenda'
 import DigitalTicket from '../pages/public/DigitalTicket'
+import VerifyCertificate from '../pages/public/VerifyCertificate'
 import Login from '../pages/auth/Login'
 import Register from '../pages/auth/Register'
 import ForgotPassword from '../pages/auth/ForgotPassword'
@@ -24,6 +25,7 @@ import SessionsManagement from '../pages/admin/SessionsManagement'
 import SessionForm from '../pages/admin/SessionForm'
 import SessionDetailAdmin from '../pages/admin/SessionDetailAdmin'
 import CheckInScanner from '../pages/admin/CheckInScanner'
+import AIKnowledgeBase from '../pages/admin/AIKnowledgeBase'
 import ProposalsManagement from '../pages/admin/ProposalsManagement'
 import StudentsManagement from '../pages/admin/StudentsManagement'
 import Reports from '../pages/admin/Reports'
@@ -41,6 +43,7 @@ export const router = createBrowserRouter([
       { path: '/conferencistas', element: <Speakers /> },
       { path: '/proponer', element: <ProposeActivity /> },
       { path: '/ticket/:id', element: <DigitalTicket /> },
+      { path: '/verificar/:codigo', element: <VerifyCertificate /> },
       {
         path: '/mi-agenda',
         element: (
@@ -73,6 +76,7 @@ export const router = createBrowserRouter([
       { path: '/admin/sesiones/editar/:id', element: <SessionForm /> },
       { path: '/admin/sesiones/:id', element: <SessionDetailAdmin /> },
       { path: '/admin/check-in', element: <CheckInScanner /> },
+      { path: '/admin/ia', element: <AIKnowledgeBase /> },
       { path: '/admin/propuestas', element: <ProposalsManagement /> },
       { path: '/admin/estudiantes', element: <StudentsManagement /> },
       { path: '/admin/reportes', element: <Reports /> },

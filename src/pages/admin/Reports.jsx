@@ -773,9 +773,59 @@ export default function Reports() {
       setGenerando(false)
     }
   }
+// ── Exportar Reporte Maestro de Asistencia (CSV) ─────────────────────────
+const handleExportarMaestroAsistencia = async () => {
+  if (!jornada) { showToast('No hay jornada activa', 'error'); return }
+  try {
+    setExportando('maestro')
 
-  const EXPORT_ROWS = [
-    { key: 'inscritos', label: 'Asistencia General', format: 'CSV', desc: 'Listado de todos los confirmados en cada sesión.', fn: handleExportarInscritos },
+    // 1. Obtener todas las sesiones activas de esta jornada
+    const { data: ses } = await supabase
+      .from('sesiones')
+      .select('id')
+      .eq('jornada_id', jornada.id)
+      .eq('estado', 'activa')
+    const totalSesiones = ses?.length || 0
+
+    // 2. Obtener todos los estudiantes registrados
+    const { data: ests } = await supabase
+      .from('estudiantes')
+      .select('id, nombre, apellidos, matricula, correo, programa_academico')
+
+    // 3. Obtener todas las asistencias de esta jornada
+    const { data: asist } = await supabase
+      .from('asistencias')
+      .select('estudiante_id, sesion_id')
+      .in('sesion_id', ses?.map(s => s.id) || [])
+
+    // 4. Mapear datos
+    const rows = (ests || []).map(e => {
+      const misAsistencias = (asist || []).filter(a => a.estudiante_id === e.id).length
+      return {
+        'Nombre': `${e.nombre} ${e.apellidos}`.trim(),
+        'Matrícula': e.matricula || '',
+        'Carrera': PROGRAMA_LABELS[e.programa_academico] || e.programa_academico || '',
+        'Correo': e.correo || '',
+        'Sesiones Asistidas': misAsistencias,
+        'Total Sesiones Jornada': totalSesiones,
+        '% Cumplimiento': totalSesiones > 0 ? Math.round((misAsistencias / totalSesiones) * 100) + '%' : '0%'
+      }
+    })
+
+    const headers = ['Nombre','Matrícula','Carrera','Correo','Sesiones Asistidas','Total Sesiones Jornada','% Cumplimiento']
+    downloadCSV(toCSV(rows, headers), `Reporte-Maestro-Asistencia-${jornada.nombre}.csv`)
+    showToast(`${rows.length} estudiantes procesados`)
+  } catch (err) {
+    showToast('Error: ' + err.message, 'error')
+  } finally {
+    setExportando(null)
+  }
+}
+
+const EXPORT_ROWS = [
+  { key: 'maestro', label: 'Reporte Maestro de Asistencia', format: 'CSV', desc: 'Métrica individual de asistencia real por cada alumno registrado.', fn: handleExportarMaestroAsistencia },
+  { key: 'inscritos', label: 'Inscripciones por Sesión', format: 'CSV', desc: 'Listado de todos los confirmados en cada sesión.', fn: handleExportarInscritos },
+...
     { key: 'estudiantes', label: 'Censo Estudiantil', format: 'CSV', desc: 'Base de datos de estudiantes registrados en el sistema.', fn: handleExportarEstudiantes },
     { key: 'programa', label: 'Métrica por Carrera', format: 'CSV', desc: 'Resumen cuantitativo por programa académico.', fn: handleExportarResumenPrograma },
     { key: 'propuestas', label: 'Banco de Propuestas', format: 'CSV', desc: 'Historial de actividades propuestas por ponentes.', fn: handleExportarPropuestas },

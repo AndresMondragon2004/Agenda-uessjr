@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { NavLink, Link, useLocation } from 'react-router-dom'
 import { Moon, Sun, Menu, X, GraduationCap } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
+import NotificationBell from './NotificationBell'
 
 const NAV_LINKS = [
   { label: 'Inicio',             to: '/'               },
@@ -121,6 +122,9 @@ export default function Navbar() {
 
           {/* Right actions */}
           <div className="flex items-center gap-2">
+
+            {/* Notifications (Pro) */}
+            {isLoggedIn && !isAdmin && <NotificationBell />}
 
             {/* Dark mode toggle */}
             <button

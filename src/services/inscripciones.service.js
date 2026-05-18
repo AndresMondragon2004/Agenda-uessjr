@@ -1,6 +1,6 @@
 import { supabase } from './supabase'
 import { gasService } from './gas.service'
-import { whatsappService } from './whatsapp.service'
+import { whatsappService } from './telegram.service'
 
 export const inscripcionesService = {
 
