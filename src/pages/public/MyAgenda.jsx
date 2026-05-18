@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { CheckCircle2 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { supabase } from '../../services/supabase'
 
@@ -32,9 +33,10 @@ const IMAGENES_POR_DIA = {
 }
 
 export default function MyAgenda() {
-  const { estudiante, isLoggedIn } = useAuth()
+  const { estudiante } = useAuth()
 
   const [inscripciones, setInscripciones] = useState([])
+  const [asistencias,   setAsistencias]   = useState([])
   const [loading,       setLoading]       = useState(true)
   const [cancelando,    setCancelando]    = useState(null)
   const [confirmando,   setConfirmando]   = useState(null)
@@ -50,18 +52,18 @@ export default function MyAgenda() {
       setLoading(false)
       return
     }
-    cargarInscripciones()
+    cargarDatos()
   }, [estudiante])
 
-  async function cargarInscripciones() {
+  async function cargarDatos() {
     try {
       setLoading(true)
-      const { data, error } = await supabase
+      
+      // 1. Cargar inscripciones
+      const { data: insc, error: iErr } = await supabase
         .from('inscripciones')
         .select(`
-          id,
-          estado,
-          created_at,
+          id, sesion_id, estado, created_at,
           sesiones (
             id, nombre, tipo, hora_inicio, hora_fin,
             ponente_nombre, ponente_grado,
@@ -72,10 +74,20 @@ export default function MyAgenda() {
         .eq('estudiante_id', estudiante.id)
         .order('created_at', { ascending: false })
 
-      if (error) throw error
-      setInscripciones(data || [])
+      if (iErr) throw iErr
+      setInscripciones(insc || [])
+
+      // 2. Cargar asistencias reales
+      const { data: asist, error: aErr } = await supabase
+        .from('asistencias')
+        .select('sesion_id')
+        .eq('estudiante_id', estudiante.id)
+      
+      if (aErr) throw aErr
+      setAsistencias(asist || [])
+
     } catch (err) {
-      console.error('Error cargando inscripciones:', err)
+      console.error('Error cargando agenda:', err)
     } finally {
       setLoading(false)
     }
@@ -97,6 +109,10 @@ export default function MyAgenda() {
     } finally {
       setCancelando(null)
     }
+  }
+
+  const checkAsistencia = (sesionId) => {
+    return asistencias.some(a => a.sesion_id === sesionId)
   }
 
   // Agrupar inscripciones por día
@@ -252,6 +268,18 @@ export default function MyAgenda() {
                                 <h3 className="font-bold text-gray-900 dark:text-gray-100 text-base leading-snug mb-2 group-hover:text-[#1B4332] dark:group-hover:text-emerald-400 transition-colors">
                                   {ses.nombre}
                                 </h3>
+
+                                {/* Badge de Asistencia */}
+                                {checkAsistencia(ses.id) ? (
+                                  <div className="mb-3 inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 rounded-full text-[9px] font-black uppercase tracking-widest border border-emerald-100 dark:border-emerald-800/30">
+                                    <CheckCircle2 size={12} strokeWidth={3} /> Asistencia Registrada
+                                  </div>
+                                ) : (
+                                  <div className="mb-3 inline-flex items-center gap-1.5 px-3 py-1 bg-gray-50 dark:bg-gray-800 text-gray-400 dark:text-gray-500 rounded-full text-[9px] font-black uppercase tracking-widest border border-gray-100 dark:border-gray-700">
+                                    Pendiente de acceso
+                                  </div>
+                                )}
+
                                 {ses.ponente_nombre && (
                                   <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
                                     <span className="font-bold text-gray-700 dark:text-gray-300">{ses.ponente_grado}</span> {ses.ponente_nombre}
@@ -300,11 +328,11 @@ export default function MyAgenda() {
                               </div>
                             </div>
                           </div>
-                        )
-                      })}
+                          )
+                        })}
+                    </div>
                   </div>
-                </div>
-              )})}
+                )})}
             </div>
           </>
         )}
