@@ -23,6 +23,7 @@ import ScenariosManagement from '../pages/admin/ScenariosManagement'
 import SessionsManagement from '../pages/admin/SessionsManagement'
 import SessionForm from '../pages/admin/SessionForm'
 import SessionDetailAdmin from '../pages/admin/SessionDetailAdmin'
+import CheckInScanner from '../pages/admin/CheckInScanner'
 import ProposalsManagement from '../pages/admin/ProposalsManagement'
 import StudentsManagement from '../pages/admin/StudentsManagement'
 import Reports from '../pages/admin/Reports'
@@ -71,6 +72,7 @@ export const router = createBrowserRouter([
       { path: '/admin/sesiones/nueva', element: <SessionForm /> },
       { path: '/admin/sesiones/editar/:id', element: <SessionForm /> },
       { path: '/admin/sesiones/:id', element: <SessionDetailAdmin /> },
+      { path: '/admin/check-in', element: <CheckInScanner /> },
       { path: '/admin/propuestas', element: <ProposalsManagement /> },
       { path: '/admin/estudiantes', element: <StudentsManagement /> },
       { path: '/admin/reportes', element: <Reports /> },

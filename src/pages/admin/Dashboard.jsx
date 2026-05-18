@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import {
   CalendarDays, Clock, Users, Inbox,
   ChevronRight, Plus, UserPlus, FileSearch,
-  BarChart2, Bell, FileText, ChevronLeft
+  BarChart2, Bell, FileText, ChevronLeft, Camera
 } from 'lucide-react'
 import { jornadaService } from '../../services/jornada.service'
 import { sesionesService } from '../../services/sesiones.service'
@@ -201,8 +201,8 @@ function WeeklyChart({ sesiones = [] }) {
 // ─── Quick Actions ────────────────────────────────────────────────────────────
 function QuickActions({ navigate }) {
   const actions = [
+    { label: 'Registrar asistencia', icon: Camera,      path: '/admin/check-in'       },
     { label: 'Nueva sesión',        icon: Plus,        path: '/admin/sesiones/nueva' },
-    { label: 'Ver vista agenda',    icon: CalendarDays, path: '/admin/agenda-simple' },
     { label: 'Revisar propuestas',  icon: FileSearch,  path: '/admin/propuestas'     },
     { label: 'Ver estudiantes',     icon: UserPlus,    path: '/admin/estudiantes'    },
   ]
