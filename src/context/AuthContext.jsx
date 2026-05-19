@@ -138,15 +138,14 @@ export function AuthProvider({ children }) {
         }])
       if (dbError) throw dbError
 
-      // 3. Notificaciones de bienvenida
+      // 3. Notificaciones de bienvenida (Solo correo por ahora)
       const estudianteData = {
         nombre: datosEstudiante.nombre,
         correo: correo,
         telefono: datosEstudiante.telefono,
         matricula: datosEstudiante.matricula
       };
-      
-      telegramService.sendWelcomeQR(estudianteData);
+
       gasService.sendEmail({
         to: correo,
         subject: '¡Bienvenido a la 12va Jornada Académica!',
@@ -156,9 +155,9 @@ export function AuthProvider({ children }) {
           full_name: `${datosEstudiante.nombre} ${datosEstudiante.apellidos}`
         }
       });
-    }
-    return data
-  }
+      }
+      return data
+      }
 
   async function signOut() {
     const { error } = await supabase.auth.signOut()

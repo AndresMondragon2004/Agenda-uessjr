@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Eye, EyeOff, Info, User, Mail, BookOpen, Lock, Sun, Moon, Send } from 'lucide-react'
+import { Eye, EyeOff, Info, User, Mail, BookOpen, Lock, Sun, Moon, Send, Phone } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import AuthLayout from '../../components/layout/AuthLayout'
 
@@ -193,23 +193,23 @@ export default function Register() {
           <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-2 italic">Tu matrícula es el número de 8 dígitos de tu credencial institucional</p>
         </div>
 
-        {/* Teléfono / Telegram ID */}
+        {/* Teléfono */}
         <div>
-          <label className="block text-xs font-bold text-gray-500 tracking-wider mb-2 uppercase">ID de Telegram *</label>
+          <label className="block text-xs font-bold text-gray-500 tracking-wider mb-2 uppercase">Número Celular (10 dígitos) *</label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
-              <Send size={16} />
+              <Phone size={16} />
             </div>
             <input
-              type="text"
+              type="tel"
               name="telefono"
               value={form.telefono}
               onChange={handleChange}
-              placeholder="Ej. 123456789"
+              placeholder="Ej. 7121234567"
               className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-[#0F2018] border border-gray-100 dark:border-emerald-900/50 rounded-xl focus:bg-white dark:focus:bg-[#0F2018] focus:ring-2 focus:ring-[#1a3b2b] focus:border-transparent outline-none text-gray-900 dark:text-gray-300 text-sm transition-all"
             />
           </div>
-          <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-2 italic">Ingresa tu Chat ID de Telegram para recibir tu QR. Búscalo en @userinfobot</p>
+          <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-2 italic">Necesario para enlazarte con nuestro bot de Telegram y enviarte tu QR.</p>
         </div>
 
         {/* Correo */}

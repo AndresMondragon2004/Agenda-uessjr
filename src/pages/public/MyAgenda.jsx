@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { CheckCircle2, Loader2, Users } from 'lucide-react'
+import { CheckCircle2, Loader2, Users, Send } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { supabase } from '../../services/supabase'
 import { generateConstanciaPDF } from '../../utils/pdfGenerator'
@@ -275,6 +275,18 @@ export default function MyAgenda() {
               </div>
 
               <div className="flex gap-2 w-full sm:w-auto">
+                {/* Botón de Telegram (Pro) */}
+                {!estudiante?.telegram_chat_id && (
+                  <a
+                    href={`https://t.me/agendauessjrbot?start=${estudiante.id}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex-1 sm:flex-none px-6 py-3 bg-[#0088cc] hover:bg-[#0077b5] text-white text-xs font-black uppercase tracking-widest rounded-2xl transition-all shadow-lg flex items-center justify-center gap-2"
+                  >
+                    <Send size={16} /> Vincular Telegram
+                  </a>
+                )}
+                
                 {asistencias.length > 0 ? (
                   <button
                     onClick={handleDescargarConstancia}
