@@ -10,7 +10,7 @@
  *    https://api.telegram.org/bot<TU_TOKEN>/setWebhook?url=<URL_DE_GOOGLE>
  */
 
-const TELEGRAM_TOKEN = "8886704517:AAH7hFV4CHkiuJE5lmi7pS9xewNsxfgoyXU"; // Tu token real
+const TELEGRAM_TOKEN = "TU_TELEGRAM_BOT_TOKEN"; // Reemplaza con tu token real obtenido de @BotFather
 const SUPABASE_URL = "TU_URL_DE_SUPABASE";
 const SUPABASE_ANON_KEY = "TU_ANON_KEY_DE_SUPABASE";
 const APP_URL = "https://agenda-uessjr.vercel.app"; // URL de tu proyecto
