@@ -1,82 +1,98 @@
-# 🎓 UESSJR Agenda - Sistema de Gestión de Jornadas Académicas
+<div align="center">
 
-Sistema integral para la organización, registro y seguimiento de la **Jornada Académica y Cultural UESSJR**. Una plataforma moderna diseñada para estudiantes y administradores, optimizada para dispositivos móviles y con integración inteligente.
+# UESSJR Agenda — Sistema de Gestión de Jornadas Académicas
 
----
+<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=24&duration=3000&pause=1000&color=1B4332&center=true&vCenter=true&width=600&lines=Gestión+de+Eventos+Académicos;Inscripción+e+IA+Concierge;Control+de+Asistencia+Offline" alt="Typing SVG" />
 
-## 🚀 Características Principales
+<br/>
 
-### 👤 Para Estudiantes
-- **Agenda Personalizada**: Consulta de sesiones, horarios y lugares en tiempo real.
-- **Inscripción Inteligente**: Sistema de registro con control de traslapes de horario.
-- **Lista de Espera**: Promoción automática si se liberan cupos en sesiones llenas.
-- **Pase Digital (QR)**: Ticket individual para acceso rápido a las sesiones.
-- **Constancias Automáticas**: Generación de constancias en PDF al cumplir con las asistencias.
-- **Concierge IA**: Bot de Telegram para consultas sobre la agenda y soporte.
+[![GitHub](https://img.shields.io/badge/GitHub-AndresMondragon2004-181717?style=for-the-badge&logo=github)](https://github.com/AndresMondragon2004)
+[![Tecnología](https://img.shields.io/badge/Stack-React_%2B_Supabase-06B6D4?style=for-the-badge)](https://supabase.com)
 
-### 🛠 Para Administradores (Staff)
-- **Escáner Offline**: Registro de asistencia mediante QR incluso sin conexión a internet, con sincronización automática.
-- **Gestión de Sesiones**: Panel para crear, editar y cancelar actividades de la jornada.
-- **Broadcast de Telegram**: Envío de avisos masivos a todos los estudiantes registrados.
-- **Reportes y Analíticas**: Visualización de métricas de participación y asistencia por carrera.
-- **Control de Escenarios**: Gestión de sedes y capacidades máximas.
+</div>
 
 ---
 
-## 🛠 Tecnologías Utilizadas
+## Sobre el Proyecto
 
-- **Frontend**: React (Vite) + Tailwind CSS + Lucide Icons.
-- **Backend/Base de Datos**: Supabase (PostgreSQL, Auth, Storage).
-- **Lógica Serverless**: Supabase Edge Functions (Deno).
-- **Integraciones**: Telegram Bot API, Google Apps Script (GAS) para correos.
-- **Documentación**: jspdf para generación de constancias.
+Sistema integral diseñado para la **Unidad de Estudios Superiores San José del Rincón**. Permite la organización, registro y seguimiento de la Jornada Académica y Cultural, optimizando la experiencia tanto para estudiantes como para el personal administrativo mediante herramientas digitales modernas.
 
 ---
 
-## ⚙️ Configuración del Entorno
+## Tech Stack
 
-### 1. Variables de Entorno (.env)
-Crea un archivo `.env` en la raíz con:
+<div align="center">
+
+### Frontend
+![React](https://img.shields.io/badge/React-61DAFB?style=flat-square&logo=react&logoColor=black)
+![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
+![Lucide](https://img.shields.io/badge/Lucide_Icons-F7DF1E?style=flat-square&logo=lucide&logoColor=black)
+
+### Backend & Infraestructura
+![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=flat-square&logo=supabase&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=flat-square&logo=postgresql&logoColor=white)
+![Deno](https://img.shields.io/badge/Deno-000000?style=flat-square&logo=deno&logoColor=white)
+![Google Apps Script](https://img.shields.io/badge/Google_Apps_Script-4285F4?style=flat-square&logo=google&logoColor=white)
+
+</div>
+
+---
+
+## Características Principales
+
+| Módulo | Funcionalidad |
+|:---|:---|
+| **Gestión de Agenda** | Visualización de sesiones, horarios y sedes en tiempo real con control de cupos. |
+| **Inscripciones** | Sistema inteligente que evita traslapes de horario y gestiona listas de espera. |
+| **Asistencia Offline** | Escáner de QR con soporte para registro sin conexión y sincronización posterior. |
+| **Concierge IA** | Bot de Telegram integrado para consultas automatizadas sobre la agenda. |
+| **Constancias** | Generación automática de certificados en PDF basados en asistencias verificadas. |
+| **Notificaciones** | Avisos masivos vía Telegram y correo electrónico para cambios de última hora. |
+
+---
+
+## Configuración del Entorno
+
+### Variables de Entorno
+Crea un archivo `.env` en la raíz del proyecto con las siguientes claves:
+
 ```env
 VITE_SUPABASE_URL=tu_url_de_supabase
 VITE_SUPABASE_ANON_KEY=tu_anon_key
 ```
 
-### 2. Instalación
+### Comandos de Instalación y Desarrollo
+
 ```bash
+# Instalar dependencias
 npm install
-```
 
-### 3. Desarrollo
-```bash
+# Servidor de desarrollo
 npm run dev
-```
 
-### 4. Edge Functions (Telegram/Recordatorios)
-Para desplegar las funciones de Supabase:
-```bash
+# Desplegar funciones de Supabase (Telegram/Recordatorios)
 supabase functions deploy telegram
 supabase functions deploy telegram-digest
 supabase functions deploy telegram-reminders
 ```
-*Recuerda configurar el `TELEGRAM_BOT_TOKEN` en los secretos de Supabase:*
-`supabase secrets set TELEGRAM_BOT_TOKEN=tu_token`
 
 ---
 
-## 📱 Bot de Telegram
-El bot permite a los estudiantes vincular su cuenta para recibir:
-- ✅ Confirmaciones de inscripción.
-- ⚠️ Avisos de cambios de salón o cancelaciones.
-- 🕐 Recordatorios de sus próximas sesiones.
-- 📄 Enlaces directos a sus constancias.
+## Seguridad
+
+- **Políticas RLS**: Seguridad a nivel de fila en Supabase para proteger datos sensibles.
+- **Validación Pública**: Sistema de verificación de constancias mediante códigos UUID únicos.
+- **Gestión de Secretos**: Los tokens de bots se gestionan mediante secretos de Supabase (Vault).
 
 ---
 
-## 🔒 Seguridad
-- Autenticación segura vía Supabase Auth.
-- Políticas RLS (Row Level Security) para proteger datos de estudiantes y administradores.
-- Validador público de constancias mediante código único UUID.
+<div align="center">
 
----
-**Desarrollado para la Unidad de Estudios Superiores San José del Rincón.**
+**Unidad de Estudios Superiores San José del Rincón**
+
+Desarrollado por **Jesús Andrés Mondragón Tenorio**
+
+[![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/AndresMondragon2004)
+
+</div>
