@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { X, Search, Trash2, Users, Edit2, Save, Loader2, Filter, CalendarDays, Calendar, Clock, ChevronRight, Check, ArrowRight } from 'lucide-react'
+import { X, Search, Trash2, Users, Edit2, Save, Loader2, Filter, CalendarDays, Calendar, Clock, ChevronRight, Check, ArrowRight, Megaphone, Download } from 'lucide-react'
 import { estudiantesService } from '../../services/estudiantes.service'
 
 const PROGRAMA_LABELS = {
@@ -280,6 +280,17 @@ function DeleteModal({ estudiante, onClose, onConfirm, deleting }) {
   )
 }
 
+// ─── Utils ───────────────────────────────────────────────────────────────
+const normalizeText = (text) => {
+  if (!text) return ''
+  return text
+    .toString()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+}
+
 function getInitials(nombre, apellidos) {
   return ((nombre?.[0] || '') + (apellidos?.[0] || '')).toUpperCase() || '?'
 }
@@ -332,11 +343,11 @@ export default function StudentsManagement() {
     .filter(e => programaFiltro === 'todos' || e.programa_academico === programaFiltro)
     .filter(e => {
       if (!busqueda) return true
-      const q = busqueda.toLowerCase()
-      return e.nombre?.toLowerCase().includes(q) ||
-        e.apellidos?.toLowerCase().includes(q) ||
-        e.matricula?.toLowerCase().includes(q) ||
-        e.correo?.toLowerCase().includes(q)
+      const q = normalizeText(busqueda)
+      return normalizeText(e.nombre).includes(q) ||
+        normalizeText(e.apellidos).includes(q) ||
+        normalizeText(e.matricula).includes(q) ||
+        normalizeText(e.correo).includes(q)
     })
 
   const handleSelectEstudiante = async (est) => {
@@ -394,8 +405,41 @@ export default function StudentsManagement() {
         <h1 className="font-black text-xl text-gray-900 dark:text-gray-100 tracking-tight">Estudiantes registrados</h1>
         <div className="flex items-center gap-2">
           <div className="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/30 text-[#1B4332] dark:text-emerald-400 rounded-xl text-[10px] font-black uppercase tracking-widest border border-emerald-100 dark:border-emerald-900/50">
-            Total: {estudiantes.length}
+            {estudiantesFiltrados.length} / {estudiantes.length}
           </div>
+          <button
+            onClick={() => {
+              if (estudiantesFiltrados.length === 0) return
+              const headers = ['Nombre', 'Apellidos', 'Matrícula', 'Correo', 'Programa', 'Telegram ID']
+              const rows = estudiantesFiltrados.map(e => [
+                e.nombre || '',
+                e.apellidos || '',
+                e.matricula || '',
+                e.correo || '',
+                PROGRAMA_LABELS[e.programa_academico] || e.programa_academico || '',
+                e.telegram_chat_id || '',
+              ])
+              const csv = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n')
+              const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
+              const url = URL.createObjectURL(blob)
+              const a = document.createElement('a')
+              a.href = url
+              a.download = `estudiantes-uessjr-${new Date().toISOString().slice(0,10)}.csv`
+              a.click()
+              URL.revokeObjectURL(url)
+            }}
+            title="Exportar lista filtrada como CSV"
+            className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-[#0F2018] text-gray-500 dark:text-gray-400 rounded-xl text-[10px] font-black uppercase tracking-widest border border-gray-100 dark:border-emerald-900/40 hover:bg-gray-100 dark:hover:bg-emerald-900/30 transition-all"
+          >
+            <Download size={13} /> CSV
+          </button>
+          <button
+            onClick={() => navigate('/admin/broadcast')}
+            title="Enviar mensaje masivo por Telegram"
+            className="flex items-center gap-2 px-3 py-1.5 bg-orange-50 dark:bg-orange-900/20 text-[#D97706] rounded-xl text-[10px] font-black uppercase tracking-widest border border-orange-100 dark:border-orange-900/30 hover:bg-orange-100 transition-all"
+          >
+            <Megaphone size={13} /> Broadcast
+          </button>
         </div>
       </div>
 

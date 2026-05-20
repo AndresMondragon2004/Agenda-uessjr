@@ -309,22 +309,46 @@ export default function CheckInScanner() {
 
   // 3. Inicializar / Destruir Scanner
   useEffect(() => {
-    if (scanning && sesionId && !scannerRef.current) {
-      const scanner = new Html5QrcodeScanner("reader", { 
-        fps: 10, 
-        qrbox: { width: 250, height: 250 },
-        aspectRatio: 1.0
-      }, false)
+    let scanner = null;
 
-      scanner.render(handleScanSuccess, (err) => {
-        // Ignorar errores de "no se encuentra QR en frame"
-      })
-      scannerRef.current = scanner
+    async function startScanner() {
+      if (scanning && sesionId) {
+        // Pequeño delay para asegurar que el div "reader" ya está en el DOM
+        await new Promise(r => setTimeout(r, 100));
+        
+        const element = document.getElementById("reader");
+        if (!element) {
+          console.error("No se encontró el elemento 'reader'");
+          return;
+        }
+
+        scanner = new Html5QrcodeScanner("reader", { 
+          fps: 10, 
+          qrbox: { width: 250, height: 250 },
+          aspectRatio: 1.0,
+          rememberLastUsedCamera: true,
+          supportedScanTypes: [0] // 0 = Html5QrcodeScanType.SCAN_TYPE_CAMERA
+        }, false)
+
+        try {
+          scanner.render(handleScanSuccess, (err) => {
+            // Ignorar errores de "no se encuentra QR en frame"
+          })
+          scannerRef.current = scanner
+        } catch (err) {
+          console.error("Error al renderizar el escáner:", err)
+          setLastResult({ success: false, msg: "Error al iniciar cámara: " + err.message })
+        }
+      }
     }
+
+    startScanner();
 
     return () => {
       if (scannerRef.current) {
-        scannerRef.current.clear().catch(console.error)
+        scannerRef.current.clear().catch(err => {
+          console.warn("Error al limpiar el escáner:", err);
+        })
         scannerRef.current = null
       }
     }

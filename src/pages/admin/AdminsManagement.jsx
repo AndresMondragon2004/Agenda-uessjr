@@ -227,10 +227,21 @@ export default function AdminsManagement() {
     }
   }
 
-  const filteredAdmins = admins.filter(a =>
-    a.nombre?.toLowerCase().includes(busqueda.toLowerCase()) ||
-    a.correo?.toLowerCase().includes(busqueda.toLowerCase())
-  )
+  const normalizeText = (text) => {
+    if (!text) return ''
+    return text
+      .toString()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim()
+  }
+
+  const filteredAdmins = admins.filter(a => {
+    const q = normalizeText(busqueda)
+    return normalizeText(a.nombre).includes(q) ||
+           normalizeText(a.correo).includes(q)
+  })
 
   return (
     <>
