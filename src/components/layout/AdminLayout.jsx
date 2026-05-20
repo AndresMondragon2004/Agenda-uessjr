@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
-import { LayoutDashboard, CalendarDays, MapPin, ListVideo, FileText, Users, BarChart3, LogOut, Sun, Moon, Search, Shield, Brain, Sparkles } from 'lucide-react'
+import { LayoutDashboard, CalendarDays, MapPin, ListVideo, FileText, Users, BarChart3, LogOut, Sun, Moon, Search, Shield, Brain, Sparkles, Megaphone } from 'lucide-react'
 import { jornadaService } from '../../services/jornada.service'
 import { useAuth } from '../../context/AuthContext'
 import CommandPalette from '../admin/CommandPalette'
@@ -62,6 +62,7 @@ const SIDEBAR_ITEMS = [
   { label: 'Sesiones',         path: '/admin/sesiones',    icon: Sparkles },
   { label: 'Propuestas',       path: '/admin/propuestas',  icon: FileText },
   { label: 'Estudiantes',      path: '/admin/estudiantes', icon: Users },
+  { label: 'Broadcast',        path: '/admin/broadcast',   icon: Megaphone },
   { label: 'Inteligencia IA',  path: '/admin/ia',          icon: Brain },
   { label: 'Reportes',         path: '/admin/reportes',    icon: BarChart3 },
 ]
