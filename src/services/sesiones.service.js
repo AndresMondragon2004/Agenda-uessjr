@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { telegramService } from './telegram.service'
 
 export const sesionesService = {
 
@@ -68,6 +69,8 @@ export const sesionesService = {
   },
 
   async update(id, sesion) {
+    const sesionAnterior = await this.getById(id).catch(() => null);
+
     const payload = { ...sesion }
     delete payload.dias_jornada
     delete payload.escenarios
@@ -81,7 +84,48 @@ export const sesionesService = {
       .select()
       .single()
     if (error) throw error
+
+    if (sesionAnterior) {
+      this.getById(id).then(sesionNueva => {
+        this.notificarCambioSesion(sesionAnterior, sesionNueva).catch(console.error);
+      }).catch(console.error);
+    }
+
     return data
+  },
+
+  async notificarCambioSesion(sesionAnterior, sesionNueva) {
+    let cambios = {};
+    if (sesionAnterior.escenario_id !== sesionNueva.escenario_id) {
+      cambios.escenario = sesionNueva.escenarios?.nombre || 'Nuevo lugar por confirmar';
+    }
+    if (sesionAnterior.hora_inicio !== sesionNueva.hora_inicio || sesionAnterior.hora_fin !== sesionNueva.hora_fin) {
+      cambios.horario = `${sesionNueva.hora_inicio?.slice(0, 5)} - ${sesionNueva.hora_fin?.slice(0, 5)}`;
+    }
+    if (sesionAnterior.estado !== 'cancelada' && sesionNueva.estado === 'cancelada') {
+      cambios.cancelada = true;
+    }
+    
+    if (Object.keys(cambios).length > 0) {
+      const { data: inscritos, error } = await supabase
+        .from('inscripciones')
+        .select(`
+          estudiantes(id, telegram_chat_id)
+        `)
+        .eq('sesion_id', sesionNueva.id)
+        .eq('estado', 'confirmada');
+        
+      if (!error && inscritos) {
+        await Promise.allSettled(
+          inscritos.map(insc => {
+            if (insc.estudiantes?.telegram_chat_id) {
+              return telegramService.sendSessionChange(insc.estudiantes, sesionNueva, cambios);
+            }
+            return Promise.resolve();
+          })
+        );
+      }
+    }
   },
 
   async delete(id) {

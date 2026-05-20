@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { supabase } from '../../services/supabase'
 import { sesionesService } from '../../services/sesiones.service'
+import { telegramService } from '../../services/telegram.service'
 
 export default function CheckInScanner() {
   const navigate = useNavigate()
@@ -17,10 +18,27 @@ export default function CheckInScanner() {
   const [scanning, setScanning] = useState(false)
   const [lastResult, setLastResult] = useState(null) // { success: bool, msg: string, student: obj }
   const [processing, setProcessing] = useState(false)
+  const [offlineCount, setOfflineCount] = useState(0)
+  const [isOnline, setIsOnline] = useState(navigator.onLine)
+  const [syncing, setSyncing] = useState(false)
+  const [cachedStudents, setCachedStudents] = useState({})
   
   const scannerRef = useRef(null)
+  
+  // Referencias para evitar clausuras obsoletas en callbacks del escáner
+  const sesionIdRef = useRef(sesionId)
+  const cachedStudentsRef = useRef(cachedStudents)
+  const processingRef = useRef(processing)
+  const sesionesRef = useRef(sesiones)
+  const isOnlineRef = useRef(isOnline)
 
-  // 1. Cargar sesiones activas de hoy para el selector
+  useEffect(() => { sesionIdRef.current = sesionId }, [sesionId])
+  useEffect(() => { cachedStudentsRef.current = cachedStudents }, [cachedStudents])
+  useEffect(() => { processingRef.current = processing }, [processing])
+  useEffect(() => { sesionesRef.current = sesiones }, [sesiones])
+  useEffect(() => { isOnlineRef.current = isOnline }, [isOnline])
+
+  // 1. Cargar sesiones activas de hoy
   useEffect(() => {
     async function loadSessions() {
       try {
@@ -28,7 +46,6 @@ export default function CheckInScanner() {
         if (!jornada) return
         
         const data = await sesionesService.getByJornada(jornada.id)
-        // Ordenar: primero las que están por empezar o en curso hoy
         setSesiones(data || [])
       } catch (err) {
         console.error(err)
@@ -39,11 +56,158 @@ export default function CheckInScanner() {
     loadSessions()
   }, [])
 
-  // 2. Lógica de registro de asistencia
-  const handleScanSuccess = async (decodedText) => {
-    if (processing || !sesionId) return
+  // 2. Escuchar estado de conexión de red y cargar asistencias offline iniciales
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true)
+      syncOfflineCheckins()
+    }
+    const handleOffline = () => setIsOnline(false)
+
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('offline', handleOffline)
+
+    const stored = localStorage.getItem('offline_checkins')
+    if (stored) {
+      setOfflineCount(JSON.parse(stored).length)
+    }
+
+    // Cargar caché local de estudiantes
+    const storedStudents = localStorage.getItem('cached_students')
+    if (storedStudents) {
+      setCachedStudents(JSON.parse(storedStudents))
+    }
+
+    return () => {
+      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('offline', handleOffline)
+    }
+  }, [])
+
+  // 3. Precargar base de datos de estudiantes para verificación offline
+  useEffect(() => {
+    async function fetchAndCacheStudents() {
+      try {
+        const { data } = await supabase
+          .from('estudiantes')
+          .select('id, nombre, apellidos, matricula, programa_academico, telegram_chat_id')
+        if (data) {
+          const map = {}
+          data.forEach(est => {
+            map[est.id] = est
+          })
+          localStorage.setItem('cached_students', JSON.stringify(map))
+          setCachedStudents(map)
+        }
+      } catch (err) {
+        console.error('No se pudo precargar estudiantes en red. Usando caché existente:', err)
+      }
+    }
+    if (isOnline) {
+      fetchAndCacheStudents()
+    }
+  }, [isOnline])
+
+  // 4. Lógica de registro de asistencias offline
+  const registerOffline = (studentId, qrMatricula) => {
+    let est = cachedStudentsRef.current[studentId]
+    if (!est) {
+      est = {
+        id: studentId,
+        nombre: 'Estudiante',
+        apellidos: '(Modo Offline)',
+        matricula: qrMatricula,
+        programa_academico: 'Por confirmar en sincronización'
+      }
+    }
+
+    const stored = localStorage.getItem('offline_checkins')
+    const checkins = stored ? JSON.parse(stored) : []
     
-    // El formato del QR es "student:[id]:[matricula]"
+    const yaRegistradoOffline = checkins.some(c => c.estudiante_id === studentId && c.sesion_id === sesionIdRef.current)
+    if (yaRegistradoOffline) {
+      setLastResult({ 
+        success: false, 
+        msg: 'Asistencia ya registrada localmente (Modo Offline)', 
+        student: est 
+      })
+      return
+    }
+
+    const nuevoCheckin = {
+      estudiante_id: studentId,
+      sesion_id: sesionIdRef.current,
+      hora_entrada: new Date().toLocaleTimeString('it-IT'),
+      estudiante_datos: est
+    }
+
+    checkins.push(nuevoCheckin)
+    localStorage.setItem('offline_checkins', JSON.stringify(checkins))
+    setOfflineCount(checkins.length)
+
+    setLastResult({
+      success: true,
+      msg: 'Asistencia guardada localmente (Modo Offline) ⏳',
+      student: est
+    })
+
+    setTimeout(() => setLastResult(null), 4000)
+  }
+
+  // 5. Sincronizar asistencias pendientes con Supabase
+  const syncOfflineCheckins = async () => {
+    const stored = localStorage.getItem('offline_checkins')
+    if (!stored) return
+    const checkins = JSON.parse(stored)
+    if (checkins.length === 0) return
+
+    setSyncing(true)
+    let syncs = 0
+    const remaining = []
+
+    for (const item of checkins) {
+      try {
+        const { data: exist } = await supabase
+          .from('asistencias')
+          .select('id')
+          .eq('estudiante_id', item.estudiante_id)
+          .eq('sesion_id', item.sesion_id)
+          .maybeSingle()
+
+        if (!exist) {
+          const { error } = await supabase
+            .from('asistencias')
+            .insert([{
+              estudiante_id: item.estudiante_id,
+              sesion_id: item.sesion_id,
+              hora_entrada: item.hora_entrada
+            }])
+          if (error) throw error
+        }
+        syncs++
+      } catch (err) {
+        console.error('Error sincronizando registro offline:', err)
+        remaining.push(item)
+      }
+    }
+
+    localStorage.setItem('offline_checkins', JSON.stringify(remaining))
+    setOfflineCount(remaining.length)
+    setSyncing(false)
+
+    if (syncs > 0) {
+      setLastResult({
+        success: true,
+        msg: `¡Sincronización exitosa! Se subieron ${syncs} asistencias. ✅`
+      })
+      setTimeout(() => setLastResult(null), 4000)
+    }
+  }
+
+  // 6. Lógica de registro de asistencia al escanear
+  const handleScanSuccess = async (decodedText) => {
+    if (processingRef.current || !sesionIdRef.current) return
+    
     const parts = decodedText.split(':')
     if (parts[0] !== 'student' || parts.length < 2) {
       setLastResult({ success: false, msg: 'QR no válido para este sistema' })
@@ -51,8 +215,16 @@ export default function CheckInScanner() {
     }
 
     const studentId = parts[1]
+    const qrMatricula = parts[2] || 'S/M'
     setProcessing(true)
     
+    // Si no hay internet, ir directamente a registro offline
+    if (!isOnlineRef.current) {
+      setProcessing(false)
+      registerOffline(studentId, qrMatricula)
+      return
+    }
+
     try {
       // A. Verificar si el alumno existe y obtener sus datos
       const { data: est, error: eErr } = await supabase
@@ -68,7 +240,7 @@ export default function CheckInScanner() {
         .from('asistencias')
         .select('id')
         .eq('estudiante_id', studentId)
-        .eq('sesion_id', sesionId)
+        .eq('sesion_id', sesionIdRef.current)
         .maybeSingle()
       
       if (exist) {
@@ -85,11 +257,35 @@ export default function CheckInScanner() {
         .from('asistencias')
         .insert([{
           estudiante_id: studentId,
-          sesion_id: sesionId,
-          hora_entrada: new Date().toLocaleTimeString('it-IT') // HH:mm:ss
+          sesion_id: sesionIdRef.current,
+          hora_entrada: new Date().toLocaleTimeString('it-IT')
         }])
       
       if (insErr) throw insErr
+
+      // Enviar confirmación de asistencia vía Telegram
+      if (est.telegram_chat_id) {
+        const sesionActual = sesionesRef.current.find(s => s.id === sesionIdRef.current);
+        telegramService.sendMessage(
+          est.telegram_chat_id,
+          `✅ ¡Tu asistencia a "${sesionActual?.nombre}" ha sido registrada!\n\n🕐 Hora: ${new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}\n\n¡Disfruta la sesión! 🎓`
+        ).catch(console.error);
+
+        // Verificar total de asistencias para constancia
+        supabase
+          .from('asistencias')
+          .select('*', { count: 'exact', head: true })
+          .eq('estudiante_id', studentId)
+          .then(({ count, error }) => {
+            if (!error && count === 1) {
+              const appUrl = window.location.origin;
+              telegramService.sendMessage(
+                est.telegram_chat_id,
+                `🎓 ¡Gran noticia!\n\nTu constancia de participación ya está disponible para descargar.\n\n📄 Descárgala desde: ${appUrl}/mi-agenda\n\n¡Felicidades por tu participación! 🏆`
+              ).catch(console.error);
+            }
+          });
+      }
 
       setLastResult({ 
         success: true, 
@@ -97,11 +293,15 @@ export default function CheckInScanner() {
         student: est 
       })
 
-      // Limpiar resultado después de 3 segundos
       setTimeout(() => setLastResult(null), 3500)
 
     } catch (err) {
-      setLastResult({ success: false, msg: err.message })
+      if (err.message.includes('fetch') || err.message.includes('Network') || err.message.includes('Failed')) {
+        // Error de red detectado durante la consulta online, guardar localmente
+        registerOffline(studentId, qrMatricula)
+      } else {
+        setLastResult({ success: false, msg: err.message })
+      }
     } finally {
       setProcessing(false)
     }
@@ -160,6 +360,34 @@ export default function CheckInScanner() {
       </div>
 
       <div className="max-w-xl mx-auto px-4 mt-8 space-y-6">
+        
+        {/* Status de Conexión y Sincronización */}
+        <div className="bg-white dark:bg-[#122A1C] rounded-[2rem] p-5 shadow-sm border border-gray-100 dark:border-emerald-900/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className={`w-3.5 h-3.5 rounded-full ${isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500 animate-pulse'}`} />
+            <div>
+              <p className="text-xs font-bold text-gray-800 dark:text-gray-200">
+                Conexión: {isOnline ? 'En línea (Conectado)' : 'Modo Offline (Desconectado)'}
+              </p>
+              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                {offlineCount} {offlineCount === 1 ? 'asistencia pendiente' : 'asistencias pendientes'}
+              </p>
+            </div>
+          </div>
+          {offlineCount > 0 && (
+            <button
+              onClick={syncOfflineCheckins}
+              disabled={syncing || !isOnline}
+              className="px-5 py-2.5 bg-emerald-700 hover:bg-emerald-800 disabled:bg-gray-200 dark:disabled:bg-emerald-950/20 text-white disabled:text-gray-400 font-bold text-xs rounded-xl shadow-sm transition-all flex items-center gap-2"
+            >
+              {syncing ? (
+                <><Loader2 size={12} className="animate-spin" /> Subiendo...</>
+              ) : (
+                <>Sincronizar ahora</>
+              )}
+            </button>
+          )}
+        </div>
         
         {/* 1. Selección de Sesión */}
         <div className="bg-white dark:bg-[#122A1C] rounded-[2rem] p-6 shadow-sm border border-gray-100 dark:border-emerald-900/30">

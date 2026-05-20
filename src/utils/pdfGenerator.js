@@ -454,7 +454,7 @@ export async function generateConstanciaPDF(estudiante, jornada) {
   doc.text('UES SAN JOSÉ DEL RINCÓN', cx, 195, { align: 'center' })
 
   // Código de validación único
-  const validCode = `VERIFY-${estudiante.id.slice(0,8)}-${jornada?.id.slice(0,4)}`.toUpperCase()
+  const validCode = `VERIFY-${estudiante.id}-${jornada?.id}`.toUpperCase()
   doc.setFontSize(7)
   doc.setTextColor(200, 200, 200)
   doc.text(`Código de verificación: ${validCode}`, 20, 200)

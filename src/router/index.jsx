@@ -31,6 +31,7 @@ import StudentsManagement from '../pages/admin/StudentsManagement'
 import Reports from '../pages/admin/Reports'
 import AgendaSimple from '../pages/admin/AgendaSimple'
 import AdminsManagement from '../pages/admin/AdminsManagement'
+import BroadcastTelegram from '../pages/admin/BroadcastTelegram'
 import { SuperAdminRoute } from './AdminRoutes'
 
 export const router = createBrowserRouter([
@@ -81,6 +82,7 @@ export const router = createBrowserRouter([
       { path: '/admin/estudiantes', element: <StudentsManagement /> },
       { path: '/admin/reportes', element: <Reports /> },
       { path: '/admin/agenda-simple', element: <AgendaSimple /> },
+      { path: '/admin/broadcast', element: <BroadcastTelegram /> },
       { 
         path: '/admin/equipo', 
         element: (

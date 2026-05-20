@@ -27,20 +27,20 @@ export default function VerifyCertificate() {
       // o validaríamos el hash. Aquí buscaremos al estudiante por el prefijo.
       
       const parts = codigo.split('-')
-      if (parts.length < 3 || parts[0] !== 'VERIFY') {
+      if (parts.length < 11 || parts[0] !== 'VERIFY') {
         throw new Error('Formato de código inválido')
       }
 
-      const studentPrefix = parts[1]
+      const studentId = parts.slice(1, 6).join('-').toLowerCase()
       
-      // Buscar estudiante cuyo ID empiece con ese prefijo
+      // Buscar estudiante de forma exacta con su UUID
       const { data: est, error: eErr } = await supabase
         .from('estudiantes')
         .select(`
           nombre, apellidos, matricula, programa_academico,
           asistencias(id)
         `)
-        .filter('id', 'like', `${studentPrefix}%`)
+        .eq('id', studentId)
         .single()
 
       if (eErr || !est) throw new Error('Constancia no encontrada en nuestros registros')

@@ -9,7 +9,7 @@ const SUPABASE_ANON_KEY = "TU_ANON_KEY";
 const LLM_API_KEY = "TU_GEMINI_API_KEY"; // Opcional para IA, si no, usa lógica de búsqueda
 
 /**
- * Procesa preguntas sobre la agenda enviadas desde WhatsApp
+ * Procesa preguntas sobre la agenda enviadas desde Telegram
  */
 function handleAIQuery(pregunta, alumnoNombre) {
   // 1. Obtener la agenda actual de Supabase

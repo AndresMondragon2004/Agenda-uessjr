@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { CheckCircle2, Loader2, Users, Send } from 'lucide-react'
+import { CheckCircle2, Loader2, Users, Send, Clock } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { supabase } from '../../services/supabase'
 import { generateConstanciaPDF } from '../../utils/pdfGenerator'
@@ -138,13 +138,14 @@ export default function MyAgenda() {
 
   // ─── Estadísticas de Progreso ───
   const statsProgreso = (() => {
-    if (inscripciones.length === 0) return { asistidos: 0, total: 0, porcentaje: 0, programas: 0 }
+    const inscripcionesConfirmadas = inscripciones.filter(i => i.estado === 'confirmada')
+    if (inscripcionesConfirmadas.length === 0) return { asistidos: 0, total: 0, porcentaje: 0, programas: 0 }
     const asistidos = asistencias.length
-    const total = inscripciones.length
+    const total = inscripcionesConfirmadas.length
     const porcentaje = Math.round((asistidos / total) * 100)
     
     const programas = new Set()
-    inscripciones.forEach(i => {
+    inscripcionesConfirmadas.forEach(i => {
       if (checkAsistencia(i.sesion_id) && i.sesiones?.programa_academico) {
         // Asumiendo que programa_academico es un array o un string
         if (Array.isArray(i.sesiones.programa_academico)) {
@@ -389,7 +390,11 @@ export default function MyAgenda() {
                                 </h3>
 
                                 {/* Badge de Asistencia */}
-                                {checkAsistencia(ses.id) ? (
+                                {insc.estado === 'lista_espera' ? (
+                                  <div className="mb-3 inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 rounded-full text-[9px] font-black uppercase tracking-widest border border-amber-100 dark:border-amber-900/30 animate-pulse">
+                                    <Clock size={12} /> Lista de espera ⏳
+                                  </div>
+                                ) : checkAsistencia(ses.id) ? (
                                   <div className="mb-3 inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 rounded-full text-[9px] font-black uppercase tracking-widest border border-emerald-100 dark:border-emerald-800/30">
                                     <CheckCircle2 size={12} strokeWidth={3} /> Asistencia Registrada
                                   </div>

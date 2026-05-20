@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import {
   CalendarDays, Clock, Users, Inbox,
   ChevronRight, Plus, UserPlus, FileSearch,
-  BarChart2, Bell, FileText, ChevronLeft, Camera, Send
+  BarChart2, Bell, FileText, ChevronLeft, Camera, Send, Megaphone
 } from 'lucide-react'
 import { jornadaService } from '../../services/jornada.service'
 import { sesionesService } from '../../services/sesiones.service'

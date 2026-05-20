@@ -35,12 +35,11 @@ serve(async (req) => {
       }
 
       // Verificar que el JWT es válido usando Supabase Auth
+      const token = authHeader.replace('Bearer ', '')
       const supabaseUrl = Deno.env.get('SUPABASE_URL') || ""
-      const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') || ""
-      const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
-        global: { headers: { Authorization: authHeader } }
-      })
-      const { data: userData, error: authError } = await supabaseClient.auth.getUser()
+      const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ""
+      const supabaseAdmin = createClient(supabaseUrl, supabaseKey)
+      const { data: userData, error: authError } = await supabaseAdmin.auth.getUser(token)
       if (authError || !userData?.user) {
         console.error("JWT inválido:", authError?.message)
         return new Response(JSON.stringify({ error: 'Token inválido' }), {
@@ -85,9 +84,12 @@ serve(async (req) => {
       else if (text === "/start") {
         await enviarTelegram(chatId, "Hola 👋. Para vincular tu cuenta, por favor usa el botón azul 'Vincular Telegram' desde la página de tu Agenda en la web. 🌐")
       }
+      else if (/^[1-5]$/.test(text.trim())) {
+        await manejarFeedback(chatId, text.trim())
+      }
       else {
-        // Cualquier otro mensaje — respuesta genérica
-        await enviarTelegram(chatId, "Hola 👋. Soy el bot de la Jornada Académica UES SJR. Si necesitas ayuda, visita la web de la agenda.")
+        // Feature 3: Concierge IA
+        await responderConocimientoIA(chatId, text)
       }
       
       // Siempre debemos responder 200 OK a Telegram
@@ -108,6 +110,125 @@ serve(async (req) => {
     })
   }
 })
+
+async function manejarFeedback(chatId: string | number, calificacion: string) {
+  const supabaseUrl = Deno.env.get('SUPABASE_URL') || ""
+  const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ""
+  if (!supabaseUrl || !supabaseKey) return;
+  const supabase = createClient(supabaseUrl, supabaseKey);
+
+  const { data: estudiante } = await supabase
+    .from('estudiantes')
+    .select('id')
+    .eq('telegram_chat_id', String(chatId))
+    .maybeSingle()
+    
+  if (!estudiante) {
+    await responderConocimientoIA(chatId, calificacion);
+    return;
+  }
+
+  const ayer = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+  
+  const { data: log } = await supabase
+    .from('telegram_reminders_log')
+    .select('sesion_id')
+    .eq('estudiante_id', estudiante.id)
+    .eq('tipo', 'feedback')
+    .gte('created_at', ayer)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (!log) {
+    await responderConocimientoIA(chatId, calificacion);
+    return;
+  }
+
+  const { data: existingFeedback } = await supabase
+    .from('feedback_sesiones')
+    .select('id')
+    .eq('estudiante_id', estudiante.id)
+    .eq('sesion_id', log.sesion_id)
+    .maybeSingle()
+
+  if (existingFeedback) {
+    await enviarTelegram(chatId, "Ya has calificado esta sesión. ¡Gracias! 😊");
+    return;
+  }
+
+  const numCalificacion = parseInt(calificacion)
+  await supabase.from('feedback_sesiones').insert({
+    estudiante_id: estudiante.id,
+    sesion_id: log.sesion_id,
+    calificacion: numCalificacion
+  })
+
+  await enviarTelegram(chatId, `¡Gracias por tu opinión! ⭐ Calificaste con ${numCalificacion}/5.`);
+}
+
+function normalizarTexto(texto: string): string {
+  return texto
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // Elimina acentos/diacríticos
+    .replace(/ñ/g, "n")
+    .replace(/[^a-z0-9 ]/g, ""); // Conserva solo letras, números y espacios
+}
+
+async function responderConocimientoIA(chatId: string | number, text: string) {
+  if (text === "/ayuda") {
+    await enviarTelegram(chatId, "Categorías de ayuda:\n\n- General\n- Servicios\n- Reglas\n- Emergencia\n\nPregúntame algo como: '¿Dónde está el baño?' o '¿Qué hago en una emergencia?'");
+    return;
+  }
+
+  const supabaseUrl = Deno.env.get('SUPABASE_URL') || ""
+  const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ""
+  if (!supabaseUrl || !supabaseKey) return;
+  const supabase = createClient(supabaseUrl, supabaseKey);
+
+  const { data, error } = await supabase.from('conocimiento_ia').select('*');
+  if (error || !data || data.length === 0) {
+    await enviarTelegram(chatId, "No tengo información sobre eso, pero puedes consultar la agenda web o preguntar a un organizador. 🤔");
+    return;
+  }
+
+  // Normalizar consulta del usuario
+  const textoUsuarioNormalizado = normalizarTexto(text);
+  const palabrasUsuario = textoUsuarioNormalizado.split(/\s+/).filter(p => p.length > 2);
+  
+  let mejorMatch = null;
+  let maxPuntaje = 0;
+
+  for (const item of data) {
+    // Normalizar pregunta y respuesta de la base de datos
+    const textoBuscar = normalizarTexto(`${item.pregunta} ${item.respuesta} ${item.keywords || ''}`);
+    let puntaje = 0;
+    
+    // Coincidencia de palabras individuales
+    for (const palabra of palabrasUsuario) {
+      if (textoBuscar.includes(palabra)) {
+        puntaje += 1;
+      }
+    }
+    
+    // Coincidencia de frase exacta/consecutiva
+    if (textoBuscar.includes(textoUsuarioNormalizado) && textoUsuarioNormalizado.length > 5) {
+      puntaje += 3;
+    }
+    
+    if (puntaje > maxPuntaje) {
+      maxPuntaje = puntaje;
+      mejorMatch = item;
+    }
+  }
+
+  if (maxPuntaje >= 1 && mejorMatch) {
+    await enviarTelegram(chatId, mejorMatch.respuesta);
+  } else {
+    await enviarTelegram(chatId, "Lo siento, no logré encontrar información exacta sobre tu consulta. 😔\n\nPrueba preguntando con otras palabras clave (ej: 'baño', 'taller', 'emergencia') o escribe /ayuda para ver las opciones.");
+  }
+}
 
 // Función auxiliar para enviar mensajes a Telegram
 async function enviarTelegram(chatId: string | number, texto: string) {

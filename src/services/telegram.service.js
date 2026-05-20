@@ -52,5 +52,21 @@ export const telegramService = {
 
     const msg = `¡Confirmado! ✅ Te has inscrito a: *${sesion.nombre}*.\n\n📅 Fecha: ${sesion.dias_jornada?.nombre_dia}\n🕒 Hora: ${sesion.hora_inicio.slice(0, 5)}\n📍 Lugar: ${sesion.escenarios?.nombre || 'Por confirmar'}\n\n¡Te esperamos! 😊`;
     return this.sendMessage(chatId, msg);
+  },
+
+  /**
+   * Notificación de cambios en sesiones (Feature 2)
+   */
+  async sendSessionChange(estudiante, sesion, cambios) {
+    const chatId = estudiante.telegram_chat_id;
+    if (!chatId) return null;
+    
+    let detalles = '';
+    if (cambios.escenario) detalles += `📍 Nuevo lugar: ${cambios.escenario}\n`;
+    if (cambios.horario) detalles += `🕐 Nuevo horario: ${cambios.horario}\n`;
+    if (cambios.cancelada) detalles += `❌ La sesión ha sido cancelada.\n`;
+    
+    const msg = `⚠️ *Aviso importante*\n\nHubo cambios en la sesión "${sesion.nombre}":\n\n${detalles}\nRevisa tu agenda para más detalles.`;
+    return this.sendMessage(chatId, msg);
   }
 };

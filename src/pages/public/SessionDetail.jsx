@@ -51,6 +51,7 @@ export default function SessionDetail() {
   const [error,          setError]          = useState(null)
   const [totalInscritos, setTotalInscritos] = useState(0)
   const [yaInscrito,     setYaInscrito]     = useState(false)
+  const [inscripcionEstado, setInscripcionEstado] = useState(null)
   const [yaAsistio,      setYaAsistio]      = useState(false)
   const [yaValoro,       setYaValoro]       = useState(false)
   const [valoracion,     setValoracion]     = useState({ estrellas: 0, comentario: '' })
@@ -93,11 +94,12 @@ export default function SessionDetail() {
           // 1. Verificar Inscripción
           const { data: insc } = await supabase
             .from('inscripciones')
-            .select('id')
+            .select('id, estado')
             .eq('sesion_id', id)
             .eq('estudiante_id', estudiante.id)
             .maybeSingle()
           setYaInscrito(!!insc)
+          setInscripcionEstado(insc?.estado || null)
 
           // 2. Verificar Asistencia (Check-in Staff)
           const { data: asist } = await supabase
@@ -158,10 +160,15 @@ export default function SessionDetail() {
     if (!isLoggedIn || !estudiante) { navigate('/login'); return }
     try {
       setInscribiendo(true)
-      await inscripcionesService.inscribir(estudiante.id, id)
+      const res = await inscripcionesService.inscribir(estudiante.id, id)
       setYaInscrito(true)
-      setTotalInscritos(prev => prev + 1) // Actualización optimista local
-      showToast('¡Inscripción exitosa!')
+      setInscripcionEstado(res.estado)
+      if (res.estado === 'confirmada') {
+        setTotalInscritos(prev => prev + 1) // Actualización optimista local
+        showToast('¡Inscripción exitosa!')
+      } else {
+        showToast('Registrado en la lista de espera')
+      }
     } catch (err) {
       showToast(err.message, 'error')
     } finally {
@@ -179,7 +186,11 @@ export default function SessionDetail() {
         .eq('estudiante_id', estudiante.id)
       if (err) throw err
       setYaInscrito(false)
-      setTotalInscritos(prev => Math.max(0, prev - 1)) // Actualización optimista local
+      const antEstado = inscripcionEstado
+      setInscripcionEstado(null)
+      if (antEstado === 'confirmada') {
+        setTotalInscritos(prev => Math.max(0, prev - 1)) // Actualización optimista local
+      }
       showToast('Inscripción cancelada')
     } catch (err) {
       showToast('Error al cancelar', 'error')
@@ -547,10 +558,17 @@ export default function SessionDetail() {
                 </div>
               ) : yaInscrito ? (
                 <div className="space-y-3">
-                  <div className="p-4 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800/50 rounded-xl text-center">
-                    <p className="text-emerald-700 dark:text-emerald-300 font-bold text-sm">✓ Estás inscrito(a)</p>
-                    <p className="text-emerald-600 dark:text-emerald-400 text-xs mt-0.5">Recibirás confirmación por correo</p>
-                  </div>
+                  {inscripcionEstado === 'lista_espera' ? (
+                    <div className="p-4 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-850/50 rounded-xl text-center">
+                      <p className="text-amber-700 dark:text-amber-300 font-bold text-sm">⏳ En lista de espera</p>
+                      <p className="text-amber-600 dark:text-amber-400 text-xs mt-0.5">Te avisaremos si se libera un lugar</p>
+                    </div>
+                  ) : (
+                    <div className="p-4 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800/50 rounded-xl text-center">
+                      <p className="text-emerald-700 dark:text-emerald-300 font-bold text-sm">✓ Estás inscrito(a)</p>
+                      <p className="text-emerald-600 dark:text-emerald-400 text-xs mt-0.5">Recibirás confirmación por correo</p>
+                    </div>
+                  )}
                   {yaAsistio && (
                     <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/50 rounded-xl text-center">
                       <p className="text-blue-700 dark:text-blue-300 font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2">
@@ -563,19 +581,21 @@ export default function SessionDetail() {
                     disabled={inscribiendo}
                     className="w-full py-2.5 text-red-500 dark:text-red-400 font-semibold border border-red-200 dark:border-red-900/40 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/30 transition-all text-sm disabled:opacity-50"
                   >
-                    {inscribiendo ? 'Cancelando...' : 'Cancelar inscripción'}
+                    {inscribiendo ? 'Cancelando...' : 'Cancelar registro'}
                   </button>
                 </div>
               ) : (
                 <button
                   onClick={handleInscribirse}
-                  disabled={inscribiendo || lleno}
-                  className="w-full py-3.5 bg-[#1B4332] text-white font-bold rounded-xl hover:bg-emerald-800 transition-all mb-3 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                  disabled={inscribiendo}
+                  className={`w-full py-3.5 text-white font-bold rounded-xl transition-all mb-3 disabled:opacity-50 text-sm ${
+                    lleno ? 'bg-amber-600 hover:bg-amber-700' : 'bg-[#1B4332] hover:bg-emerald-800'
+                  }`}
                 >
                   {inscribiendo
                     ? 'Procesando...'
                     : lleno
-                    ? 'Cupo agotado'
+                    ? 'Inscribirse en lista de espera ⏳'
                     : isLoggedIn
                     ? 'Inscribirse a esta sesión'
                     : 'Inicia sesión para inscribirte'}
