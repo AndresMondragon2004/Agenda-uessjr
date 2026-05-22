@@ -6,6 +6,7 @@ import {
   Clock, MapPin, BookOpen, ChevronRight,
 } from 'lucide-react'
 import { sesionesService } from '../../../services/sesiones.service'
+import { parseSafeDate } from '../../../utils/dateHelper'
 
 /* ─── CSS de animaciones ─────────────────────────────────────────────────── */
 const ANIM_CSS = `
@@ -145,11 +146,11 @@ function SessionCard({ ses, idx, inView }) {
               {ses.hora_inicio?.slice(0, 5)}
             </p>
             <p className="text-gray-400 dark:text-gray-500 text-xs mt-0.5">
-              {ses.dias_jornada
-                ? new Date(ses.dias_jornada.fecha + 'T12:00:00')
+                {ses.dias_jornada?.fecha && parseSafeDate(ses.dias_jornada.fecha, '12:00:00')
+                  ? parseSafeDate(ses.dias_jornada.fecha, '12:00:00')
                     .toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric', month: 'short' })
                     .toUpperCase()
-                : ''}
+                  : ''}
             </p>
           </div>
         </div>
@@ -221,7 +222,7 @@ function CountdownTimer({ targetDate, endDate }) {
     if (!targetDate) return
 
     const calculateTimeLeft = () => {
-      const difference = new Date(targetDate) - new Date()
+      const difference = parseSafeDate(targetDate) - new Date()
       if (difference > 0) {
         setTimeLeft({
           d: Math.floor(difference / (1000 * 60 * 60 * 24)),
@@ -242,8 +243,8 @@ function CountdownTimer({ targetDate, endDate }) {
   if (!targetDate) return null
 
   const now = new Date()
-  const started = new Date(targetDate) <= now
-  const ended   = endDate ? new Date(endDate) < now : started
+  const started = parseSafeDate(targetDate) <= now
+  const ended   = endDate ? parseSafeDate(endDate) < now : started
 
   if (started) {
     if (!ended) {

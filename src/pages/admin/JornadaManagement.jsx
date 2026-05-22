@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Eye, Edit2, Trash2, Lock, X, CalendarDays, Check } from 'lucide-react'
+import { Plus, Eye, Edit2, Trash2, Lock, X, CalendarDays, Check, Sparkles } from 'lucide-react'
 import { jornadaService } from '../../services/jornada.service'
+import { supabase } from '../../services/supabase'
 
 
 
@@ -509,6 +510,7 @@ export default function JornadaManagement() {
   const [deleting,         setDeleting]         = useState(false)
   const [toast,            setToast]            = useState(null)
   const [showInfoBanner,   setShowInfoBanner]   = useState(true)
+  const [sesionesCountByDia, setSesionesCountByDia] = useState({})
 
   const showToast = (msg) => {
     setToast(msg)
@@ -572,8 +574,23 @@ export default function JornadaManagement() {
     }
   }
 
-  const toggleExpanded = (id) =>
-    setExpandedId(prev => prev === id ? null : id)
+  const toggleExpanded = async (id) => {
+    const next = expandedId === id ? null : id
+    setExpandedId(next)
+    if (next) {
+      try {
+        const { data } = await supabase
+          .from('sesiones')
+          .select('dia_jornada_id')
+          .eq('jornada_id', id)
+        const map = {}
+        ;(data || []).forEach(s => {
+          if (s.dia_jornada_id) map[s.dia_jornada_id] = (map[s.dia_jornada_id] || 0) + 1
+        })
+        setSesionesCountByDia(map)
+      } catch {}
+    }
+  }
 
   return (
     <>
@@ -750,6 +767,12 @@ export default function JornadaManagement() {
                                           <p className="text-[10px] font-black text-gray-300 dark:text-gray-600 mb-1">DÍA {idx + 1}</p>
                                           <p className="text-sm font-black text-[#1B4332] dark:text-emerald-400 uppercase">{dia.nombre_dia}</p>
                                           <p className="text-[10px] font-bold text-gray-500 dark:text-gray-400">{new Date(dia.fecha + 'T12:00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })}</p>
+                                          <div className="mt-2 flex items-center justify-center gap-1">
+                                            <Sparkles size={10} className="text-emerald-500" />
+                                            <span className="text-[9px] font-black text-emerald-600 dark:text-emerald-400">
+                                              {sesionesCountByDia[dia.id] || 0} sesiones
+                                            </span>
+                                          </div>
                                         </div>
                                       ))}
                                   </div>

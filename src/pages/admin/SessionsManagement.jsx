@@ -6,6 +6,7 @@ import {
 } from 'lucide-react'
 import { sesionesService } from '../../services/sesiones.service'
 import { jornadaService } from '../../services/jornada.service'
+import { norm } from '../../utils/search'
 
 // ─── Constantes ───────────────────────────────────────────────────────────────
 const TIPO_COLORS = {
@@ -300,10 +301,11 @@ export default function SessionsManagement() {
     )
     .filter(s => {
       if (!busqueda) return true
-      const q = busqueda.toLowerCase()
+      const q = norm(busqueda)
       return (
-        s.nombre?.toLowerCase().includes(q) ||
-        s.ponente_nombre?.toLowerCase().includes(q)
+        norm(s.nombre).includes(q) ||
+        norm(s.ponente_nombre).includes(q) ||
+        norm(s.escenarios?.nombre).includes(q)
       )
     })
     .sort((a, b) => {

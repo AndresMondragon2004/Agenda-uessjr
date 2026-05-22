@@ -38,78 +38,37 @@ export const inscripcionesService = {
   },
 
   async inscribir(estudianteId, sesionId) {
-    // 1. Verificar si ya está inscrito o en lista de espera en ESTA sesión
-    const { data: existing } = await supabase
-      .from('inscripciones')
-      .select('id')
-      .eq('estudiante_id', estudianteId)
-      .eq('sesion_id', sesionId)
-      .maybeSingle()
-    if (existing) throw new Error('Ya tienes un registro (inscrito o en lista de espera) en esta sesión')
+    // Llamar a la función segura en base de datos (RPC) que maneja transacciones y evita race conditions
+    const { data: result, error: rpcError } = await supabase.rpc('inscribir_estudiante', {
+      p_estudiante_id: estudianteId,
+      p_sesion_id: sesionId
+    });
 
-    // 2. Obtener datos de la sesión actual (horario y cupo)
+    if (rpcError) {
+      throw new Error(rpcError.message || 'Error al procesar la inscripción');
+    }
+
+    // El RPC retorna el id y el estado final
+    const estado = result.estado;
+    const inscripcionId = result.id;
+
+    // Obtener datos de la sesión actual (necesarios para las notificaciones)
     const { data: sesionActual, error: sErr } = await supabase
       .from('sesiones')
       .select('*, escenarios(capacidad_maxima), dias_jornada(fecha, nombre_dia)')
       .eq('id', sesionId)
       .single()
     
-    if (sErr) throw sErr
-
-    // 3. Determinar estado inicial según el cupo
-    let estado = 'confirmada'
-    const cupo = sesionActual?.escenarios?.capacidad_maxima
-    if (cupo) {
-      const { count } = await supabase
-        .from('inscripciones')
-        .select('*', { count: 'exact', head: true })
-        .eq('sesion_id', sesionId)
-        .eq('estado', 'confirmada')
-      if (count >= cupo) {
-        estado = 'lista_espera'
+    if (!sErr && sesionActual) {
+      // Notificaciones (Asíncronas)
+      if (estado === 'confirmada') {
+        this.enviarNotificacionesInscripcion(estudianteId, sesionActual);
+      } else {
+        this.enviarNotificacionesListaEspera(estudianteId, sesionActual);
       }
     }
 
-    // 4. Verificar traslape de horarios (SOLO si se confirma la sesión)
-    if (estado === 'confirmada') {
-      const { data: misInscripciones } = await supabase
-        .from('inscripciones')
-        .select('sesiones(nombre, hora_inicio, hora_fin, dias_jornada(fecha))')
-        .eq('estudiante_id', estudianteId)
-        .eq('estado', 'confirmada')
-      
-      const tieneTraslape = (misInscripciones || []).find(i => {
-        const s = i.sesiones
-        if (!s || !s.dias_jornada || !sesionActual.dias_jornada) return false
-        // Mismo día
-        if (s.dias_jornada.fecha === sesionActual.dias_jornada.fecha) {
-          // El nuevo inicia antes que termine uno existente Y termina después que inicie
-          return sesionActual.hora_inicio < s.hora_fin && sesionActual.hora_fin > s.hora_inicio
-        }
-        return false
-      })
-
-      if (tieneTraslape) {
-        throw new Error(`Conflicto de horario: Ya tienes una sesión confirmada a esta hora ("${tieneTraslape.sesiones.nombre}")`)
-      }
-    }
-
-    // 5. Insertar
-    const { data, error } = await supabase
-      .from('inscripciones')
-      .insert([{ estudiante_id: estudianteId, sesion_id: sesionId, estado }])
-      .select()
-      .single()
-    if (error) throw error
-
-    // 6. Notificaciones (Asíncronas)
-    if (estado === 'confirmada') {
-      this.enviarNotificacionesInscripcion(estudianteId, sesionActual);
-    } else {
-      this.enviarNotificacionesListaEspera(estudianteId, sesionActual);
-    }
-
-    return data
+    return { id: inscripcionId, estado, sesion_id: sesionId, estudiante_id: estudianteId };
   },
 
   async enviarNotificacionesInscripcion(estudianteId, sesion) {

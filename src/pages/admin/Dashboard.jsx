@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import {
   CalendarDays, Clock, Users, Inbox,
   ChevronRight, Plus, UserPlus, FileSearch,
-  BarChart2, Bell, FileText, ChevronLeft, Camera, Send, Megaphone
+  BarChart2, Bell, FileText, ChevronLeft, Camera, Send, Megaphone, X, Check
 } from 'lucide-react'
 import { jornadaService } from '../../services/jornada.service'
 import { sesionesService } from '../../services/sesiones.service'
@@ -199,13 +199,44 @@ function WeeklyChart({ sesiones = [] }) {
   )
 }
 
-// ─── Quick Actions ────────────────────────────────────────────────────────────
+// ─── ConfirmModal ───────────────────────────────────────────────────────────────────────────
+function ConfirmModal({ message, onConfirm, onCancel, loading }) {
+  return (
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+      <div className="bg-white dark:bg-[#122A1C] rounded-2xl shadow-2xl p-8 max-w-md w-full text-center anim-scale-in">
+        <div className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mx-auto mb-4">
+          <Send className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
+        </div>
+        <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">Confirmar envío</h2>
+        <p className="text-gray-500 dark:text-gray-400 text-sm mb-6 leading-relaxed">{message}</p>
+        <div className="space-y-3">
+          <button
+            type="button" onClick={onConfirm} disabled={loading}
+            className="w-full py-2.5 bg-[#1B4332] text-white font-semibold rounded-lg hover:bg-emerald-800 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+          >
+            {loading ? <><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />Enviando...</> : <><Send className="w-4 h-4" />Sí, emitir notificación</>}
+          </button>
+          <button
+            type="button" onClick={onCancel} disabled={loading}
+            className="w-full py-2.5 text-gray-700 dark:text-gray-300 font-semibold border border-gray-300 dark:border-emerald-900/40 rounded-lg hover:bg-gray-50 dark:hover:bg-emerald-900/20 transition-colors"
+          >
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Quick Actions ────────────────────────────────────────────────────────────────────────────
 function QuickActions({ navigate }) {
   const actions = [
-    { label: 'Registrar asistencia', icon: Camera,      path: '/admin/check-in'       },
+    { label: 'Registrar asistencia', icon: Camera,     path: '/admin/check-in'       },
     { label: 'Nueva sesión',        icon: Plus,        path: '/admin/sesiones/nueva' },
-    { label: 'Revisar propuestas',  icon: FileSearch,  path: '/admin/propuestas'     },
-    { label: 'Ver estudiantes',     icon: UserPlus,    path: '/admin/estudiantes'    },
+    { label: 'Revisar propuestas',   icon: FileSearch,  path: '/admin/propuestas'     },
+    { label: 'Ver estudiantes',      icon: UserPlus,    path: '/admin/estudiantes'    },
+    { label: 'Broadcast',            icon: Megaphone,   path: '/admin/broadcast'      },
+    { label: 'Ver reportes',         icon: BarChart2,   path: '/admin/reportes'       },
   ]
   return (
     <div className="bg-white dark:bg-[#122A1C] rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-emerald-900/40 w-full lg:w-80">
@@ -408,13 +439,14 @@ function ProgramChart({ data = {} }) {
   )
 }
 
-// ─── Broadcast Section ────────────────────────────────────────────────────────
-function BroadcastSection({ onSent }) {
+// ─── Broadcast Section ──────────────────────────────────────────────────────────────────────────
+function BroadcastSection({ navigate }) {
   const [msg, setMsg] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
+  const [sent, setSent] = useState(false)
 
-  const send = async () => {
-    if (!msg.trim()) return
+  const handleSend = async () => {
     try {
       setLoading(true)
       await notificacionesService.create({
@@ -423,7 +455,9 @@ function BroadcastSection({ onSent }) {
         tipo: 'info'
       })
       setMsg('')
-      onSent('Aviso enviado correctamente a todos los alumnos')
+      setShowConfirm(false)
+      setSent(true)
+      setTimeout(() => setSent(false), 3000)
     } catch (err) {
       console.error(err)
     } finally {
@@ -432,32 +466,60 @@ function BroadcastSection({ onSent }) {
   }
 
   return (
-    <div className="bg-white dark:bg-[#122A1C] rounded-[2rem] p-8 border border-gray-100 dark:border-emerald-900/40 shadow-sm flex-1">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600">
-          <Bell size={20} />
+    <>
+      <div className="bg-white dark:bg-[#122A1C] rounded-[2rem] p-8 border border-gray-100 dark:border-emerald-900/40 shadow-sm flex-1">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600">
+            <Bell size={20} />
+          </div>
+          <div className="flex-1">
+            <h3 className="font-black text-gray-900 dark:text-gray-100 leading-none">Comunicado global</h3>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1.5">Emitir aviso a todos los alumnos</p>
+          </div>
+          <button
+            onClick={() => navigate('/admin/broadcast')}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-50 dark:bg-orange-900/20 text-[#D97706] text-[10px] font-black uppercase tracking-widest hover:bg-orange-100 transition-all border border-orange-100 dark:border-orange-900/30"
+          >
+            <Megaphone size={12} /> Avanzado
+          </button>
         </div>
-        <div>
-          <h3 className="font-black text-gray-900 dark:text-gray-100 leading-none">Comunicado Global</h3>
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1.5">Emitir aviso a todos los alumnos</p>
+
+        {sent && (
+          <div className="mb-4 p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl border border-emerald-100 dark:border-emerald-800/40 flex items-center gap-3">
+            <Check size={16} className="text-emerald-500 shrink-0" />
+            <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400">Aviso emitido correctamente</p>
+          </div>
+        )}
+
+        <div className="relative">
+          <textarea
+            value={msg}
+            onChange={e => setMsg(e.target.value)}
+            placeholder="Escribe un aviso importante para la comunidad académica (ej. cambio de salón, recordatorio de clausura...)"
+            className="w-full p-5 bg-gray-50 dark:bg-[#0F2018] border border-gray-100 dark:border-emerald-900/50 rounded-2xl outline-none focus:border-[#1B4332] text-sm font-medium dark:text-gray-200 resize-none h-28 mb-4 transition-all"
+          />
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-[10px] font-bold text-gray-300 dark:text-gray-600">{msg.length} caracteres</span>
+            <button
+              onClick={() => setShowConfirm(true)}
+              disabled={loading || !msg.trim()}
+              className="flex-1 py-4 bg-[#1B4332] text-white font-black uppercase text-xs tracking-widest rounded-xl hover:bg-emerald-800 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+              <Send size={14} /> Emitir notificación
+            </button>
+          </div>
         </div>
       </div>
-      <div className="relative">
-        <textarea
-          value={msg}
-          onChange={e => setMsg(e.target.value)}
-          placeholder="Escribe un aviso importante para la comunidad académica (ej. cambio de salón, recordatorio de clausura...)"
-          className="w-full p-5 bg-gray-50 dark:bg-[#0F2018] border border-gray-100 dark:border-emerald-900/50 rounded-2xl outline-none focus:border-[#1B4332] text-sm font-medium dark:text-gray-200 resize-none h-28 mb-4 transition-all"
+
+      {showConfirm && (
+        <ConfirmModal
+          message={`¿Deseas emitir este comunicado a todos los alumnos del sistema? Esta acción es inmediata.`}
+          onConfirm={handleSend}
+          onCancel={() => setShowConfirm(false)}
+          loading={loading}
         />
-        <button
-          onClick={send}
-          disabled={loading || !msg.trim()}
-          className="w-full py-4 bg-[#1B4332] text-white font-black uppercase text-xs tracking-widest rounded-xl hover:bg-emerald-800 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-        >
-          {loading ? 'Enviando...' : <><Send size={14} /> Emitir Notificación Real-time</>}
-        </button>
-      </div>
-    </div>
+      )}
+    </>
   )
 }
 
@@ -751,7 +813,7 @@ export default function Dashboard() {
 
             {/* Broadcast + Acciones rápidas (Comunicación Real-time) */}
             <div className="flex flex-col lg:flex-row gap-6">
-              <BroadcastSection onSent={(m) => alert(m)} />
+              <BroadcastSection navigate={navigate} />
               <QuickActions navigate={navigate} />
             </div>
 

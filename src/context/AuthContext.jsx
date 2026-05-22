@@ -75,9 +75,11 @@ export function AuthProvider({ children }) {
         setEstudiante(estudianteData)
         setIsAdmin(false)
       } else {
-        // No es admin ni estudiante (posible usuario recién creado sin registro)
-        setIsAdmin(false)
+        // No es admin ni estudiante (cuenta huérfana). Forzamos logout para evitar estado zombie.
+        await signOut()
         setEstudiante(null)
+        setIsAdmin(false)
+        return
       }
     } catch (err) {
       console.error('Error al cargar perfil:', err)

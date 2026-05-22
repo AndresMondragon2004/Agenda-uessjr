@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { X, Search, Trash2, Users, Edit2, Save, Loader2, Filter, CalendarDays, Calendar, Clock, ChevronRight, Check, ArrowRight, Megaphone, Download } from 'lucide-react'
 import { estudiantesService } from '../../services/estudiantes.service'
+import { norm } from '../../utils/search'
 
 const PROGRAMA_LABELS = {
   sistemas:            'Ing. sistemas',
@@ -281,15 +282,7 @@ function DeleteModal({ estudiante, onClose, onConfirm, deleting }) {
 }
 
 // ─── Utils ───────────────────────────────────────────────────────────────
-const normalizeText = (text) => {
-  if (!text) return ''
-  return text
-    .toString()
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .trim()
-}
+
 
 function getInitials(nombre, apellidos) {
   return ((nombre?.[0] || '') + (apellidos?.[0] || '')).toUpperCase() || '?'
@@ -343,11 +336,12 @@ export default function StudentsManagement() {
     .filter(e => programaFiltro === 'todos' || e.programa_academico === programaFiltro)
     .filter(e => {
       if (!busqueda) return true
-      const q = normalizeText(busqueda)
-      return normalizeText(e.nombre).includes(q) ||
-        normalizeText(e.apellidos).includes(q) ||
-        normalizeText(e.matricula).includes(q) ||
-        normalizeText(e.correo).includes(q)
+      const q = norm(busqueda)
+      return norm(e.nombre).includes(q) ||
+        norm(e.apellidos).includes(q) ||
+        norm(e.matricula).includes(q) ||
+        norm(e.correo).includes(q) ||
+        norm(PROGRAMA_LABELS[e.programa_academico]).includes(q)
     })
 
   const handleSelectEstudiante = async (est) => {

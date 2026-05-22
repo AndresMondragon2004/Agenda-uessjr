@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Brain, Plus, Search, Trash2, Save, X, MessageSquare, Info, Sparkles, Loader2, Check } from 'lucide-react'
 import { supabase } from '../../services/supabase'
+import { norm } from '../../utils/search'
 
 export default function AIKnowledgeBase() {
   const [items, setItems] = useState([])
@@ -80,9 +81,10 @@ export default function AIKnowledgeBase() {
     }
   }
 
-  const filtered = items.filter(i => 
-    i.pregunta.toLowerCase().includes(busqueda.toLowerCase()) ||
-    i.respuesta.toLowerCase().includes(busqueda.toLowerCase())
+  const filtered = items.filter(i =>
+    norm(i.pregunta).includes(norm(busqueda)) ||
+    norm(i.respuesta).includes(norm(busqueda)) ||
+    norm(i.categoria).includes(norm(busqueda))
   )
 
   return (

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { X, ChevronRight, Search, Edit2, Save, Loader2, FileText, Phone, Calendar, ArrowLeft, Trash2, Check, AlertCircle, Clock, Users } from 'lucide-react'
 import { propuestasService } from '../../services/propuestas.service'
 import { supabase } from '../../services/supabase'
+import { norm } from '../../utils/search'
 
 const ESTADO_COLORS = {
   pendiente:  'bg-amber-100 text-amber-800',
@@ -439,12 +440,14 @@ export default function ProposalsManagement() {
     .filter(p => tabActivo === 'todas' || p.estado === tabActivo)
     .filter(p => {
       if (!busqueda) return true
-      const q = busqueda.toLowerCase()
+      const q = norm(busqueda)
       return (
-        p.nombre_completo?.toLowerCase().includes(q) ||
-        p.titulo?.toLowerCase().includes(q) ||
-        p.correo?.toLowerCase().includes(q) ||
-        p.descripcion?.toLowerCase().includes(q)
+        norm(p.nombre_completo).includes(q) ||
+        norm(p.titulo).includes(q) ||
+        norm(p.correo).includes(q) ||
+        norm(p.descripcion).includes(q) ||
+        norm(p.tipo_actividad).includes(q) ||
+        norm(p.relacion_institucion).includes(q)
       )
     })
 

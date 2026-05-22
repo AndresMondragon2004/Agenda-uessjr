@@ -1,11 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, Users, Calendar, FileText, LayoutDashboard, MapPin, X, ArrowRight, Loader2 } from 'lucide-react'
+import { Search, Users, Calendar, FileText, LayoutDashboard, MapPin, X, ArrowRight, Loader2, Megaphone, Camera, List } from 'lucide-react'
 import { supabase } from '../../services/supabase'
-
-// Quita acentos/tildes y normaliza a minúsculas para búsqueda insensible a diacríticos
-const norm = (str = '') =>
-  String(str).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim()
+import { norm } from '../../utils/search'
 
 export default function CommandPalette({ isOpen, onClose }) {
   const navigate = useNavigate()
@@ -15,15 +12,18 @@ export default function CommandPalette({ isOpen, onClose }) {
   const [activeIndex, setActiveIndex] = useState(0)
 
   const STATIC_PAGES = [
-    { id: 'p1', title: 'Panel de Control', path: '/admin/dashboard', icon: LayoutDashboard },
-    { id: 'p2', title: 'Gestión de Sesiones', path: '/admin/sesiones', icon: Calendar },
-    { id: 'p6', title: 'Crear Nueva Sesión', path: '/admin/sesiones/nueva', icon: Calendar, highlight: true },
-    { id: 'p3', title: 'Propuestas de Actividad', path: '/admin/propuestas', icon: FileText },
-    { id: 'p4', title: 'Listado de Estudiantes', path: '/admin/estudiantes', icon: Users },
-    { id: 'p5', title: 'Escenarios y Sedes', path: '/admin/escenarios', icon: MapPin },
-    { id: 'p7', title: 'Reportes y Estadísticas', path: '/admin/reportes', icon: FileText },
-    { id: 'p8', title: 'Configurar Fechas (Jornada)', path: '/admin/jornada', icon: Calendar },
-    { id: 'p9', title: 'Gestión de Equipo', path: '/admin/equipo', icon: Users },
+    { id: 'p1',  title: 'Panel de Control',                  path: '/admin/dashboard',      icon: LayoutDashboard },
+    { id: 'p2',  title: 'Gestión de Sesiones',               path: '/admin/sesiones',       icon: Calendar },
+    { id: 'p6',  title: 'Crear nueva sesión',                path: '/admin/sesiones/nueva', icon: Calendar, highlight: true },
+    { id: 'p3',  title: 'Propuestas de actividad',           path: '/admin/propuestas',     icon: FileText },
+    { id: 'p4',  title: 'Listado de estudiantes',            path: '/admin/estudiantes',    icon: Users },
+    { id: 'p5',  title: 'Escenarios y sedes',                path: '/admin/escenarios',     icon: MapPin },
+    { id: 'p7',  title: 'Reportes y estadísticas',           path: '/admin/reportes',       icon: FileText },
+    { id: 'p8',  title: 'Configurar fechas (Jornada)',       path: '/admin/jornada',        icon: Calendar },
+    { id: 'p9',  title: 'Gestión de equipo',                 path: '/admin/equipo',         icon: Users },
+    { id: 'p10', title: 'Broadcast Telegram',                path: '/admin/broadcast',      icon: Megaphone, highlight: true },
+    { id: 'p11', title: 'Registrar asistencia (Check-In)',   path: '/admin/check-in',       icon: Camera },
+    { id: 'p12', title: 'Agenda simplificada',               path: '/admin/agenda-simple',  icon: List },
   ]
 
   const search = useCallback(async (q) => {

@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom'
 import { jornadaService } from '../../services/jornada.service'
 import { sesionesService } from '../../services/sesiones.service'
 import { generateAgendaPDF } from '../../utils/pdfGenerator'
+import { norm } from '../../utils/search'
 
 export default function AgendaSimple() {
   const navigate = useNavigate()
@@ -44,9 +45,10 @@ export default function AgendaSimple() {
     .filter(s => diaFiltro === 'todos' || s.dia_jornada_id === diaFiltro)
     .filter(s => {
       if (!busqueda) return true
-      const q = busqueda.toLowerCase()
-      return s.nombre?.toLowerCase().includes(q) ||
-        s.ponente_nombre?.toLowerCase().includes(q)
+      const q = norm(busqueda)
+      return norm(s.nombre).includes(q) ||
+        norm(s.ponente_nombre).includes(q) ||
+        norm(s.escenarios?.nombre).includes(q)
     })
     .sort((a, b) => (a.hora_inicio || '').localeCompare(b.hora_inicio || ''))
 

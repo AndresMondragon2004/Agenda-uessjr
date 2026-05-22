@@ -825,12 +825,11 @@ const handleExportarMaestroAsistencia = async () => {
 const EXPORT_ROWS = [
   { key: 'maestro', label: 'Reporte Maestro de Asistencia', format: 'CSV', desc: 'Métrica individual de asistencia real por cada alumno registrado.', fn: handleExportarMaestroAsistencia },
   { key: 'inscritos', label: 'Inscripciones por Sesión', format: 'CSV', desc: 'Listado de todos los confirmados en cada sesión.', fn: handleExportarInscritos },
-...
-    { key: 'estudiantes', label: 'Censo Estudiantil', format: 'CSV', desc: 'Base de datos de estudiantes registrados en el sistema.', fn: handleExportarEstudiantes },
-    { key: 'programa', label: 'Métrica por Carrera', format: 'CSV', desc: 'Resumen cuantitativo por programa académico.', fn: handleExportarResumenPrograma },
-    { key: 'propuestas', label: 'Banco de Propuestas', format: 'CSV', desc: 'Historial de actividades propuestas por ponentes.', fn: handleExportarPropuestas },
-    { key: 'inscritos-sesion', label: 'Listas de Asistencia', format: 'PDF', desc: 'Documentos imprimibles para control de firmas.', fn: handleExportarInscritosPorSesion },
-  ]
+  { key: 'estudiantes', label: 'Censo Estudiantil', format: 'CSV', desc: 'Base de datos de estudiantes registrados en el sistema.', fn: handleExportarEstudiantes },
+  { key: 'programa', label: 'Métrica por Carrera', format: 'CSV', desc: 'Resumen cuantitativo por programa académico.', fn: handleExportarResumenPrograma },
+  { key: 'propuestas', label: 'Banco de Propuestas', format: 'CSV', desc: 'Historial de actividades propuestas por ponentes.', fn: handleExportarPropuestas },
+  { key: 'inscritos-sesion', label: 'Listas de Asistencia', format: 'PDF', desc: 'Documentos imprimibles para control de firmas.', fn: handleExportarInscritosPorSesion },
+]
 
   // ... (handleExportarInscritosPorSesion and other export functions)
 

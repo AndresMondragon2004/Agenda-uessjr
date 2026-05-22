@@ -5,6 +5,7 @@ import {
   Terminal, Leaf, Calculator, Users,
   Rocket, BookOpen, Mic2, Star
 } from 'lucide-react'
+import { parseSafeDate } from '../../../utils/dateHelper'
 
 /* ─── Ejes Académicos (Reutilizados) ─── */
 const EJES = [
@@ -40,7 +41,7 @@ function LargeCountdown({ targetDate }) {
 
   useEffect(() => {
     const timer = setInterval(() => {
-      const diff = new Date(targetDate) - new Date()
+      const diff = parseSafeDate(targetDate) - new Date()
       if (diff > 0) {
         setTimeLeft({
           d: Math.floor(diff / (1000 * 60 * 60 * 24)),

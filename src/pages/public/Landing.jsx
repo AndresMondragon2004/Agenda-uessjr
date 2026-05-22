@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { jornadaService } from '../../services/jornada.service'
+import { parseSafeDate } from '../../utils/dateHelper'
 
 // Importar las 3 vistas del ciclo de vida
 import PreEventView    from './landing/PreEventView'
@@ -24,9 +25,9 @@ export default function Landing() {
 
         const ahora = new Date()
         
-        // Configurar fechas límites (asegurando comparación correcta)
-        const inicio = new Date(j.fecha_inicio + 'T00:00:00')
-        const fin    = new Date(j.fecha_fin + 'T23:59:59')
+        // Configurar fechas límites (asegurando comparación correcta cross-browser)
+        const inicio = parseSafeDate(j.fecha_inicio, '00:00:00')
+        const fin    = parseSafeDate(j.fecha_fin, '23:59:59')
 
         if (ahora < inicio) {
           setState('PRE')

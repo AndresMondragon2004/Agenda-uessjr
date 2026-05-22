@@ -4,6 +4,7 @@ import { Clock, MapPin, Search, Download, ChevronRight, Loader2, Share2, Check }
 import { jornadaService }  from '../../services/jornada.service'
 import { sesionesService } from '../../services/sesiones.service'
 import { generateAgendaPDF } from '../../utils/pdfGenerator'
+import { parseSafeDate } from '../../utils/dateHelper'
 
 const TIPO_COLORS = {
   inauguracion: 'bg-blue-100   text-blue-800   dark:bg-blue-900/40   dark:text-blue-300',
@@ -79,7 +80,7 @@ export default function Agenda() {
         const j = await jornadaService.getActiva()
         setJornada(j)
         const diasOrdenados = (j.dias_jornada || [])
-          .sort((a, b) => new Date(a.fecha) - new Date(b.fecha))
+          .sort((a, b) => parseSafeDate(a.fecha) - parseSafeDate(b.fecha))
         setDias(diasOrdenados)
         const data = await sesionesService.getByJornada(j.id)
         setSesiones(data?.filter(s => s.estado === 'activa') || [])
@@ -143,14 +144,16 @@ export default function Agenda() {
   )
 
   function formatDiaHeader(dia) {
-    const d = new Date(dia.fecha + 'T12:00:00')
+    const d = parseSafeDate(dia.fecha, '12:00:00')
+    if (!d) return ''
     return d.toLocaleDateString('es-MX', {
       weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
     })
   }
 
   function formatShortDay(dia) {
-    const d = new Date(dia.fecha + 'T12:00:00')
+    const d = parseSafeDate(dia.fecha, '12:00:00')
+    if (!d) return ''
     const nombres = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
     return `${nombres[d.getDay()]} ${d.getDate()}`
   }
