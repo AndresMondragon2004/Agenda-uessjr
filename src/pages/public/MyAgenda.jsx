@@ -271,7 +271,7 @@ export default function MyAgenda() {
                 </div>
                 <div>
                   <p className="text-sm font-black text-gray-900 dark:text-white leading-tight">Certificación Digital</p>
-                  <p className="text-[11px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Estado: {asistencias.length > 0 ? 'Disponible' : 'No elegible'}</p>
+                  <p className="text-[11px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Estado: {asistencias.length >= 6 ? 'Disponible' : 'No elegible'}</p>
                 </div>
               </div>
 
@@ -288,7 +288,7 @@ export default function MyAgenda() {
                   </a>
                 )}
                 
-                {asistencias.length > 0 ? (
+                {asistencias.length >= 6 ? (
                   <button
                     onClick={handleDescargarConstancia}
                     disabled={generating}
@@ -298,7 +298,7 @@ export default function MyAgenda() {
                   </button>
                 ) : (
                   <div className="px-5 py-3.5 bg-gray-50 dark:bg-[#0F2018] rounded-2xl text-[9px] font-black uppercase tracking-widest text-gray-400 border border-gray-100 dark:border-emerald-900/20 text-center flex items-center">
-                    Asiste a tus sesiones para habilitar
+                    Asiste a {Math.max(0, 6 - asistencias.length)} sesiones más para habilitar
                   </div>
                 )}
                 <Link

@@ -24,6 +24,7 @@ export default function CheckInScanner() {
   const [cachedStudents, setCachedStudents] = useState({})
   
   const scannerRef = useRef(null)
+  const recentScansRef = useRef(new Map())
   
   // Referencias para evitar clausuras obsoletas en callbacks del escáner
   const sesionIdRef = useRef(sesionId)
@@ -46,7 +47,12 @@ export default function CheckInScanner() {
         if (!jornada) return
         
         const data = await sesionesService.getByJornada(jornada.id)
-        setSesiones(data || [])
+        
+        // Filtrar estrictamente por las sesiones del día actual
+        const hoy = new Date().toLocaleDateString('en-CA') // YYYY-MM-DD
+        const sesionesHoy = (data || []).filter(s => s.dias_jornada?.fecha === hoy)
+        
+        setSesiones(sesionesHoy)
       } catch (err) {
         console.error(err)
       } finally {
@@ -208,6 +214,15 @@ export default function CheckInScanner() {
   const handleScanSuccess = async (decodedText) => {
     if (processingRef.current || !sesionIdRef.current) return
     
+    // Cooldown de 5 segundos para evitar escaneos dobles rápidos del mismo QR
+    const now = Date.now()
+    if (recentScansRef.current.has(decodedText)) {
+      if (now - recentScansRef.current.get(decodedText) < 5000) {
+        return // Ignorar el mismo código si se escaneó hace menos de 5 segundos
+      }
+    }
+    recentScansRef.current.set(decodedText, now)
+
     const parts = decodedText.split(':')
     if (parts[0] !== 'student' || parts.length < 2) {
       setLastResult({ success: false, msg: 'QR no válido para este sistema' })
@@ -277,7 +292,7 @@ export default function CheckInScanner() {
           .select('*', { count: 'exact', head: true })
           .eq('estudiante_id', studentId)
           .then(({ count, error }) => {
-            if (!error && count === 1) {
+            if (!error && count === 6) {
               const appUrl = window.location.origin;
               telegramService.sendMessage(
                 est.telegram_chat_id,
