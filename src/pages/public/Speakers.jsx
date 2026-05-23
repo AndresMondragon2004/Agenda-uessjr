@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { Search, Mic2, ChevronRight } from 'lucide-react'
 import { jornadaService }  from '../../services/jornada.service'
 import { sesionesService } from '../../services/sesiones.service'
+import SEO from '../../components/SEO'
 
 const PROGRAMA_LABELS = {
   sistemas:            'Ing. sistemas',
@@ -94,7 +95,9 @@ export default function Speakers() {
     })
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0A1A11]">
+    <>
+      <SEO title="Conferencistas" description="Conoce a los expertos que forman parte de la jornada académica." />
+      <div className="min-h-screen bg-gray-50 dark:bg-[#0A1A11]">
 
       {/* HEADER */}
       <div className="bg-white dark:bg-[#122A1C] border-b border-gray-100 dark:border-emerald-900/40 pt-16">
@@ -252,6 +255,6 @@ export default function Speakers() {
           )}
         </div>
       </div>
-    </div>
+    </>
   )
 }

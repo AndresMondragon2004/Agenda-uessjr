@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { jornadaService } from '../../services/jornada.service'
 import { parseSafeDate } from '../../utils/dateHelper'
+import SEO from '../../components/SEO'
 
 // Importar las 3 vistas del ciclo de vida
 import PreEventView    from './landing/PreEventView'
@@ -57,9 +58,9 @@ export default function Landing() {
 
   // Renderizar la vista correspondiente según el estado
   switch (state) {
-    case 'PRE':    return <PreEventView    jornada={jornada} />
-    case 'ACTIVE': return <ActiveEventView jornada={jornada} />
-    case 'POST':   return <PostEventView   jornada={jornada} />
-    default:       return <ActiveEventView jornada={jornada} />
+    case 'PRE':    return <><SEO title="Inicio" /><PreEventView    jornada={jornada} /></>
+    case 'ACTIVE': return <><SEO title="Inicio" /><ActiveEventView jornada={jornada} /></>
+    case 'POST':   return <><SEO title="Inicio" /><PostEventView   jornada={jornada} /></>
+    default:       return <><SEO title="Inicio" /><ActiveEventView jornada={jornada} /></>
   }
 }

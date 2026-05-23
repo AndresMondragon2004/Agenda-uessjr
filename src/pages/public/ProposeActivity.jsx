@@ -4,6 +4,7 @@ import { ArrowRight, Check, ChevronRight, Rocket } from 'lucide-react'
 import { jornadaService }    from '../../services/jornada.service'
 import { propuestasService } from '../../services/propuestas.service'
 import PublicLayout from '../../components/layout/PublicLayout'
+import SEO from '../../components/SEO'
 
 // ─── Constantes ───────────────────────────────────────────────────────────────
 const TIPOS = [
@@ -309,7 +310,9 @@ export default function ProposeActivity() {
   const STEP_LABELS = ['Tus datos', 'Tu propuesta', 'Disponibilidad']
 
   return (
-    <div className="min-h-screen bg-[#F8FAFB] dark:bg-[#0A1A11]">
+    <>
+      <SEO title="Propón una actividad" description="¿Tienes una conferencia, taller o actividad cultural que quieras compartir? Cuéntanos tu idea." />
+      <div className="min-h-screen bg-[#F8FAFB] dark:bg-[#0A1A11]">
 
       {/* Header institucional */}
       <div className="relative bg-[#1B4332] pt-28 pb-16 px-4 overflow-hidden">
@@ -715,6 +718,7 @@ export default function ProposeActivity() {
 
         </form>
       </div>
-    </div>
+      </div>
+    </>
   )
 }

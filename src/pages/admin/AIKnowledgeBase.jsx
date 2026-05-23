@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Brain, Plus, Search, Trash2, Save, X, MessageSquare, Info, Sparkles, Loader2, Check } from 'lucide-react'
+import { Brain, Plus, Search, Trash2, Save, X, MessageSquare, Info, Sparkles, Loader2, Check, Pencil } from 'lucide-react'
 import { supabase } from '../../services/supabase'
 import { norm } from '../../utils/search'
 
@@ -156,15 +156,19 @@ export default function AIKnowledgeBase() {
                   <span className="px-3 py-1 bg-emerald-50 dark:bg-emerald-900/40 text-[#1B4332] dark:text-emerald-400 rounded-lg text-[9px] font-black uppercase tracking-widest border border-emerald-100 dark:border-emerald-800/30">
                     {item.categoria}
                   </span>
-                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100 opacity-100">
                     <button 
                       onClick={() => { setEditando(item); setForm({ pregunta: item.pregunta, respuesta: item.respuesta, categoria: item.categoria }); setShowModal(true) }}
-                      className="p-2 hover:bg-gray-100 dark:hover:bg-emerald-900/30 text-blue-500 rounded-xl transition-all">
-                      <Plus className="w-4 h-4 rotate-45" /> {/* Reuse for edit icon logic */}
+                      className="p-2 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-600 rounded-xl transition-all"
+                      title="Editar"
+                    >
+                      <Pencil className="w-4 h-4" />
                     </button>
                     <button 
                       onClick={() => handleDelete(item.id)}
-                      className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 rounded-xl transition-all">
+                      className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 rounded-xl transition-all"
+                      title="Eliminar"
+                    >
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>

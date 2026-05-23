@@ -5,6 +5,7 @@ import { jornadaService }  from '../../services/jornada.service'
 import { sesionesService } from '../../services/sesiones.service'
 import { generateAgendaPDF } from '../../utils/pdfGenerator'
 import { parseSafeDate } from '../../utils/dateHelper'
+import SEO from '../../components/SEO'
 
 const TIPO_COLORS = {
   inauguracion: 'bg-blue-100   text-blue-800   dark:bg-blue-900/40   dark:text-blue-300',
@@ -163,7 +164,9 @@ export default function Agenda() {
   }, [diaFiltro, tipoFiltro, progFiltro, busqueda])
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0A1A11]">
+    <>
+      <SEO title="Agenda de Eventos" description="Explora todas las sesiones, filtra por día, carrera o tipo de actividad." />
+      <div className="min-h-screen bg-gray-50 dark:bg-[#0A1A11]">
 
       {/* PAGE HEADER */}
       <div className="bg-white dark:bg-[#122A1C] border-b border-gray-100 dark:border-emerald-900/40 pt-16">
@@ -489,6 +492,6 @@ export default function Agenda() {
           </div>
         )}
       </div>
-    </div>
+    </>
   )
 }

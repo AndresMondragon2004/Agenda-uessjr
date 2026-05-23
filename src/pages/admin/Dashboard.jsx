@@ -148,21 +148,21 @@ function WeeklyChart({ sesiones = [] }) {
                    style={{ height: '140px' }}>
                 {d.count > 0 ? (
                   <div
-                    className={`w-full rounded-t-lg transition-all duration-700
-                                group-hover:opacity-90
+                    className={`w-full rounded-t-md transition-all duration-700
+                                group-hover:opacity-90 shadow-md
                                 ${d.isToday
-                                  ? 'bg-[#D97706]'
-                                  : 'bg-[#1B4332]'}`}
+                                  ? 'bg-gradient-to-t from-[#D97706] to-[#F59E0B]'
+                                  : 'bg-gradient-to-t from-[#1B4332] to-[#34D399]'}`}
                     style={{
                       height: `${Math.max((d.count / maxCount) * 140, 4)}px`,
                     }}
                   >
                     {/* Brillo superior */}
-                    <div className={`w-full h-1.5 rounded-t-lg opacity-30
-                                    ${d.isToday ? 'bg-amber-300' : 'bg-emerald-300'}`} />
+                    <div className={`w-full h-1.5 rounded-t-md opacity-40
+                                    ${d.isToday ? 'bg-white' : 'bg-white'}`} />
                   </div>
                 ) : (
-                  <div className="w-full rounded-t-lg bg-gray-100 dark:bg-emerald-900/20" style={{ height: '4px' }} />
+                  <div className="w-full rounded-t-md bg-gray-100 dark:bg-emerald-900/20" style={{ height: '4px' }} />
                 )}
               </div>
 
@@ -235,36 +235,37 @@ function QuickActions({ navigate }) {
     { label: 'Nueva sesión',        icon: Plus,        path: '/admin/sesiones/nueva' },
     { label: 'Revisar propuestas',   icon: FileSearch,  path: '/admin/propuestas'     },
     { label: 'Ver estudiantes',      icon: UserPlus,    path: '/admin/estudiantes'    },
-    { label: 'Broadcast',            icon: Megaphone,   path: '/admin/broadcast'      },
+    { label: 'Anuncios y Mensajes', icon: Megaphone,   path: '/admin/anuncios'      },
     { label: 'Ver reportes',         icon: BarChart2,   path: '/admin/reportes'       },
   ]
   return (
-    <div className="bg-white dark:bg-[#122A1C] rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-emerald-900/40 w-full lg:w-80">
-      <div className="flex items-center gap-3 mb-5">
-        <div className="w-1 h-5 bg-[#D97706] rounded-full" />
-        <h3 className="font-bold text-gray-900 dark:text-gray-100 text-sm">Acciones rápidas</h3>
+    <div className="bg-white dark:bg-[#122A1C] rounded-[2.5rem] p-8 shadow-sm border border-gray-100 dark:border-emerald-900/40 w-full">
+      <div className="flex items-center gap-3 mb-8">
+        <div className="w-1.5 h-6 bg-[#D97706] rounded-full shadow-sm" />
+        <h3 className="font-black text-gray-900 dark:text-gray-100 text-sm uppercase tracking-widest">Acciones rápidas</h3>
       </div>
-      <div className="space-y-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {actions.map((act, i) => (
           <button
             key={i}
             onClick={() => navigate(act.path)}
-            className="w-full flex items-center justify-between p-3.5 rounded-xl
-                       border border-gray-100 dark:border-emerald-900/40 hover:border-[#1B4332]/30
-                       hover:bg-emerald-50/50 dark:hover:bg-emerald-900/20 transition-all group"
+            className="w-full flex items-center justify-between p-4 rounded-2xl
+                       bg-gray-50/50 dark:bg-[#0F2018] border border-gray-100 dark:border-emerald-900/30
+                       hover:border-emerald-500/30 hover:bg-white dark:hover:bg-emerald-900/20
+                       transition-all duration-300 group shadow-sm"
           >
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-gray-50 dark:bg-[#0F2018] flex items-center justify-center
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-emerald-900/30 flex items-center justify-center
                               text-gray-400 group-hover:bg-[#1B4332] group-hover:text-white
-                              transition-all">
-                <act.icon size={16} />
+                              transition-all duration-300 shadow-inner">
+                <act.icon size={18} />
               </div>
-              <span className="text-sm font-semibold text-gray-700 dark:text-gray-300
-                               group-hover:text-gray-900 dark:group-hover:text-gray-100 transition-colors">
+              <span className="text-xs font-black text-gray-700 dark:text-gray-300
+                               group-hover:text-gray-900 dark:group-hover:text-gray-100 transition-colors uppercase tracking-wider">
                 {act.label}
               </span>
             </div>
-            <ChevronRight size={15} className="text-gray-300 dark:text-gray-600 group-hover:text-[#1B4332] transition-colors" />
+            <ChevronRight size={16} className="text-gray-300 dark:text-gray-600 group-hover:text-[#1B4332] dark:group-hover:text-emerald-400 transition-colors" />
           </button>
         ))}
       </div>
@@ -366,9 +367,9 @@ function PopularSessions({ ranking = [] }) {
                 <p className="text-xs font-bold text-gray-800 dark:text-gray-200 truncate group-hover:text-[#1B4332] dark:group-hover:text-emerald-400 transition-colors">
                   {s.nombre}
                 </p>
-                <div className="w-full bg-gray-100 dark:bg-emerald-900/20 h-1 rounded-full mt-1.5 overflow-hidden">
+                <div className="w-full bg-gray-100 dark:bg-emerald-900/20 h-2.5 rounded-md mt-2 overflow-hidden shadow-inner">
                   <div 
-                    className="h-full bg-[#D97706] rounded-full transition-all duration-1000"
+                    className="h-full bg-gradient-to-r from-[#D97706] to-[#F59E0B] rounded-md transition-all duration-1000 shadow-sm"
                     style={{ width: `${Math.min((s.inscritos / (s.escenarios?.capacidad_maxima || 100)) * 100, 100)}%` }}
                   />
                 </div>
@@ -420,10 +421,14 @@ function ProgramChart({ data = {} }) {
               <span className="text-gray-500 dark:text-gray-400">{LABELS[key] || key}</span>
               <span className="text-gray-900 dark:text-white">{val}</span>
             </div>
-            <div className="h-2 w-full bg-gray-50 dark:bg-emerald-950/40 rounded-full overflow-hidden">
+            <div className="h-3 w-full bg-gray-50 dark:bg-emerald-950/40 rounded-md overflow-hidden shadow-inner">
               <div 
-                className="h-full rounded-full transition-all duration-1000"
-                style={{ width: `${(val / total) * 100}%`, backgroundColor: COLORS[key] || '#ccc' }}
+                className="h-full rounded-md transition-all duration-1000 shadow-sm relative overflow-hidden"
+                style={{ 
+                  width: `${(val / total) * 100}%`, 
+                  backgroundColor: COLORS[key] || '#ccc',
+                  backgroundImage: `linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.15) 100%)`
+                }}
               />
             </div>
           </div>
@@ -436,90 +441,6 @@ function ProgramChart({ data = {} }) {
         </p>
       </div>
     </div>
-  )
-}
-
-// ─── Broadcast Section ──────────────────────────────────────────────────────────────────────────
-function BroadcastSection({ navigate }) {
-  const [msg, setMsg] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [showConfirm, setShowConfirm] = useState(false)
-  const [sent, setSent] = useState(false)
-
-  const handleSend = async () => {
-    try {
-      setLoading(true)
-      await notificacionesService.create({
-        titulo: 'Aviso de la Organización',
-        mensaje: msg,
-        tipo: 'info'
-      })
-      setMsg('')
-      setShowConfirm(false)
-      setSent(true)
-      setTimeout(() => setSent(false), 3000)
-    } catch (err) {
-      console.error(err)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  return (
-    <>
-      <div className="bg-white dark:bg-[#122A1C] rounded-[2rem] p-8 border border-gray-100 dark:border-emerald-900/40 shadow-sm flex-1">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600">
-            <Bell size={20} />
-          </div>
-          <div className="flex-1">
-            <h3 className="font-black text-gray-900 dark:text-gray-100 leading-none">Comunicado global</h3>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1.5">Emitir aviso a todos los alumnos</p>
-          </div>
-          <button
-            onClick={() => navigate('/admin/broadcast')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-50 dark:bg-orange-900/20 text-[#D97706] text-[10px] font-black uppercase tracking-widest hover:bg-orange-100 transition-all border border-orange-100 dark:border-orange-900/30"
-          >
-            <Megaphone size={12} /> Avanzado
-          </button>
-        </div>
-
-        {sent && (
-          <div className="mb-4 p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl border border-emerald-100 dark:border-emerald-800/40 flex items-center gap-3">
-            <Check size={16} className="text-emerald-500 shrink-0" />
-            <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400">Aviso emitido correctamente</p>
-          </div>
-        )}
-
-        <div className="relative">
-          <textarea
-            value={msg}
-            onChange={e => setMsg(e.target.value)}
-            placeholder="Escribe un aviso importante para la comunidad académica (ej. cambio de salón, recordatorio de clausura...)"
-            className="w-full p-5 bg-gray-50 dark:bg-[#0F2018] border border-gray-100 dark:border-emerald-900/50 rounded-2xl outline-none focus:border-[#1B4332] text-sm font-medium dark:text-gray-200 resize-none h-28 mb-4 transition-all"
-          />
-          <div className="flex items-center justify-between gap-3">
-            <span className="text-[10px] font-bold text-gray-300 dark:text-gray-600">{msg.length} caracteres</span>
-            <button
-              onClick={() => setShowConfirm(true)}
-              disabled={loading || !msg.trim()}
-              className="flex-1 py-4 bg-[#1B4332] text-white font-black uppercase text-xs tracking-widest rounded-xl hover:bg-emerald-800 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-            >
-              <Send size={14} /> Emitir notificación
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {showConfirm && (
-        <ConfirmModal
-          message={`¿Deseas emitir este comunicado a todos los alumnos del sistema? Esta acción es inmediata.`}
-          onConfirm={handleSend}
-          onCancel={() => setShowConfirm(false)}
-          loading={loading}
-        />
-      )}
-    </>
   )
 }
 
@@ -811,11 +732,8 @@ export default function Dashboard() {
               <ProgramChart data={progStats} />
             </div>
 
-            {/* Broadcast + Acciones rápidas (Comunicación Real-time) */}
-            <div className="flex flex-col lg:flex-row gap-6">
-              <BroadcastSection navigate={navigate} />
-              <QuickActions navigate={navigate} />
-            </div>
+            {/* Acciones rápidas (Comunicación Real-time) */}
+            <QuickActions navigate={navigate} />
 
             {/* Sesiones de hoy + Calendario */}
             <div className="flex flex-col lg:flex-row gap-6">

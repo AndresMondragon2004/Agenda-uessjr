@@ -62,8 +62,7 @@ const SIDEBAR_ITEMS = [
   { label: 'Sesiones',         path: '/admin/sesiones',    icon: Sparkles },
   { label: 'Propuestas',       path: '/admin/propuestas',  icon: FileText },
   { label: 'Estudiantes',      path: '/admin/estudiantes', icon: Users },
-  { label: 'Broadcast',        path: '/admin/broadcast',   icon: Megaphone },
-  { label: 'Inteligencia IA',  path: '/admin/ia',          icon: Brain },
+  { label: 'Anuncios y Mensajes', path: '/admin/anuncios',   icon: Megaphone },  { label: 'Inteligencia IA',  path: '/admin/ia',          icon: Brain },
   { label: 'Reportes',         path: '/admin/reportes',    icon: BarChart3 },
 ]
 
