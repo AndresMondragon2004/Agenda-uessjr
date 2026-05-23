@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Html5QrcodeScanner } from 'html5-qrcode'
+import { Html5Qrcode } from 'html5-qrcode'
 import { 
   Camera, CheckCircle2, XCircle, Users, 
   ArrowLeft, Loader2, UserCheck, MapPin, 
@@ -309,11 +309,10 @@ export default function CheckInScanner() {
 
   // 3. Inicializar / Destruir Scanner
   useEffect(() => {
-    let scanner = null;
+    let html5QrCode = null;
 
     async function startScanner() {
       if (scanning && sesionId) {
-        // Pequeño delay para asegurar que el div "reader" ya está en el DOM
         await new Promise(r => setTimeout(r, 100));
         
         const element = document.getElementById("reader");
@@ -322,22 +321,27 @@ export default function CheckInScanner() {
           return;
         }
 
-        scanner = new Html5QrcodeScanner("reader", { 
-          fps: 10, 
-          qrbox: { width: 250, height: 250 },
-          aspectRatio: 1.0,
-          rememberLastUsedCamera: true,
-          supportedScanTypes: [0] // 0 = Html5QrcodeScanType.SCAN_TYPE_CAMERA
-        }, false)
+        html5QrCode = new Html5Qrcode("reader");
 
         try {
-          scanner.render(handleScanSuccess, (err) => {
-            // Ignorar errores de "no se encuentra QR en frame"
-          })
-          scannerRef.current = scanner
+          await html5QrCode.start(
+            { facingMode: "environment" }, 
+            {
+              fps: 10,
+              qrbox: { width: 250, height: 250 },
+              aspectRatio: 1.0
+            },
+            (decodedText) => {
+              handleScanSuccess(decodedText)
+            },
+            (errorMessage) => {
+              // Ignorar errores de "no se encuentra QR en frame"
+            }
+          );
+          scannerRef.current = html5QrCode
         } catch (err) {
-          console.error("Error al renderizar el escáner:", err)
-          setLastResult({ success: false, msg: "Error al iniciar cámara: " + err.message })
+          console.error("Error al iniciar cámara:", err)
+          setLastResult({ success: false, msg: "Error de cámara: Permite el acceso a la cámara en tu navegador." })
         }
       }
     }
@@ -346,8 +350,10 @@ export default function CheckInScanner() {
 
     return () => {
       if (scannerRef.current) {
-        scannerRef.current.clear().catch(err => {
-          console.warn("Error al limpiar el escáner:", err);
+        scannerRef.current.stop().then(() => {
+          scannerRef.current.clear()
+        }).catch(err => {
+          console.warn("Error al detener el escáner:", err);
         })
         scannerRef.current = null
       }
