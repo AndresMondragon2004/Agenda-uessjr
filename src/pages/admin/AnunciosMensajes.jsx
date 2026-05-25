@@ -55,7 +55,7 @@ function ConfirmModal({ count, programa, channels, onConfirm, onCancel, loading 
         <div className="w-16 h-16 rounded-2xl bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center mx-auto mb-4">
           <Send className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
         </div>
-        <h2 className="text-xl font-black text-gray-900 dark:text-gray-100 mb-1 uppercase tracking-tight">Confirmar Envío</h2>
+        <h2 className="text-xl font-black text-gray-900 dark:text-gray-100 mb-1 uppercase tracking-tight">Confirmar envío</h2>
         <p className="text-gray-500 dark:text-gray-400 text-sm mb-4 leading-relaxed">
           Se enviará el mensaje a{' '}
           <strong className="text-gray-900 dark:text-gray-100">{count} alumnos</strong>
@@ -210,24 +210,24 @@ export default function AnunciosMensajes() {
     
     // 1. Notificación WEB (Siempre)
     try {
-      await notificacionesService.create({
-        titulo: 'Anuncio de la Organización',
-        mensaje: mensaje,
-        tipo: 'info',
-        estudiante_id: programa === 'todos' ? null : 'FILTRADO' // Usamos un flag o insertamos por cada uno si no es global
-      })
-      // Nota: notificacionesService.create maneja el null como global. 
-      // Si hay filtro por carrera, deberíamos insertar una por cada alumno en la tabla notificaciones 
-      // o mejorar el servicio para soportar filtros. Por ahora, si es todos es global.
-      if (programa !== 'todos') {
+      if (programa === 'todos') {
+        await notificacionesService.create({
+          titulo: 'Anuncio de la Organización',
+          mensaje: mensaje,
+          tipo: 'info',
+          estudiante_id: null
+        })
+      } else {
         const insertNotifs = destinatarios.map(est => ({
-          titulo: 'Aviso para tu carrera',
+          titulo: 'Aviso para tu programa',
           mensaje: mensaje,
           tipo: 'info',
           estudiante_id: est.id,
           leida: false
         }))
-        await supabase.from('notificaciones').insert(insertNotifs)
+        // Batch insert for students of the specific program
+        const { error } = await supabase.from('notificaciones').insert(insertNotifs)
+        if (error) throw error
       }
     } catch (e) { console.error('Error Web Notif:', e) }
 
@@ -300,7 +300,7 @@ export default function AnunciosMensajes() {
               <ArrowLeft size={20} className="text-gray-400" />
             </button>
             <div>
-              <h1 className="font-black text-gray-900 dark:text-gray-100 text-xl leading-none">Anuncios y Mensajes</h1>
+              <h1 className="font-black text-gray-900 dark:text-gray-100 text-xl leading-none">Anuncios y mensajes</h1>
               <p className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em] mt-2 flex items-center gap-1">
                 <Globe size={10} /> Sistema de Difusión Omnicanal
               </p>
@@ -449,7 +449,7 @@ export default function AnunciosMensajes() {
                   <CheckCircle2 size={28} />
                 </div>
                 <div>
-                  <h3 className="text-lg font-black text-emerald-900 dark:text-emerald-400 leading-none">Difusión Exitosa</h3>
+                  <h3 className="text-lg font-black text-emerald-900 dark:text-emerald-400 leading-none">Difusión exitosa</h3>
                   <p className="text-xs font-bold text-emerald-700 dark:text-emerald-500 mt-2">
                     El mensaje ha sido procesado para {result.count} alumnos a través de los canales activos.
                   </p>
@@ -487,7 +487,7 @@ export default function AnunciosMensajes() {
             <div className="bg-gradient-to-br from-[#1B4332] to-[#0D2B1D] rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-xl">
               <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12"><Globe size={120} /></div>
               <div className="relative z-10">
-                <h4 className="font-black text-sm uppercase tracking-widest mb-4">Ayuda Técnica</h4>
+                <h4 className="font-black text-sm uppercase tracking-widest mb-4">Ayuda técnica</h4>
                 <ul className="space-y-3">
                   <li className="text-[10px] flex items-start gap-2 text-emerald-100/70"><span className="w-1 h-1 bg-emerald-400 rounded-full mt-1.5 shrink-0" /> Los mensajes en la Web aparecen al instante en la campanita.</li>
                   <li className="text-[10px] flex items-start gap-2 text-emerald-100/70"><span className="w-1 h-1 bg-emerald-400 rounded-full mt-1.5 shrink-0" /> Telegram requiere que el alumno haya vinculado su cuenta previamente.</li>

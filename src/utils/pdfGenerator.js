@@ -380,84 +380,157 @@ export async function generateConstanciaPDF(estudiante, jornada) {
   const { jsPDF } = await import('jspdf')
   const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'landscape' })
   
-  const [imgUES, imgUMB] = await Promise.all([
+  const validCode = `VERIFY-${estudiante.id.split('-')[0]}-${jornada?.id.split('-')[0]}`.toUpperCase()
+  const verifyUrl = `${window.location.origin}/verificar/${validCode}`
+  const qrImgUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(verifyUrl)}&margin=1&format=png`
+
+  const [imgUES, imgUMB, imgQR] = await Promise.all([
     tryLoadImage('/images/logos/ues-sjr.png'),
-    tryLoadImage('/images/logos/umb.png')
+    tryLoadImage('/images/logos/umb.png'),
+    tryLoadImage(qrImgUrl)
   ])
 
   const cx = 297 / 2
   const cy = 210 / 2
 
-  // Fondo elegante
-  doc.setFillColor(252, 251, 247)
+  // 1. Fondo base elegante (Papel hueso sutil)
+  doc.setFillColor(252, 252, 250)
   doc.rect(0, 0, 297, 210, 'F')
   
-  // Marco institucional
+  // 2. Marcos Perimetrales Estilo Diploma
+  // Marco Exterior (Verde UES)
   doc.setDrawColor(27, 67, 50)
-  doc.setLineWidth(1)
+  doc.setLineWidth(3.5)
   doc.rect(10, 10, 277, 190)
-  doc.setDrawColor(212, 160, 23)
-  doc.setLineWidth(0.5)
-  doc.rect(12, 12, 273, 186)
-
-  // Logos
-  if (imgUMB) doc.addImage(imgUMB, 'PNG', 25, 20, 45, 22)
-  if (imgUES) doc.addImage(imgUES, 'PNG', 227, 20, 45, 22)
-
-  // Textos
-  doc.setFont('times', 'bold')
-  doc.setFontSize(22)
-  doc.setTextColor(27, 67, 50)
-  doc.text('UNIVERSIDAD MEXIQUENSE DEL BICENTENARIO', cx, 45, { align: 'center' })
   
-  doc.setFontSize(14)
-  doc.text('UNIDAD DE ESTUDIOS SUPERIORES SAN JOSÉ DEL RINCÓN', cx, 52, { align: 'center' })
+  // Marco Interior (Dorado Fino)
+  doc.setDrawColor(212, 160, 23)
+  doc.setLineWidth(0.6)
+  doc.rect(15, 15, 267, 180)
 
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(32)
-  doc.setTextColor(212, 160, 23)
-  doc.text('CONSTANCIA', cx, 85, { align: 'center' })
+  // Acentos Dorados en las esquinas
+  doc.setDrawColor(212, 160, 23)
+  doc.setLineWidth(2)
+  const l = 15 // Longitud del acento
+  // Sup-Izq
+  doc.line(13, 13, 13 + l, 13); doc.line(13, 13, 13, 13 + l);
+  // Sup-Der
+  doc.line(284, 13, 284 - l, 13); doc.line(284, 13, 284, 13 + l);
+  // Inf-Izq
+  doc.line(13, 197, 13 + l, 197); doc.line(13, 197, 13, 197 - l);
+  // Inf-Der
+  doc.line(284, 197, 284 - l, 197); doc.line(284, 197, 284, 197 - l);
 
+  // 3. Marca de Agua (Logo UES translúcido)
+  if (imgUES) {
+    doc.setGState(new doc.GState({ opacity: 0.05 }))
+    doc.addImage(imgUES, 'PNG', cx - 60, cy - 30, 120, 60)
+    doc.setGState(new doc.GState({ opacity: 1.0 }))
+  }
+
+  // 4. Logos Institucionales Superiores
+  if (imgUMB) doc.addImage(imgUMB, 'PNG', 25, 22, 45, 22)
+  if (imgUES) doc.addImage(imgUES, 'PNG', 227, 22, 45, 22)
+
+  // 5. Encabezado Institucional
+  doc.setFont('times', 'bold')
+  doc.setFontSize(24)
+  doc.setTextColor(27, 67, 50)
+  doc.text('UNIVERSIDAD MEXIQUENSE DEL BICENTENARIO', cx, 38, { align: 'center' })
+  
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(13)
+  doc.setTextColor(75, 85, 99)
+  doc.text('UNIDAD DE ESTUDIOS SUPERIORES SAN JOSÉ DEL RINCÓN', cx, 45, { align: 'center' })
+
+  // Línea divisoria encabezado
+  doc.setDrawColor(212, 160, 23)
+  doc.setLineWidth(0.4)
+  doc.line(cx - 70, 51, cx + 70, 51)
+
+  // 6. Título del Documento
+  doc.setFont('times', 'bold')
+  doc.setFontSize(36)
+  doc.setTextColor(212, 160, 23) // Dorado
+  doc.text('CONSTANCIA', cx, 75, { align: 'center' })
+
+  // 7. Cuerpo del Certificado
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(14)
-  doc.setTextColor(75, 85, 99)
-  doc.text('Se otorga la presente a:', cx, 105, { align: 'center' })
+  doc.setTextColor(100, 100, 100)
+  doc.text('Que se otorga a:', cx, 95, { align: 'center' })
 
-  doc.setFont('times', 'bolditalic')
-  doc.setFontSize(28)
+  // Nombre del Estudiante
+  doc.setFont('times', 'italic')
+  doc.setFontSize(34)
   doc.setTextColor(17, 24, 39)
-  doc.text(`${estudiante.nombre} ${estudiante.apellidos}`.toUpperCase(), cx, 120, { align: 'center' })
+  const fullName = `${estudiante.nombre} ${estudiante.apellidos}`.toUpperCase()
+  doc.text(fullName, cx, 115, { align: 'center' })
 
+  // Subrayado del nombre
+  doc.setDrawColor(180, 180, 180)
+  doc.setLineWidth(0.5)
+  const nameWidth = doc.getTextWidth(fullName)
+  doc.line(cx - (nameWidth/2) - 10, 118, cx + (nameWidth/2) + 10, 118)
+
+  // Motivo
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(14)
   doc.setTextColor(75, 85, 99)
-  const texto = `Por su valiosa participación en la ${jornada?.edicion || '12va'} Jornada Académica y Cultural titulada:`
-  doc.text(texto, cx, 135, { align: 'center' })
+  const textoMotivo = `Por su destacada participación en la ${jornada?.edicion || '12va'} Jornada Académica y Cultural:`
+  doc.text(textoMotivo, cx, 134, { align: 'center' })
 
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(16)
+  // Nombre de la Jornada / Lema
+  doc.setFont('times', 'bold')
+  doc.setFontSize(18)
   doc.setTextColor(27, 67, 50)
   const lema = `"${jornada?.lema || 'Cultura que inspira, conocimiento que transforma'}"`
-  doc.text(lema, cx, 145, { align: 'center' })
+  doc.text(lema, cx, 144, { align: 'center' })
 
+  // Fechas
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(11)
   doc.setTextColor(107, 114, 128)
-  const fechaStr = `Llevada a cabo del ${new Date(jornada?.fecha_inicio + 'T12:00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'long' })} al ${new Date(jornada?.fecha_fin + 'T12:00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' })}.`
-  doc.text(fechaStr, cx, 155, { align: 'center' })
+  const dateStr = `Realizada del ${new Date(jornada?.fecha_inicio + 'T12:00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'long' })} al ${new Date(jornada?.fecha_fin + 'T12:00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' })}.`
+  doc.text(dateStr, cx, 153, { align: 'center' })
 
-  // Firmas (Simuladas)
-  doc.setDrawColor(200, 200, 200)
-  doc.line(cx - 50, 185, cx + 50, 185)
-  doc.setFontSize(10)
-  doc.text('DIRECCIÓN ACADÉMICA', cx, 190, { align: 'center' })
-  doc.text('UES SAN JOSÉ DEL RINCÓN', cx, 195, { align: 'center' })
+  // 8. Zona de Firmas
+  doc.setDrawColor(100, 100, 100)
+  doc.setLineWidth(0.5)
+  doc.line(cx - 45, 180, cx + 45, 180)
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(11)
+  doc.setTextColor(27, 67, 50)
+  doc.text('DIRECCIÓN ACADÉMICA', cx, 186, { align: 'center' })
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(9)
+  doc.setTextColor(100, 100, 100)
+  doc.text('UES SAN JOSÉ DEL RINCÓN', cx, 191, { align: 'center' })
 
-  // Código de validación único
-  const validCode = `VERIFY-${estudiante.id}-${jornada?.id}`.toUpperCase()
-  doc.setFontSize(7)
-  doc.setTextColor(200, 200, 200)
-  doc.text(`Código de verificación: ${validCode}`, 20, 200)
+  // 9. Código QR y Validación
+  if (imgQR) {
+    // Caja contenedora sutil para el QR
+    doc.setFillColor(255, 255, 255)
+    doc.setDrawColor(220, 220, 220)
+    doc.setLineWidth(0.3)
+    doc.roundedRect(22, 155, 28, 28, 2, 2, 'FD')
+    
+    // Imprimir el código QR
+    doc.addImage(imgQR, 'PNG', 23, 156, 26, 26)
+    
+    // Texto de verificación
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(7)
+    doc.setTextColor(130, 130, 130)
+    doc.text('ESCANEAR PARA', 36, 188, { align: 'center' })
+    doc.text('VERIFICAR', 36, 191, { align: 'center' })
+  }
+
+  // Identificador único textual
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(6)
+  doc.setTextColor(180, 180, 180)
+  doc.text(`ID: ${validCode}`, 36, 195, { align: 'center' })
 
   doc.save(`Constancia-${estudiante.nombre.replace(/\s+/g, '_')}-UESSJR.pdf`)
 }

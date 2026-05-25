@@ -43,5 +43,16 @@ export const notificacionesService = {
       .update({ leida: true })
       .eq('id', id)
     if (error) throw error
+  },
+
+  /**
+   * Elimina todas las notificaciones personales del estudiante
+   */
+  async clearAll(estudianteId) {
+    const { error } = await supabase
+      .from('notificaciones')
+      .delete()
+      .eq('estudiante_id', estudianteId)
+    if (error) throw error
   }
 }

@@ -128,7 +128,7 @@ function StatCard({ icon: Icon, value, label, color, delay }) {
 
 /* ─── Session card ────────────────────────────────────────────────────────── */
 function SessionCard({ ses, idx, inView }) {
-  const ACCENTS = ['#1B4332', '#D97706', '#2563EB']
+  const ACCENTS = ['#10B981', '#D97706', '#2563EB'] // Changed first to bright emerald
   const accent  = ACCENTS[idx % ACCENTS.length]
   return (
     <div
@@ -154,7 +154,7 @@ function SessionCard({ ses, idx, inView }) {
             </p>
           </div>
         </div>
-        <span className="text-gray-100 dark:text-[#1A3425] font-black text-5xl leading-none select-none -mt-1 mb-2">
+        <span className="text-gray-300 dark:text-gray-600/80 font-black text-5xl leading-none select-none -mt-1 mb-2">
           0{idx + 1}
         </span>
         <h3 className="text-base font-bold text-gray-900 dark:text-gray-100 mb-4 leading-snug line-clamp-3 flex-grow group-hover:text-[#1B4332] dark:group-hover:text-emerald-400 transition-colors">

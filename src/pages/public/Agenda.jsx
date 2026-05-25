@@ -128,9 +128,10 @@ export default function Agenda() {
     })
     .filter(s => {
       if (!busqueda) return true
-      const q = busqueda.toLowerCase()
-      return s.nombre?.toLowerCase().includes(q) ||
-        s.ponente_nombre?.toLowerCase().includes(q)
+      const normalizeText = (str) => str ? str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() : ""
+      const q = normalizeText(busqueda)
+      return normalizeText(s.nombre).includes(q) ||
+        normalizeText(s.ponente_nombre).includes(q)
     })
 
   const totalFiltradas = sesionesFiltradas.length

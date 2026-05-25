@@ -90,8 +90,9 @@ export default function Speakers() {
     .filter(p => programaFiltro === 'todos' || (p.programas || []).includes(programaFiltro))
     .filter(p => {
       if (!busqueda) return true
-      const q = busqueda.toLowerCase()
-      return p.nombre.toLowerCase().includes(q) || p.institucion?.toLowerCase().includes(q)
+      const normalizeText = (str) => str ? str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() : ""
+      const q = normalizeText(busqueda)
+      return normalizeText(p.nombre).includes(q) || normalizeText(p.institucion).includes(q)
     })
 
   return (

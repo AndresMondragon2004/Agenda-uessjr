@@ -191,6 +191,31 @@ export default function MyAgenda() {
               ? `${estudiante.nombre} ${estudiante.apellidos} — Sesiones a las que estás inscrito(a).`
               : 'Tus sesiones inscritas.'}
           </p>
+
+          {/* Banner de Telegram para todos los usuarios sin vincular */}
+          {estudiante && !estudiante.telegram_chat_id && (
+            <div className="mt-6 bg-[#E8F4F8] dark:bg-[#0088cc]/10 border border-[#0088cc]/20 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-[#0088cc]/10 dark:bg-[#0088cc]/20 rounded-xl shrink-0 mt-0.5 sm:mt-0">
+                  <Send className="text-[#0088cc]" size={20} />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black text-gray-900 dark:text-gray-100 mb-1">Obtén tu código QR en Telegram</h3>
+                  <p className="text-xs font-medium text-gray-600 dark:text-gray-400 leading-tight">
+                    Vincula tu cuenta con nuestro bot oficial para tener tu boleto de acceso siempre a la mano y recibir notificaciones de tus sesiones.
+                  </p>
+                </div>
+              </div>
+              <a
+                href={`https://t.me/agendauessjrbot?start=${estudiante.id}`}
+                target="_blank"
+                rel="noreferrer"
+                className="w-full sm:w-auto px-6 py-3 bg-[#0088cc] hover:bg-[#0077b5] text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 shrink-0 transform hover:-translate-y-0.5"
+              >
+                Vincular Telegram
+              </a>
+            </div>
+          )}
         </div>
       </div>
 
@@ -227,8 +252,8 @@ export default function MyAgenda() {
                 <div className="relative z-10">
                   <div className="flex items-center justify-between mb-8">
                     <div>
-                      <h2 className="text-2xl font-black tracking-tight">Tu Progreso</h2>
-                      <p className="text-emerald-200/70 text-[10px] font-black uppercase tracking-widest mt-1">Jornada Académica 2026</p>
+                      <h2 className="text-2xl font-black tracking-tight">Tu progreso</h2>
+                      <p className="text-emerald-200/70 text-[10px] font-black uppercase tracking-widest mt-1">Jornada académica 2026</p>
                     </div>
                     <div className="text-right">
                       <span className="text-5xl font-black leading-none">{statsProgreso?.porcentaje}%</span>
@@ -258,7 +283,7 @@ export default function MyAgenda() {
                   <Users className="text-[#1B4332] dark:text-emerald-400" size={24} />
                 </div>
                 <p className="text-3xl font-black text-gray-900 dark:text-white leading-none mb-1">{statsProgreso?.programas}</p>
-                <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Áreas Cubiertas</p>
+                <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Áreas cubiertas</p>
                 <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-4 leading-tight font-medium">Has explorado sesiones de {statsProgreso?.programas} programas diferentes.</p>
               </div>
             </div>
@@ -270,23 +295,12 @@ export default function MyAgenda() {
                   <CheckCircle2 className="text-emerald-500" size={24} />
                 </div>
                 <div>
-                  <p className="text-sm font-black text-gray-900 dark:text-white leading-tight">Certificación Digital</p>
+                  <p className="text-sm font-black text-gray-900 dark:text-white leading-tight">Certificación digital</p>
                   <p className="text-[11px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Estado: {asistencias.length >= 6 ? 'Disponible' : 'No elegible'}</p>
                 </div>
               </div>
 
-              <div className="flex gap-2 w-full sm:w-auto">
-                {/* Botón de Telegram (Pro) */}
-                {!estudiante?.telegram_chat_id && (
-                  <a
-                    href={`https://t.me/agendauessjrbot?start=${estudiante.id}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex-1 sm:flex-none px-6 py-3 bg-[#0088cc] hover:bg-[#0077b5] text-white text-xs font-black uppercase tracking-widest rounded-2xl transition-all shadow-lg flex items-center justify-center gap-2"
-                  >
-                    <Send size={16} /> Vincular Telegram
-                  </a>
-                )}
+              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                 
                 {asistencias.length >= 6 ? (
                   <button

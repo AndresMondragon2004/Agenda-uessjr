@@ -99,7 +99,7 @@ export default function AIKnowledgeBase() {
             <div>
               <h1 className="font-black text-xl text-gray-900 dark:text-gray-100 leading-none">Entrenamiento IA</h1>
               <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mt-1.5 flex items-center gap-1">
-                <Sparkles size={10} /> Knowledge Base Concierge
+                <Sparkles size={10} /> Base de conocimientos
               </p>
             </div>
           </div>
@@ -120,7 +120,7 @@ export default function AIKnowledgeBase() {
             <Brain size={180} />
           </div>
           <div className="relative z-10 max-w-2xl">
-            <h2 className="text-2xl font-black mb-3">La memoria de tu Asistente</h2>
+            <h2 className="text-2xl font-black mb-3">La memoria de tu asistente</h2>
             <p className="text-emerald-100/70 text-sm leading-relaxed">
               Lo que escribas aquí será utilizado por el bot de Telegram para responder a los alumnos. 
               Puedes añadir información sobre logística, servicios del campus o reglas del evento que no están en la agenda oficial.

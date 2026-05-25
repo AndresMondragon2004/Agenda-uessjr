@@ -92,33 +92,36 @@ async function tryLoadImage(url) {
   })
 }
 
-function drawPDFHeader(doc, jornada, dia, isContinuation, imgUES, imgUMB) {
+function drawPDFHeader(doc, jornada, dia, isContinuation, imgUES, imgUMB, incluyeLogos) {
   const cx = PAGE_W / 2
   doc.setDrawColor(27, 67, 50)
   doc.setLineWidth(1.5)
   doc.line(0, 0, PAGE_W, 0)
-  doc.setDrawColor(220, 220, 220)
-  doc.setLineWidth(0.5)
-  doc.setLineDash([2, 2])
-  if (imgUMB) {
-    doc.addImage(imgUMB, 'PNG', MARGIN, 3, 30, 16)
-  } else {
-    doc.rect(MARGIN, 3, 30, 16)
-    doc.setFont('helvetica', 'normal')
-    doc.setFontSize(5.5)
-    doc.setTextColor(180, 180, 180)
-    doc.text('[LOGO UMB]', MARGIN + 15, 12, { align: 'center' })
+  
+  if (incluyeLogos) {
+    doc.setDrawColor(220, 220, 220)
+    doc.setLineWidth(0.5)
+    doc.setLineDash([2, 2])
+    if (imgUMB) {
+      doc.addImage(imgUMB, 'PNG', MARGIN, 3, 30, 16)
+    } else {
+      doc.rect(MARGIN, 3, 30, 16)
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(5.5)
+      doc.setTextColor(180, 180, 180)
+      doc.text('[LOGO UMB]', MARGIN + 15, 12, { align: 'center' })
+    }
+    if (imgUES) {
+      doc.addImage(imgUES, 'PNG', PAGE_W - MARGIN - 30, 3, 30, 16)
+    } else {
+      doc.rect(PAGE_W - MARGIN - 30, 3, 30, 16)
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(5.5)
+      doc.setTextColor(180, 180, 180)
+      doc.text('[LOGO UES SJR]', PAGE_W - MARGIN - 15, 12, { align: 'center' })
+    }
+    doc.setLineDash([])
   }
-  if (imgUES) {
-    doc.addImage(imgUES, 'PNG', PAGE_W - MARGIN - 30, 3, 30, 16)
-  } else {
-    doc.rect(PAGE_W - MARGIN - 30, 3, 30, 16)
-    doc.setFont('helvetica', 'normal')
-    doc.setFontSize(5.5)
-    doc.setTextColor(180, 180, 180)
-    doc.text('[LOGO UES SJR]', PAGE_W - MARGIN - 15, 12, { align: 'center' })
-  }
-  doc.setLineDash([])
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(13)
   doc.setTextColor(27, 67, 50)
@@ -139,34 +142,36 @@ function drawPDFHeader(doc, jornada, dia, isContinuation, imgUES, imgUMB) {
   doc.line(MARGIN, HEADER_H - 2, PAGE_W - MARGIN, HEADER_H - 2)
 }
 
-function drawPDFFooter(doc, logos, jornada, pageNum, totalPages) {
+function drawPDFFooter(doc, logos, jornada, pageNum, totalPages, incluyeLogos) {
   const cx = PAGE_W / 2
   const fy = FOOTER_Y
   doc.setDrawColor(229, 231, 235)
   doc.setLineWidth(0.6)
   doc.line(MARGIN, fy, PAGE_W - MARGIN, fy)
   
-  const items   = logos.length > 0 ? logos.slice(0, 5) : []
-  const spacing = 15 // Aumentado para más separación
-  const totalW  = (items.length - 1) * spacing
-  const startX  = cx - totalW / 2
+  if (incluyeLogos) {
+    const items   = logos.length > 0 ? logos.slice(0, 5) : []
+    const spacing = 15 // Aumentado para más separación
+    const totalW  = (items.length - 1) * spacing
+    const startX  = cx - totalW / 2
 
-  items.forEach((inst, i) => {
-    const lx = startX + i * spacing
-    if (inst.imgData) {
-      // Dibujar imagen más ancha y con mejor espacio
-      doc.addImage(inst.imgData, 'PNG', lx - 6, fy + 2, 12, 8, undefined, 'FAST')
-    } else {
-      doc.setDrawColor(27, 67, 50)
-      doc.setLineWidth(0.6)
-      doc.setFillColor(255, 255, 255)
-      doc.circle(lx, fy + 7, 3.5, 'FD')
-      doc.setFont('helvetica', 'bold')
-      doc.setFontSize(5)
-      doc.setTextColor(27, 67, 50)
-      doc.text((inst.nombre?.[0] || '?').toUpperCase(), lx, fy + 8.5, { align: 'center' })
-    }
-  })
+    items.forEach((inst, i) => {
+      const lx = startX + i * spacing
+      if (inst.imgData) {
+        // Dibujar imagen más ancha y con mejor espacio
+        doc.addImage(inst.imgData, 'PNG', lx - 6, fy + 2, 12, 8, undefined, 'FAST')
+      } else {
+        doc.setDrawColor(27, 67, 50)
+        doc.setLineWidth(0.6)
+        doc.setFillColor(255, 255, 255)
+        doc.circle(lx, fy + 7, 3.5, 'FD')
+        doc.setFont('helvetica', 'bold')
+        doc.setFontSize(5)
+        doc.setTextColor(27, 67, 50)
+        doc.text((inst.nombre?.[0] || '?').toUpperCase(), lx, fy + 8.5, { align: 'center' })
+      }
+    })
+  }
   const raw  = (jornada.lema || 'Cultura que inspira, conocimiento que transforma').replace(/^"|"$/g, '')
   const lema = `"${raw}"`
   doc.setFont('helvetica', 'italic')
@@ -179,7 +184,7 @@ function drawPDFFooter(doc, logos, jornada, pageNum, totalPages) {
   doc.text(`${pageNum} / ${totalPages}`, PAGE_W - MARGIN, fy + 14, { align: 'right' })
 }
 
-function drawPDFPortada(doc, jornada, imgUES, imgUMB, logos) {
+function drawPDFPortada(doc, jornada, imgUES, imgUMB, logos, incluyeLogos) {
   const cx = PAGE_W / 2
   const cy = PAGE_H / 2
   doc.setFillColor(249, 247, 242)
@@ -187,28 +192,31 @@ function drawPDFPortada(doc, jornada, imgUES, imgUMB, logos) {
   doc.setDrawColor(27, 67, 50)
   doc.setLineWidth(1.5)
   doc.line(0, 0, PAGE_W, 0)
-  doc.setDrawColor(220, 220, 220)
-  doc.setLineWidth(0.5)
-  doc.setLineDash([2, 2])
-  if (imgUMB) {
-    doc.addImage(imgUMB, 'PNG', MARGIN, 3, 30, 16)
-  } else {
-    doc.rect(MARGIN, 3, 30, 16)
-    doc.setFont('helvetica', 'normal')
-    doc.setFontSize(5.5)
-    doc.setTextColor(180, 180, 180)
-    doc.text('[LOGO UMB]', MARGIN + 15, 12, { align: 'center' })
+  
+  if (incluyeLogos) {
+    doc.setDrawColor(220, 220, 220)
+    doc.setLineWidth(0.5)
+    doc.setLineDash([2, 2])
+    if (imgUMB) {
+      doc.addImage(imgUMB, 'PNG', MARGIN, 3, 30, 16)
+    } else {
+      doc.rect(MARGIN, 3, 30, 16)
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(5.5)
+      doc.setTextColor(180, 180, 180)
+      doc.text('[LOGO UMB]', MARGIN + 15, 12, { align: 'center' })
+    }
+    if (imgUES) {
+      doc.addImage(imgUES, 'PNG', PAGE_W - MARGIN - 30, 3, 30, 16)
+    } else {
+      doc.rect(PAGE_W - MARGIN - 30, 3, 30, 16)
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(5.5)
+      doc.setTextColor(180, 180, 180)
+      doc.text('[LOGO UES SJR]', PAGE_W - MARGIN - 15, 12, { align: 'center' })
+    }
+    doc.setLineDash([])
   }
-  if (imgUES) {
-    doc.addImage(imgUES, 'PNG', PAGE_W - MARGIN - 30, 3, 30, 16)
-  } else {
-    doc.rect(PAGE_W - MARGIN - 30, 3, 30, 16)
-    doc.setFont('helvetica', 'normal')
-    doc.setFontSize(5.5)
-    doc.setTextColor(180, 180, 180)
-    doc.text('[LOGO UES SJR]', PAGE_W - MARGIN - 15, 12, { align: 'center' })
-  }
-  doc.setLineDash([])
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(13)
   doc.setTextColor(27, 67, 50)
@@ -238,25 +246,27 @@ function drawPDFPortada(doc, jornada, imgUES, imgUMB, logos) {
   doc.setLineWidth(0.6)
   doc.line(MARGIN, fy, PAGE_W - MARGIN, fy)
   
-  const items   = logos.length > 0 ? logos.slice(0, 5) : []
-  const spacing = 18 // Más separación en portada
-  const totalW  = (items.length - 1) * spacing
-  const startX  = cx - totalW / 2
-  items.forEach((inst, i) => {
-    const lx = startX + i * spacing
-    if (inst.imgData) {
-      doc.addImage(inst.imgData, 'PNG', lx - 7, fy + 2, 14, 9, undefined, 'FAST')
-    } else {
-      doc.setDrawColor(27, 67, 50)
-      doc.setLineWidth(0.6)
-      doc.setFillColor(249, 247, 242)
-      doc.circle(lx, fy + 7, 3.5, 'FD')
-      doc.setFont('helvetica', 'bold')
-      doc.setFontSize(5)
-      doc.setTextColor(27, 67, 50)
-      doc.text(inst.nombre?.[0] || '?', lx, fy + 8.5, { align: 'center' })
-    }
-  })
+  if (incluyeLogos) {
+    const items   = logos.length > 0 ? logos.slice(0, 5) : []
+    const spacing = 18 // Más separación en portada
+    const totalW  = (items.length - 1) * spacing
+    const startX  = cx - totalW / 2
+    items.forEach((inst, i) => {
+      const lx = startX + i * spacing
+      if (inst.imgData) {
+        doc.addImage(inst.imgData, 'PNG', lx - 7, fy + 2, 14, 9, undefined, 'FAST')
+      } else {
+        doc.setDrawColor(27, 67, 50)
+        doc.setLineWidth(0.6)
+        doc.setFillColor(249, 247, 242)
+        doc.circle(lx, fy + 7, 3.5, 'FD')
+        doc.setFont('helvetica', 'bold')
+        doc.setFontSize(5)
+        doc.setTextColor(27, 67, 50)
+        doc.text(inst.nombre?.[0] || '?', lx, fy + 8.5, { align: 'center' })
+      }
+    })
+  }
   const raw  = (jornada?.lema || 'Cultura que inspira, conocimiento que transforma').replace(/^"|"$/g, '')
   doc.setFont('helvetica', 'italic')
   doc.setFontSize(7)
@@ -264,7 +274,7 @@ function drawPDFPortada(doc, jornada, imgUES, imgUMB, logos) {
   doc.text(`"${raw}"`, cx, fy + 14, { align: 'center' })
 }
 
-function drawSessionsColumn(doc, sesiones, incluyePonentes, dia) {
+function drawSessionsColumn(doc, sesiones, incluyePonentes, dia, incluyeDescripcion, incluyeMateriales) {
   const rowH    = ROW_H_DYN(sesiones.length)
   const areaTop = SESSIONS_TOP
   doc.setFont('helvetica', 'bold')
@@ -306,6 +316,21 @@ function drawSessionsColumn(doc, sesiones, incluyePonentes, dia) {
       doc.setTextColor(107, 114, 128)
       doc.text(pStr, SESSION_X, nextY)
       nextY += 4
+    }
+    if (incluyeDescripcion && ses.descripcion && nextY + 3 <= rowTop + rowH) {
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(6.5)
+      doc.setTextColor(130, 130, 130)
+      const descLines = doc.splitTextToSize(ses.descripcion, SESSION_W)
+      doc.text(descLines.slice(0, 1)[0] + (descLines.length > 1 ? '...' : ''), SESSION_X, nextY)
+      nextY += 3.5
+    }
+    if (incluyeMateriales && ses.materiales_requeridos && nextY + 3 <= rowTop + rowH) {
+      doc.setFont('helvetica', 'italic')
+      doc.setFontSize(6)
+      doc.setTextColor(212, 160, 23)
+      doc.text(`Materiales: ${ses.materiales_requeridos}`.slice(0, 90), SESSION_X, nextY)
+      nextY += 3.5
     }
     if (ses.escenarios?.nombre && nextY + 2 <= rowTop + rowH) {
       doc.setFont('helvetica', 'bold')
@@ -496,7 +521,7 @@ export default function Reports() {
       const totalPaginas = 1 + diasAIncluir.length
       const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'landscape' })
 
-      drawPDFPortada(doc, jornada, imgUES, imgUMB, logosConImagen)
+      drawPDFPortada(doc, jornada, imgUES, imgUMB, logosConImagen, incluyeLogos)
 
       let pageNum = 1
       diasAIncluir.forEach((dia, idx) => {
@@ -506,10 +531,10 @@ export default function Reports() {
         )
         doc.setFillColor(249, 247, 242)
         doc.rect(0, 0, PAGE_W, PAGE_H, 'F')
-        drawPDFHeader(doc, jornada, dia, false, imgUES, imgUMB)
-        drawSessionsColumn(doc, sesDia, incluyePonentes, dia)
+        drawPDFHeader(doc, jornada, dia, false, imgUES, imgUMB, incluyeLogos)
+        drawSessionsColumn(doc, sesDia, incluyePonentes, dia, incluyeDescripcion, incluyeMateriales)
         drawPhotoPlaceholder(doc, imagenesTematicas[idx])
-        drawPDFFooter(doc, logosConImagen, jornada, pageNum, totalPaginas - 1)
+        drawPDFFooter(doc, logosConImagen, jornada, pageNum, totalPaginas - 1, incluyeLogos)
         pageNum++
       })
 
@@ -823,12 +848,12 @@ const handleExportarMaestroAsistencia = async () => {
 }
 
 const EXPORT_ROWS = [
-  { key: 'maestro', label: 'Reporte Maestro de Asistencia', format: 'CSV', desc: 'Métrica individual de asistencia real por cada alumno registrado.', fn: handleExportarMaestroAsistencia },
-  { key: 'inscritos', label: 'Inscripciones por Sesión', format: 'CSV', desc: 'Listado de todos los confirmados en cada sesión.', fn: handleExportarInscritos },
-  { key: 'estudiantes', label: 'Censo Estudiantil', format: 'CSV', desc: 'Base de datos de estudiantes registrados en el sistema.', fn: handleExportarEstudiantes },
-  { key: 'programa', label: 'Métrica por Carrera', format: 'CSV', desc: 'Resumen cuantitativo por programa académico.', fn: handleExportarResumenPrograma },
-  { key: 'propuestas', label: 'Banco de Propuestas', format: 'CSV', desc: 'Historial de actividades propuestas por ponentes.', fn: handleExportarPropuestas },
-  { key: 'inscritos-sesion', label: 'Listas de Asistencia', format: 'PDF', desc: 'Documentos imprimibles para control de firmas.', fn: handleExportarInscritosPorSesion },
+  { key: 'maestro', label: 'Reporte maestro de asistencia', format: 'CSV', desc: 'Métrica individual de asistencia real por cada alumno registrado.', fn: handleExportarMaestroAsistencia },
+  { key: 'inscritos', label: 'Inscripciones por sesión', format: 'CSV', desc: 'Listado de todos los confirmados en cada sesión.', fn: handleExportarInscritos },
+  { key: 'estudiantes', label: 'Censo estudiantil', format: 'CSV', desc: 'Base de datos de estudiantes registrados en el sistema.', fn: handleExportarEstudiantes },
+  { key: 'programa', label: 'Métrica por carrera', format: 'CSV', desc: 'Resumen cuantitativo por programa académico.', fn: handleExportarResumenPrograma },
+  { key: 'propuestas', label: 'Banco de propuestas', format: 'CSV', desc: 'Historial de actividades propuestas por ponentes.', fn: handleExportarPropuestas },
+  { key: 'inscritos-sesion', label: 'Listas de asistencia', format: 'PDF', desc: 'Documentos imprimibles para control de firmas.', fn: handleExportarInscritosPorSesion },
 ]
 
   // ... (handleExportarInscritosPorSesion and other export functions)
@@ -986,7 +1011,7 @@ const EXPORT_ROWS = [
                         ${diasSeleccionados === 'todos'
                           ? 'bg-[#1B4332] text-white'
                           : 'bg-white dark:bg-[#0F2018] border border-gray-200 dark:border-emerald-900/40 text-gray-600 dark:text-gray-300 hover:border-[#1B4332]/30 hover:bg-emerald-50 dark:hover:bg-emerald-900/30'}`}>
-                      Evento Completo
+                      Evento completo
                     </button>
                     {dias.map(dia => (
                       <button key={dia.id} type="button"
@@ -1006,10 +1031,10 @@ const EXPORT_ROWS = [
                   <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">2. Contenido del documento</p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {[
-                      { checked: incluyeLogos,       set: setIncluyeLogos,       label: 'Identidad Institucional',     desc: 'Escudos UES y UMB' },
-                      { checked: incluyePonentes,    set: setIncluyePonentes,    label: 'Perfiles de Ponentes', desc: 'Grados y nombres' },
-                      { checked: incluyeDescripcion, set: setIncluyeDescripcion, label: 'Sinopsis de Actividades',    desc: 'Descripción completa' },
-                      { checked: incluyeMateriales,  set: setIncluyeMateriales,  label: 'Materiales Especiales',       desc: 'Requerimientos técnicos' },
+                      { checked: incluyeLogos,       set: setIncluyeLogos,       label: 'Identidad institucional',     desc: 'Escudos UES y UMB' },
+                      { checked: incluyePonentes,    set: setIncluyePonentes,    label: 'Perfiles de ponentes', desc: 'Grados y nombres' },
+                      { checked: incluyeDescripcion, set: setIncluyeDescripcion, label: 'Sinopsis de actividades',    desc: 'Descripción completa' },
+                      { checked: incluyeMateriales,  set: setIncluyeMateriales,  label: 'Materiales especiales',       desc: 'Requerimientos técnicos' },
                     ].map((item, i) => (
                       <label key={i} className="flex items-start gap-3 p-4 rounded-xl border border-gray-100 dark:border-emerald-900/40 hover:border-emerald-100 dark:hover:border-emerald-800/50 hover:bg-emerald-50/30 dark:hover:bg-emerald-900/20 transition-all cursor-pointer group">
                         <div className={`mt-0.5 flex shrink-0 items-center justify-center w-5 h-5 rounded-lg border-2 transition-all
@@ -1032,7 +1057,7 @@ const EXPORT_ROWS = [
                     <p className="text-sm font-bold text-gray-700 dark:text-gray-200">{jornada?.nombre || 'Jornada Académica'}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">Total Páginas</p>
+                    <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">Total de páginas</p>
                     <p className="text-sm font-black text-[#1B4332] dark:text-emerald-400">{totalPages}</p>
                   </div>
                 </div>
@@ -1162,11 +1187,11 @@ const EXPORT_ROWS = [
                       <div className="w-full h-full flex flex-col p-4" style={{ background: '#F9F7F2' }}>
                         <div className="flex items-center justify-between border-b-2 border-[#1B4332] pb-2 mb-4">
                           <div className="w-12 h-8 flex items-center justify-center">
-                            <img src="/images/logos/umb.png" alt="UMB" className="max-h-full object-contain opacity-40" onError={(e) => e.target.style.display='none'} />
+                            {incluyeLogos && <img src="/images/logos/umb.png" alt="UMB" className="max-h-full object-contain opacity-40" onError={(e) => e.target.style.display='none'} />}
                           </div>
                           <p className="text-[8px] font-black text-[#1B4332] tracking-widest">UES SAN JOSÉ DEL RINCÓN</p>
                           <div className="w-12 h-8 flex items-center justify-center">
-                            <img src="/images/logos/ues-sjr.png" alt="UES" className="max-h-full object-contain opacity-40" onError={(e) => e.target.style.display='none'} />
+                            {incluyeLogos && <img src="/images/logos/ues-sjr.png" alt="UES" className="max-h-full object-contain opacity-40" onError={(e) => e.target.style.display='none'} />}
                           </div>
                         </div>
                         <div className="flex-1 flex flex-col items-center justify-center text-center">
@@ -1180,7 +1205,7 @@ const EXPORT_ROWS = [
                         </div>
                         <div className="border-t border-gray-100 pt-4 mt-auto flex flex-col items-center gap-2">
                           <div className="flex gap-3">
-                            {logos.slice(0, 5).map(logo => (
+                            {incluyeLogos && logos.slice(0, 5).map(logo => (
                               <div key={logo.id} className="w-5 h-5 rounded-full border border-gray-100 overflow-hidden bg-white flex items-center justify-center">
                                 {logo.logotipo_url ? (
                                   <img src={logo.logotipo_url} alt={logo.nombre} className="w-full h-full object-contain p-0.5" />
@@ -1189,7 +1214,7 @@ const EXPORT_ROWS = [
                                 )}
                               </div>
                             ))}
-                            {logos.length === 0 && [1,2,3,4].map(i => <div key={i} className="w-4 h-4 rounded-full border border-gray-100" />)}
+                            {incluyeLogos && logos.length === 0 && [1,2,3,4].map(i => <div key={i} className="w-4 h-4 rounded-full border border-gray-100" />)}
                           </div>
                           <p className="text-[6px] text-gray-400 italic">"{jornada?.lema || 'Cultura que inspira...'}"</p>
                         </div>
@@ -1224,7 +1249,15 @@ const EXPORT_ROWS = [
                                   <span className="text-[6px] font-black text-[#1B4332] w-8">{ses.hora_inicio?.slice(0, 5)}</span>
                                   <div className="flex-1">
                                     <p className="text-[7px] font-black text-gray-800 leading-tight mb-0.5">{ses.nombre.slice(0, 45)}...</p>
-                                    <p className="text-[5px] font-bold text-gray-400">{ses.ponente_nombre}</p>
+                                    {incluyePonentes && ses.ponente_nombre && (
+                                      <p className="text-[5px] font-bold text-gray-400 mb-0.5">{ses.ponente_nombre}</p>
+                                    )}
+                                    {incluyeDescripcion && ses.descripcion && (
+                                      <p className="text-[4.5px] text-gray-400 mb-0.5">{ses.descripcion.slice(0, 80)}...</p>
+                                    )}
+                                    {incluyeMateriales && ses.materiales_requeridos && (
+                                      <p className="text-[4.5px] italic text-[#D4A017]">Mat: {ses.materiales_requeridos.slice(0, 60)}</p>
+                                    )}
                                   </div>
                                 </div>
                               )) : <p className="text-[8px] text-gray-300 text-center py-8">Sin actividades</p>}

@@ -58,6 +58,18 @@ export default function NotificationBell() {
     }
   }
 
+  const handleClearAll = async () => {
+    try {
+      await notificacionesService.clearAll(estudiante.id)
+      // Hide all notifications locally so the user feels it worked instantly.
+      // Next reload, they'll only see global notifications if any.
+      setNotificaciones([])
+      setUnreadCount(0)
+    } catch (err) {
+      console.error('Error limpiando notificaciones', err)
+    }
+  }
+
   const getIcon = (tipo) => {
     switch (tipo) {
       case 'alerta': return <AlertTriangle className="text-orange-500" size={16} />
@@ -88,7 +100,14 @@ export default function NotificationBell() {
           <div className="absolute right-0 mt-3 w-80 bg-white dark:bg-[#122A1C] rounded-[2rem] shadow-2xl border border-gray-100 dark:border-emerald-900/40 z-50 overflow-hidden anim-scale-in">
             <div className="p-5 border-b border-gray-50 dark:border-emerald-900/30 flex items-center justify-between">
               <h3 className="text-xs font-black text-gray-900 dark:text-gray-100 uppercase tracking-widest">Avisos y Alertas</h3>
-              <button onClick={() => setIsOpen(false)} className="text-gray-400 hover:text-gray-600"><X size={16} /></button>
+              <div className="flex items-center gap-3">
+                {notificaciones.length > 0 && (
+                  <button onClick={handleClearAll} className="text-[10px] font-black uppercase text-gray-400 hover:text-red-500 transition-colors">
+                    Limpiar
+                  </button>
+                )}
+                <button onClick={() => setIsOpen(false)} className="text-gray-400 hover:text-gray-600"><X size={16} /></button>
+              </div>
             </div>
 
             <div className="max-h-[400px] overflow-y-auto scrollbar-hide">

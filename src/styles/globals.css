@@ -3,12 +3,16 @@
 @tailwind utilities;
 
 /* ─── Base Styles ────────────────────────────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
 /* Disable transitions for elements where it might look weird or cause lag */
-.no-transition, .no-transition * {
+.no-transition, .no-transition *, .no-transition::before, .no-transition::after {
   transition: none !important;
 }
 

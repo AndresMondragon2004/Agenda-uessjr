@@ -21,7 +21,7 @@ export default function CommandPalette({ isOpen, onClose }) {
     { id: 'p7',  title: 'Reportes y estadísticas',           path: '/admin/reportes',       icon: FileText },
     { id: 'p8',  title: 'Configurar fechas (Jornada)',       path: '/admin/jornada',        icon: Calendar },
     { id: 'p9',  title: 'Gestión de equipo',                 path: '/admin/equipo',         icon: Users },
-    { id: 'p10', title: 'Anuncios y Mensajes',               path: '/admin/anuncios',       icon: Megaphone, highlight: true },
+    { id: 'p10', title: 'Anuncios y mensajes',               path: '/admin/anuncios',       icon: Megaphone, highlight: true },
     { id: 'p11', title: 'Registrar asistencia (Check-In)',   path: '/admin/check-in',       icon: Camera },
     { id: 'p12', title: 'Agenda simplificada',               path: '/admin/agenda-simple',  icon: List },
   ]
