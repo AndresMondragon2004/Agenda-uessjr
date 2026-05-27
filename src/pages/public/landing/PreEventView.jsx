@@ -1,11 +1,45 @@
-import { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useState, useEffect, useRef } from 'react'
+import { Link } from 'react-router-dom'
 import { 
-  ArrowRight, CalendarDays, MapPin, 
+  ArrowRight,
   Terminal, Leaf, Calculator, Users,
   Rocket, BookOpen, Mic2, Star
 } from 'lucide-react'
 import { parseSafeDate } from '../../../utils/dateHelper'
+
+/* ─── CSS de animaciones (Unificado con ActiveEventView) ─────────────────── */
+const ANIM_CSS = `
+  @keyframes fadeUp    { from { opacity:0; transform:translateY(24px) } to { opacity:1; transform:translateY(0) } }
+  @keyframes scaleIn   { from { opacity:0; transform:scale(.93)       } to { opacity:1; transform:scale(1)     } }
+  @keyframes floatSlow { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-18px)} }
+  @keyframes floatMed  { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+  @keyframes shimmer   { from{background-position:200% 0} to{background-position:-200% 0} }
+
+  .anim-fade-up   { animation: fadeUp  .6s ease both }
+  .anim-scale-in  { animation: scaleIn .6s ease both }
+  .anim-delay-100 { animation-delay:.10s }
+  .anim-delay-200 { animation-delay:.20s }
+  .anim-delay-300 { animation-delay:.30s }
+  .anim-delay-400 { animation-delay:.40s }
+  .anim-delay-800 { animation-delay:.80s }
+`
+
+/* ─── Intersection Observer Hook ────────────────────────────────────────── */
+function useInView(threshold = 0.12) {
+  const ref = useRef(null)
+  const [vis, setVis] = useState(false)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const obs = new IntersectionObserver(
+      ([e]) => { if (e.isIntersecting) { setVis(true); obs.disconnect() } },
+      { threshold }
+    )
+    obs.observe(el)
+    return () => obs.disconnect()
+  }, [threshold])
+  return [ref, vis]
+}
 
 /* ─── Ejes Académicos (Reutilizados) ─── */
 const EJES = [
@@ -74,10 +108,12 @@ function LargeCountdown({ targetDate }) {
 }
 
 export default function PreEventView({ jornada }) {
-  const navigate = useNavigate()
+  const [viviremosRef, viviremosVis] = useInView()
+  const [ctaRef,       ctaVis]       = useInView()
 
   return (
     <div className="min-h-screen bg-[#0D2B1D] selection:bg-amber-400 selection:text-[#0D2B1D]">
+      <style>{ANIM_CSS}</style>
       
       {/* 1. Hero Section: Countdown focus */}
       <section className="relative pt-32 pb-20 overflow-hidden">
@@ -120,10 +156,10 @@ export default function PreEventView({ jornada }) {
       </section>
 
       {/* 2. Qué esperar (Stats Teaser) */}
-      <section className="bg-white dark:bg-[#0A1A11] py-24 rounded-t-[3rem] -mt-10 relative z-20">
+      <section className="bg-white dark:bg-[#0A1A11] py-24 rounded-t-[3rem] -mt-10 relative z-20" ref={viviremosRef}>
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-center">
-            <div className="lg:col-span-1">
+            <div className={`lg:col-span-1 ${viviremosVis ? 'anim-fade-up' : 'opacity-0'}`}>
               <h2 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white leading-tight mb-6">
                 Lo que <span className="text-[#1B4332] dark:text-emerald-500">viviremos</span> en esta edición
               </h2>
@@ -145,7 +181,11 @@ export default function PreEventView({ jornada }) {
             
             <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
               {EJES.map((eje, i) => (
-                <div key={i} className={`p-8 rounded-3xl bg-gradient-to-br ${eje.bg} ${eje.bgDark} border border-transparent hover:border-gray-200 transition-all cursor-default group`}>
+                <div 
+                  key={i} 
+                  className={`p-8 rounded-3xl bg-gradient-to-br ${eje.bg} ${eje.bgDark} border border-transparent hover:border-gray-200 transition-all cursor-default group ${viviremosVis ? 'anim-fade-up' : 'opacity-0'}`}
+                  style={{ animationDelay: `${0.1 + i * 0.1}s` }}
+                >
                   <div className="w-14 h-14 rounded-2xl bg-white dark:bg-gray-800 shadow-xl flex items-center justify-center mb-6 transition-transform group-hover:scale-110">
                     <eje.icon size={28} style={{ color: eje.acento }} />
                   </div>
@@ -159,8 +199,8 @@ export default function PreEventView({ jornada }) {
       </section>
 
       {/* 3. Call to Action: Proponer */}
-      <section className="py-24 bg-[#F0F7F4] dark:bg-[#071410]">
-        <div className="max-w-4xl mx-auto px-4 text-center">
+      <section className="py-24 bg-[#F0F7F4] dark:bg-[#071410]" ref={ctaRef}>
+        <div className={`max-w-4xl mx-auto px-4 text-center ${ctaVis ? 'anim-scale-in' : 'opacity-0'}`}>
           <div className="bg-[#0D2B1D] rounded-[3rem] p-12 relative overflow-hidden">
             <div className="absolute top-0 right-0 p-8 opacity-10">
               <Rocket size={200} className="text-white" />

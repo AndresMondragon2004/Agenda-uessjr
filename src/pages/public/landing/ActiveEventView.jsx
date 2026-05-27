@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import {
   ArrowRight, Megaphone, Terminal, Leaf,
   Calculator, Users, CalendarDays, Mic2,
-  Clock, MapPin, BookOpen, ChevronRight,
+  MapPin, BookOpen, ChevronRight,
 } from 'lucide-react'
 import { sesionesService } from '../../../services/sesiones.service'
 import { parseSafeDate } from '../../../utils/dateHelper'

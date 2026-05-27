@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { CheckCircle2, Loader2, Users, Send, Clock } from 'lucide-react'
+import { CheckCircle2, Loader2, Users, Send, Clock, Ticket, Download } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { supabase } from '../../services/supabase'
-import { generateConstanciaPDF } from '../../utils/pdfGenerator'
+import { generateConstanciaPDF, generatePersonalAgendaPDF } from '../../utils/pdfGenerator'
 
 const TIPO_COLORS = {
   inauguracion: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300',
@@ -100,6 +100,20 @@ export default function MyAgenda() {
     }
   }
 
+  const handleDescargarAgendaPersonal = async () => {
+    if (!jornada || !estudiante || inscripciones.length === 0) return
+    try {
+      setGenerating(true)
+      await generatePersonalAgendaPDF(estudiante, jornada, inscripciones)
+      showToast('Agenda personal generada')
+    } catch (err) {
+      console.error(err)
+      alert(err.message || 'Error al generar la agenda')
+    } finally {
+      setGenerating(false)
+    }
+  }
+
   const handleDescargarConstancia = async () => {
     if (!jornada || !estudiante) return
     try {
@@ -192,6 +206,34 @@ export default function MyAgenda() {
               : 'Tus sesiones inscritas.'}
           </p>
 
+          {/* Acciones Rápidas de Acceso y Programación */}
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Link
+              to={`/ticket/${estudiante?.id}`}
+              className="flex-1 sm:flex-none px-6 py-3 bg-[#1B4332] text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-emerald-800 transition-all shadow-lg shadow-emerald-950/20 flex items-center justify-center gap-2 transform hover:-translate-y-0.5 active:scale-95"
+            >
+              <Ticket size={14} /> Ver Mi Ticket (QR)
+            </Link>
+
+            {inscripciones.length > 0 && (
+              <button
+                onClick={handleDescargarAgendaPersonal}
+                disabled={generating}
+                className="flex-1 sm:flex-none px-6 py-3 bg-white dark:bg-[#0F2018] text-[#1B4332] dark:text-emerald-400 border-2 border-[#1B4332] dark:border-emerald-900/50 text-[10px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-gray-50 dark:hover:bg-emerald-900/20 transition-all shadow-sm flex items-center justify-center gap-2"
+              >
+                {generating ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+                Descargar Agenda (PDF)
+              </button>
+            )}
+            
+            <Link
+              to="/agenda"
+              className="flex-1 sm:flex-none px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400 border-2 border-gray-100 dark:border-emerald-900/30 rounded-xl hover:bg-gray-50 dark:hover:bg-emerald-900/20 transition-all text-center flex items-center justify-center"
+            >
+              Explorar más talleres
+            </Link>
+          </div>
+
           {/* Banner de Telegram para todos los usuarios sin vincular */}
           {estudiante && !estudiante.telegram_chat_id && (
             <div className="mt-6 bg-[#E8F4F8] dark:bg-[#0088cc]/10 border border-[#0088cc]/20 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
@@ -202,7 +244,8 @@ export default function MyAgenda() {
                 <div>
                   <h3 className="text-sm font-black text-gray-900 dark:text-gray-100 mb-1">Obtén tu código QR en Telegram</h3>
                   <p className="text-xs font-medium text-gray-600 dark:text-gray-400 leading-tight">
-                    Vincula tu cuenta con nuestro bot oficial para tener tu boleto de acceso siempre a la mano y recibir notificaciones de tus sesiones.
+                    Vincula tu cuenta con nuestro bot oficial para tener tu boleto de acceso siempre a la mano y recibir notificaciones de tus sesiones. 
+                    <Link to={`/ticket/${estudiante.id}`} className="ml-1 text-[#1B4332] dark:text-emerald-400 font-bold hover:underline">O ver ticket en la web →</Link>
                   </p>
                 </div>
               </div>
@@ -289,19 +332,18 @@ export default function MyAgenda() {
             </div>
 
             {/* Summary bar (Compacta) */}
-            <div className="bg-white dark:bg-[#122A1C] rounded-3xl shadow-sm p-6 mb-12 flex flex-col sm:flex-row items-center justify-between border border-gray-100 dark:border-emerald-900/30 gap-6">
+            <div className="bg-white dark:bg-[#122A1C] rounded-3xl shadow-sm p-6 mb-12 flex flex-col sm:flex-row items-center justify-between border border-gray-100 dark:border-emerald-900/40 gap-6">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-emerald-50 dark:bg-emerald-900/30 rounded-2xl flex items-center justify-center shrink-0">
                   <CheckCircle2 className="text-emerald-500" size={24} />
                 </div>
                 <div>
-                  <p className="text-sm font-black text-gray-900 dark:text-white leading-tight">Certificación digital</p>
-                  <p className="text-[11px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Estado: {asistencias.length >= 6 ? 'Disponible' : 'No elegible'}</p>
+                  <p className="text-sm font-black text-gray-900 dark:text-white leading-tight">Certificación digital de asistencia</p>
+                  <p className="text-[11px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Estado: {asistencias.length >= 6 ? 'Disponible' : 'No elegible aún'}</p>
                 </div>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                
                 {asistencias.length >= 6 ? (
                   <button
                     onClick={handleDescargarConstancia}
@@ -312,15 +354,9 @@ export default function MyAgenda() {
                   </button>
                 ) : (
                   <div className="px-5 py-3.5 bg-gray-50 dark:bg-[#0F2018] rounded-2xl text-[9px] font-black uppercase tracking-widest text-gray-400 border border-gray-100 dark:border-emerald-900/20 text-center flex items-center">
-                    Asiste a {Math.max(0, 6 - asistencias.length)} sesiones más para habilitar
+                    Completa {Math.max(0, 6 - asistencias.length)} sesiones más para habilitar
                   </div>
                 )}
-                <Link
-                  to="/agenda"
-                  className="flex-1 sm:flex-none px-8 py-3.5 text-xs font-black uppercase tracking-[0.2em] text-[#1B4332] dark:text-emerald-400 border-2 border-[#1B4332] dark:border-emerald-900/50 rounded-2xl hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all text-center"
-                >
-                  Explorar
-                </Link>
               </div>
             </div>
 

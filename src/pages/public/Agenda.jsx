@@ -84,6 +84,7 @@ export default function Agenda() {
           .sort((a, b) => parseSafeDate(a.fecha) - parseSafeDate(b.fecha))
         setDias(diasOrdenados)
         const data = await sesionesService.getByJornada(j.id)
+        // No filtrar por disponibilidad, solo por estado activo
         setSesiones(data?.filter(s => s.estado === 'activa') || [])
       } catch (err) {
         console.error(err)
@@ -170,7 +171,7 @@ export default function Agenda() {
       <div className="min-h-screen bg-gray-50 dark:bg-[#0A1A11]">
 
       {/* PAGE HEADER */}
-      <div className="bg-white dark:bg-[#122A1C] border-b border-gray-100 dark:border-emerald-900/40 pt-16">
+      <div className="bg-white dark:bg-[#122A1C] border-b border-gray-100 dark:border-emerald-900/40 pt-24">
         <div className="px-4 sm:px-6 lg:px-8 py-8 sm:py-12 max-w-7xl mx-auto">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>

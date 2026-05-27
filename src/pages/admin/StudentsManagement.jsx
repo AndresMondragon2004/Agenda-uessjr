@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { X, Search, Trash2, Users, Edit2, Save, Loader2, Filter, CalendarDays, Calendar, Clock, ChevronRight, Check, ArrowRight, Megaphone, Download } from 'lucide-react'
+import { X, Search, Trash2, Users, Edit2, Save, Loader2, Filter, CalendarDays, Calendar, Clock, ChevronRight, ChevronLeft, Check, ArrowRight, Megaphone, Download } from 'lucide-react'
 import { estudiantesService } from '../../services/estudiantes.service'
 import { norm } from '../../utils/search'
 
@@ -29,6 +29,7 @@ const PROGRAMAS_OPTIONS = [
 
 // ─── View Detail Modal ───────────────────────────────────────────────────
 function ViewEstudianteModal({ estudiante, onClose, onEdit, onDelete, loadingDetalle }) {
+  const navigate = useNavigate()
   if (!estudiante) return null
 
   const getInitials = (n, a) => ((n?.[0] || '') + (a?.[0] || '')).toUpperCase() || '?'
@@ -114,15 +115,22 @@ function ViewEstudianteModal({ estudiante, onClose, onEdit, onDelete, loadingDet
                         const ses = insc.sesiones
                         if (!ses) return null
                         return (
-                          <div key={insc.id} className="p-4 bg-[#FAF9F6] dark:bg-[#122A1C] rounded-2xl border border-gray-100 dark:border-emerald-900/30 shadow-sm hover:border-[#1B4332]/30 transition-all flex items-center justify-between gap-4">
+                          <div 
+                            key={insc.id} 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/admin/sesiones/${ses.id}`);
+                            }}
+                            className="p-4 bg-[#FAF9F6] dark:bg-[#122A1C] rounded-2xl border border-gray-100 dark:border-emerald-900/30 shadow-sm hover:border-[#1B4332]/50 hover:bg-emerald-50/30 dark:hover:bg-emerald-900/10 transition-all flex items-center justify-between gap-4 cursor-pointer group/item"
+                          >
                             <div className="flex-1 min-w-0">
-                              <p className="text-xs font-black text-gray-800 dark:text-gray-200 leading-snug truncate">{ses.nombre}</p>
+                              <p className="text-xs font-black text-gray-800 dark:text-gray-200 leading-snug truncate group-hover/item:text-[#1B4332] dark:group-hover/item:text-emerald-400 transition-colors">{ses.nombre}</p>
                               <div className="flex items-center gap-3 text-[9px] font-bold text-gray-400 mt-1 uppercase">
                                 <span className="flex items-center gap-1"><Calendar size={10} /> {ses.dias_jornada?.nombre_dia}</span>
                                 <span className="flex items-center gap-1"><Clock size={10} /> {ses.hora_inicio?.slice(0, 5)}</span>
                               </div>
                             </div>
-                            <ArrowRight size={14} className="text-emerald-500 shrink-0" />
+                            <ArrowRight size={14} className="text-emerald-500 shrink-0 group-hover/item:translate-x-1 transition-transform" />
                           </div>
                         )
                       })}
@@ -305,6 +313,8 @@ export default function StudentsManagement() {
   const [showEditModal,           setShowEditModal]           = useState(false)
   const [estudianteAEditar,       setEstudianteAEditar]       = useState(null)
   const [toast,                   setToast]                   = useState(null)
+  const [currentPage,             setCurrentPage]             = useState(1)
+  const itemsPerPage = 20
 
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(null), 2000) }
 
@@ -319,6 +329,11 @@ export default function StudentsManagement() {
 
   useEffect(() => { cargar() }, [])
 
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [busqueda, programaFiltro])
+
   // ─── Detect and open student from navigation state ─────────────────────
   useEffect(() => {
     if (location.state?.selectedStudentId && estudiantes.length > 0) {
@@ -332,17 +347,26 @@ export default function StudentsManagement() {
     }
   }, [location.state, estudiantes])
 
-  const estudiantesFiltrados = estudiantes
-    .filter(e => programaFiltro === 'todos' || e.programa_academico === programaFiltro)
-    .filter(e => {
-      if (!busqueda) return true
-      const q = norm(busqueda)
-      return norm(e.nombre).includes(q) ||
-        norm(e.apellidos).includes(q) ||
-        norm(e.matricula).includes(q) ||
-        norm(e.correo).includes(q) ||
-        norm(PROGRAMA_LABELS[e.programa_academico]).includes(q)
-    })
+  const estudiantesFiltrados = useMemo(() => {
+    return estudiantes
+      .filter(e => programaFiltro === 'todos' || e.programa_academico === programaFiltro)
+      .filter(e => {
+        if (!busqueda) return true
+        const q = norm(busqueda)
+        return norm(e.nombre).includes(q) ||
+          norm(e.apellidos).includes(q) ||
+          norm(e.matricula).includes(q) ||
+          norm(e.correo).includes(q) ||
+          norm(PROGRAMA_LABELS[e.programa_academico] || '').includes(q)
+      })
+  }, [estudiantes, programaFiltro, busqueda])
+
+  const currentEstudiantes = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage
+    return estudiantesFiltrados.slice(start, start + itemsPerPage)
+  }, [estudiantesFiltrados, currentPage])
+
+  const totalPages = Math.ceil(estudiantesFiltrados.length / itemsPerPage)
 
   const handleSelectEstudiante = async (est) => {
     try {
@@ -470,60 +494,119 @@ export default function StudentsManagement() {
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="bg-[#FAF9F6] dark:bg-[#122A1C] rounded-3xl p-6 border border-gray-100 dark:border-emerald-900/40 animate-pulse flex flex-col gap-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-gray-200 dark:bg-emerald-900/30"></div>
-                  <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-gray-200 dark:bg-emerald-900/30 rounded w-3/4"></div>
-                    <div className="h-3 bg-gray-100 dark:bg-emerald-900/20 rounded w-1/2"></div>
-                  </div>
-                </div>
-                <div className="pt-4 border-t border-gray-50 dark:border-emerald-900/30 flex justify-between">
-                  <div className="h-5 bg-gray-200 dark:bg-emerald-900/30 rounded w-1/4"></div>
-                </div>
-              </div>
+          <div className="bg-[#FAF9F6] dark:bg-[#122A1C] rounded-3xl p-6 border border-gray-100 dark:border-emerald-900/40 animate-pulse flex flex-col gap-4">
+            <div className="h-10 bg-gray-200 dark:bg-emerald-900/30 rounded w-full mb-4"></div>
+            {[1, 2, 3, 4, 5].map(i => (
+              <div key={i} className="h-16 bg-gray-100 dark:bg-emerald-900/20 rounded w-full"></div>
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {estudiantesFiltrados.length === 0 ? (
-              <div className="lg:col-span-3 py-24 text-center bg-[#FAF9F6] dark:bg-[#122A1C] rounded-3xl border border-gray-100 dark:border-emerald-900/30 border-dashed">
-                <Users className="w-16 h-16 text-gray-200 dark:text-emerald-900/50 mx-auto mb-4" />
-                <p className="font-black text-gray-900 dark:text-gray-100 uppercase tracking-widest text-sm">Sin estudiantes registrados</p>
-              </div>
-            ) : (
-              estudiantesFiltrados.map((est, index) => (
-                <div
-                  key={est.id}
-                  onClick={() => handleSelectEstudiante(est)}
-                  className="bg-[#FAF9F6]/80 backdrop-blur-md dark:bg-[#122A1C]/80 rounded-3xl p-6 border border-gray-100 dark:border-emerald-900/40 hover:border-emerald-300 dark:hover:border-emerald-600 hover:shadow-[0_8px_30px_rgb(27,67,50,0.12)] hover:-translate-y-1 transition-all duration-300 cursor-pointer group opacity-0 animate-slide-up"
-                  style={{ animationDelay: `${index * 50}ms` }}
-                >
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-emerald-900/30 group-hover:bg-[#1B4332] group-hover:text-white flex items-center justify-center transition-all duration-300 font-black text-sm text-gray-500 dark:text-gray-400 shadow-sm">
-                      {getInitials(est.nombre, est.apellidos)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-black text-gray-900 dark:text-gray-100 group-hover:text-[#1B4332] dark:group-hover:text-emerald-400 transition-colors truncate">
-                        {est.nombre} {est.apellidos}
-                      </p>
-                      <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 truncate">{est.matricula || 'Sin matrícula'}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between pt-4 border-t border-gray-50 dark:border-emerald-900/30">
-                    <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider border
-                      ${PROGRAMA_COLORS[est.programa_academico] || 'bg-gray-100 text-gray-600'}`}>
-                      {PROGRAMA_LABELS[est.programa_academico] || est.programa_academico}
-                    </span>
-                    <div className="flex items-center gap-1 text-[#1B4332] dark:text-emerald-400 text-[9px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all">
-                      Perfil <ChevronRight size={12} className="group-hover:translate-x-1 transition-transform" />
-                    </div>
-                  </div>
+          <div className="bg-[#FAF9F6]/80 backdrop-blur-xl dark:bg-[#122A1C]/80 rounded-3xl border border-gray-100 dark:border-emerald-900/40 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-gray-50/50 dark:bg-[#0F2018]/50 border-b border-gray-100 dark:border-emerald-900/40">
+                    <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Estudiante</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Contacto</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Programa</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100 dark:divide-emerald-900/30">
+                  {currentEstudiantes.length === 0 ? (
+                    <tr>
+                      <td colSpan={4} className="py-24 text-center">
+                        <Users className="w-16 h-16 text-gray-200 dark:text-emerald-900/50 mx-auto mb-4" />
+                        <p className="font-black text-gray-900 dark:text-gray-100 uppercase tracking-widest text-sm">No se encontraron resultados</p>
+                      </td>
+                    </tr>
+                  ) : (
+                    currentEstudiantes.map((est) => (
+                      <tr 
+                        key={est.id}
+                        className="group hover:bg-white dark:hover:bg-emerald-900/10 transition-colors cursor-pointer"
+                        onClick={() => handleSelectEstudiante(est)}
+                      >
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#1B4332] to-[#2D6A4F] text-white flex items-center justify-center font-black text-xs shadow-md shadow-emerald-900/20 shrink-0">
+                              {getInitials(est.nombre, est.apellidos)}
+                            </div>
+                            <div>
+                              <p className="text-sm font-black text-gray-900 dark:text-gray-100 group-hover:text-[#1B4332] dark:group-hover:text-emerald-400 transition-colors">
+                                {est.nombre} {est.apellidos}
+                              </p>
+                              <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500">{est.matricula || 'Sin matrícula'}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <p className="text-xs font-bold text-gray-700 dark:text-gray-300">{est.correo}</p>
+                          <p className="text-[10px] font-semibold text-gray-400">{est.telefono || 'Sin teléfono'}</p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={`inline-block px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider border ${PROGRAMA_COLORS[est.programa_academico] || 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 border-gray-200 dark:border-gray-700'}`}>
+                            {PROGRAMA_LABELS[est.programa_academico] || 'General'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <button 
+                              onClick={(e) => { e.stopPropagation(); handleSelectEstudiante(est) }}
+                              className="p-2 rounded-xl text-[#1B4332] dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors border border-emerald-100 dark:border-emerald-900/30"
+                              title="Ver perfil"
+                            >
+                              <ChevronRight size={16} />
+                            </button>
+                            <button 
+                              onClick={(e) => { e.stopPropagation(); setEstudianteAEditar(est); setShowEditModal(true) }}
+                              className="p-2 rounded-xl text-amber-600 dark:text-amber-500 bg-amber-50/50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors border border-amber-100 dark:border-amber-900/30"
+                              title="Editar"
+                            >
+                              <Edit2 size={16} />
+                            </button>
+                            <button 
+                              onClick={(e) => { e.stopPropagation(); setEstudianteAEliminar(est); setShowDeleteModal(true) }}
+                              className="p-2 rounded-xl text-red-600 dark:text-red-500 bg-red-50/50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors border border-red-100 dark:border-red-900/30"
+                              title="Eliminar"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="px-6 py-4 border-t border-gray-100 dark:border-emerald-900/40 flex items-center justify-between bg-gray-50/50 dark:bg-[#0F2018]/50">
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest hidden sm:block">
+                  Mostrando {((currentPage - 1) * itemsPerPage) + 1} a {Math.min(currentPage * itemsPerPage, estudiantesFiltrados.length)} de {estudiantesFiltrados.length} estudiantes
+                </p>
+                <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+                  <button 
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className="p-2 rounded-xl border border-gray-200 dark:border-emerald-900/40 text-gray-500 dark:text-gray-400 disabled:opacity-30 hover:bg-gray-100 dark:hover:bg-emerald-900/30 transition-colors bg-white dark:bg-[#122A1C]"
+                  >
+                    <ChevronLeft size={16} />
+                  </button>
+                  <span className="text-[10px] font-black text-gray-700 dark:text-gray-300 px-3 uppercase tracking-widest">
+                    Página {currentPage} de {totalPages}
+                  </span>
+                  <button 
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                    className="p-2 rounded-xl border border-gray-200 dark:border-emerald-900/40 text-gray-500 dark:text-gray-400 disabled:opacity-30 hover:bg-gray-100 dark:hover:bg-emerald-900/30 transition-colors bg-white dark:bg-[#122A1C]"
+                  >
+                    <ChevronRight size={16} />
+                  </button>
                 </div>
-              ))
+              </div>
             )}
           </div>
         )}

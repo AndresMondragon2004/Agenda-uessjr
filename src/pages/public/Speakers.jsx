@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { Search, Mic2, ChevronRight } from 'lucide-react'
+import { Search, Mic2, ChevronRight, ChevronLeft } from 'lucide-react'
 import { jornadaService }  from '../../services/jornada.service'
 import { sesionesService } from '../../services/sesiones.service'
 import SEO from '../../components/SEO'
@@ -48,8 +48,14 @@ export default function Speakers() {
   const [loading,        setLoading]        = useState(true)
   const [busqueda,       setBusqueda]       = useState('')
   const [programaFiltro, setProgramaFiltro] = useState('todos')
+  const [currentPage,    setCurrentPage]    = useState(1)
+  const itemsPerPage = 10
 
   const [gridRef, gridVis] = useInView()
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [busqueda, programaFiltro])
 
   useEffect(() => {
     async function cargar() {
@@ -86,14 +92,23 @@ export default function Speakers() {
     cargar()
   }, [])
 
-  const ponentesFiltrados = ponentes
-    .filter(p => programaFiltro === 'todos' || (p.programas || []).includes(programaFiltro))
-    .filter(p => {
-      if (!busqueda) return true
-      const normalizeText = (str) => str ? str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() : ""
-      const q = normalizeText(busqueda)
-      return normalizeText(p.nombre).includes(q) || normalizeText(p.institucion).includes(q)
-    })
+  const ponentesFiltrados = useMemo(() => {
+    return ponentes
+      .filter(p => programaFiltro === 'todos' || (p.programas || []).includes(programaFiltro))
+      .filter(p => {
+        if (!busqueda) return true
+        const normalizeText = (str) => str ? str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() : ""
+        const q = normalizeText(busqueda)
+        return normalizeText(p.nombre).includes(q) || normalizeText(p.institucion).includes(q)
+      })
+  }, [ponentes, busqueda, programaFiltro])
+
+  const currentPonentes = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage
+    return ponentesFiltrados.slice(start, start + itemsPerPage)
+  }, [ponentesFiltrados, currentPage])
+
+  const totalPages = Math.ceil(ponentesFiltrados.length / itemsPerPage)
 
   return (
     <>
@@ -184,7 +199,7 @@ export default function Speakers() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {ponentesFiltrados.map((p, i) => (
+              {currentPonentes.map((p, i) => (
                 <div
                   key={i}
                   className={`bg-white dark:bg-[#122A1C] rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border border-gray-100 dark:border-emerald-900/40 flex flex-col overflow-hidden ${gridVis ? 'anim-fade-up' : 'opacity-0'}`}
@@ -252,6 +267,37 @@ export default function Speakers() {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* Pagination Controls */}
+          {!loading && totalPages > 1 && (
+            <div className="mt-12 flex flex-col items-center justify-center gap-4">
+              <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">
+                Página {currentPage} de {totalPages}
+              </p>
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => {
+                    setCurrentPage(p => Math.max(1, p - 1))
+                    window.scrollTo({ top: 0, behavior: 'smooth' })
+                  }}
+                  disabled={currentPage === 1}
+                  className="flex items-center justify-center w-10 h-10 rounded-xl bg-white dark:bg-[#122A1C] border border-gray-200 dark:border-emerald-900/40 text-gray-600 dark:text-gray-300 disabled:opacity-30 hover:bg-gray-50 dark:hover:bg-emerald-900/30 transition-colors shadow-sm"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+                <button 
+                  onClick={() => {
+                    setCurrentPage(p => Math.min(totalPages, p + 1))
+                    window.scrollTo({ top: 0, behavior: 'smooth' })
+                  }}
+                  disabled={currentPage === totalPages}
+                  className="flex items-center justify-center w-10 h-10 rounded-xl bg-white dark:bg-[#122A1C] border border-gray-200 dark:border-emerald-900/40 text-gray-600 dark:text-gray-300 disabled:opacity-30 hover:bg-gray-50 dark:hover:bg-emerald-900/30 transition-colors shadow-sm"
+                >
+                  <ChevronRight size={20} />
+                </button>
+              </div>
             </div>
           )}
         </div>

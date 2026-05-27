@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { Clock, MapPin, CalendarDays, Users, Share2, ChevronRight, CheckCircle2, Download, Star } from 'lucide-react'
+import { Clock, MapPin, CalendarDays, Users, Share2, ChevronRight, CheckCircle2, Download, Star, X } from 'lucide-react'
 import { sesionesService } from '../../services/sesiones.service'
 import { inscripcionesService } from '../../services/inscripciones.service'
 import { useAuth }         from '../../context/AuthContext'
@@ -58,6 +58,7 @@ export default function SessionDetail() {
   const [enviandoVal,    setEnviandoVal]    = useState(false)
   const [inscribiendo,   setInscribiendo]   = useState(false)
   const [finalizada,     setFinalizada]     = useState(false)
+  const [showRatingModal, setShowRatingModal] = useState(false)
   const [toast,          setToast]          = useState(null)
 
   useEffect(() => {
@@ -266,7 +267,7 @@ export default function SessionDetail() {
     <div className="min-h-screen bg-gray-50 dark:bg-[#0A1A11] pb-12">
 
       {/* Hero banner — thematic background */}
-      <div className="relative pt-24 pb-12 overflow-hidden">
+      <div className="relative pt-32 lg:pt-36 pb-12 overflow-hidden">
         {/* Background Layer */}
         <div className="absolute inset-0 bg-[#0A1A11]" />
         {(sesion.dias_jornada?.imagen_url || IMAGENES_POR_DIA[sesion.dias_jornada?.nombre_dia]) ? (
@@ -374,65 +375,24 @@ export default function SessionDetail() {
 
                   {/* ── SECCIÓN DE FEEDBACK (PRO) ── */}
                   {yaAsistio && (
-                    <div className="mt-12 bg-white dark:bg-[#122A1C] rounded-[2.5rem] p-8 sm:p-12 shadow-sm border border-gray-100 dark:border-emerald-900/30 anim-fade-up">
-                      <div className="max-w-2xl">
-                        <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-2">Califica esta sesión</h2>
-                        <p className="text-gray-500 dark:text-gray-400 mb-8 font-medium">Tu opinión ayuda a mejorar futuras jornadas académicas.</p>
-
-                        {yaValoro ? (
-                          <div className="p-6 bg-emerald-50 dark:bg-emerald-950/40 rounded-3xl border border-emerald-100 dark:border-emerald-900/30 text-center sm:text-left">
-                            <div className="flex items-center gap-1 mb-3 justify-center sm:justify-start">
-                              {[1,2,3,4,5].map(n => (
-                                <Star key={n} size={20} className={n <= valoracion.estrellas ? 'text-amber-400 fill-amber-400' : 'text-gray-200'} />
-                              ))}
-                            </div>
-                            <p className="text-[#1B4332] dark:text-emerald-400 font-bold">¡Valoración enviada!</p>
-                            <p className="text-emerald-600 dark:text-emerald-500 text-sm italic mt-2">"{valoracion.comentario}"</p>
-                          </div>
-                        ) : (
-                          <div className="space-y-6">
-                            {/* Estrellas */}
-                            <div className="flex items-center gap-3">
-                              {[1,2,3,4,5].map(n => (
-                                <button 
-                                  key={n} 
-                                  onClick={() => setValoracion(p => ({ ...p, estrellas: n }))}
-                                  className="transition-transform hover:scale-125 focus:scale-110 outline-none"
-                                >
-                                  <Star size={32} className={n <= valoracion.estrellas ? 'text-amber-400 fill-amber-400' : 'text-gray-200 dark:text-emerald-900/50'} />
-                                </button>
-                              ))}
-                              <span className="ml-2 text-xs font-black text-gray-400 uppercase tracking-widest">
-                                {['Pobre','Regular','Buena','Muy buena','Excelente'][valoracion.estrellas - 1] || 'Toca para calificar'}
-                              </span>
-                            </div>
-
-                            {/* Comentario */}
-                            <div>
-                              <textarea 
-                                value={valoracion.comentario}
-                                onChange={e => setValoracion(p => ({ ...p, comentario: e.target.value }))}
-                                placeholder="Escribe un comentario opcional sobre la sesión, el ponente o el contenido..."
-                                className="w-full p-5 bg-gray-50 dark:bg-[#0F2018] border border-gray-100 dark:border-emerald-900/50 rounded-[2rem] outline-none focus:border-[#1B4332] text-sm font-medium dark:text-gray-200 resize-none h-32"
-                              />
-                            </div>
-
-                            <button 
-                              onClick={handleValorar}
-                              disabled={enviandoVal || valoracion.estrellas === 0}
-                              className="px-10 py-4 bg-[#1B4332] text-white font-black uppercase text-xs tracking-widest rounded-2xl hover:bg-emerald-800 transition-all shadow-lg shadow-emerald-900/20 disabled:opacity-50"
-                            >
-                              {enviandoVal ? 'Enviando...' : 'Enviar Calificación'}
-                            </button>
-                          </div>
-                        )}
+                    <div className="mt-12 bg-white dark:bg-[#122A1C] rounded-[2.5rem] p-8 sm:p-12 shadow-sm border border-gray-100 dark:border-emerald-900/30 text-center anim-fade-up">
+                      <div className="max-w-2xl mx-auto">
+                        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+                          {yaValoro ? 'Tu calificación está registrada' : '¿Qué te pareció esta sesión?'}
+                        </h2>
+                        <button 
+                          onClick={() => setShowRatingModal(true)}
+                          className="px-8 py-4 bg-[#1B4332] text-white font-black uppercase text-xs tracking-widest rounded-2xl hover:bg-emerald-800 transition-all shadow-lg shadow-emerald-900/20"
+                        >
+                          {yaValoro ? 'Ver mi calificación' : 'Calificar sesión'}
+                        </button>
                       </div>
                     </div>
                   )}
-                  </div>
-                  </div>
-                  )
-                  }
+                </div>
+              </div>
+            )
+          }
 
 
             {/* Descripción */}
@@ -655,6 +615,77 @@ export default function SessionDetail() {
           </div>
         </div>
       </div>
+
+      {/* Modal de Calificación */}
+      {showRatingModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm anim-fade-in">
+          <div className="bg-white dark:bg-[#122A1C] rounded-[2.5rem] p-8 sm:p-12 shadow-2xl border border-gray-100 dark:border-emerald-900/30 w-full max-w-xl relative anim-fade-up">
+            <button 
+              onClick={() => setShowRatingModal(false)}
+              className="absolute top-6 right-6 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors outline-none"
+            >
+              <X size={24} />
+            </button>
+            
+            <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-2">Califica esta sesión</h2>
+            <p className="text-gray-500 dark:text-gray-400 mb-8 font-medium">Tu opinión ayuda a mejorar futuras jornadas académicas.</p>
+
+            {yaValoro ? (
+              <div className="p-6 bg-emerald-50 dark:bg-emerald-950/40 rounded-3xl border border-emerald-100 dark:border-emerald-900/30 text-center sm:text-left">
+                <div className="flex items-center gap-1 mb-3 justify-center sm:justify-start">
+                  {[1,2,3,4,5].map(n => (
+                    <Star key={n} size={20} className={n <= valoracion.estrellas ? 'text-amber-400 fill-amber-400' : 'text-gray-200 dark:text-emerald-900/50'} />
+                  ))}
+                </div>
+                <p className="text-[#1B4332] dark:text-emerald-400 font-bold">¡Valoración enviada!</p>
+                <p className="text-emerald-600 dark:text-emerald-500 text-sm italic mt-2">
+                  {valoracion.comentario ? `"${valoracion.comentario}"` : 'Sin comentarios adicionales.'}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {/* Estrellas */}
+                <div className="flex items-center justify-center sm:justify-start gap-3">
+                  {[1,2,3,4,5].map(n => (
+                    <button 
+                      key={n} 
+                      onClick={() => setValoracion(p => ({ ...p, estrellas: n }))}
+                      className="transition-transform hover:scale-125 focus:scale-110 outline-none"
+                    >
+                      <Star size={32} className={n <= valoracion.estrellas ? 'text-amber-400 fill-amber-400' : 'text-gray-200 dark:text-emerald-900/50'} />
+                    </button>
+                  ))}
+                </div>
+                <div className="text-center sm:text-left">
+                  <span className="text-xs font-black text-gray-400 uppercase tracking-widest">
+                    {['Pobre','Regular','Buena','Muy buena','Excelente'][valoracion.estrellas - 1] || 'Toca para calificar'}
+                  </span>
+                </div>
+
+                {/* Comentario */}
+                <div>
+                  <textarea 
+                    value={valoracion.comentario}
+                    onChange={e => setValoracion(p => ({ ...p, comentario: e.target.value }))}
+                    placeholder="Escribe un comentario opcional sobre la sesión, el ponente o el contenido..."
+                    className="w-full p-5 bg-gray-50 dark:bg-[#0F2018] border border-gray-100 dark:border-emerald-900/50 rounded-[2rem] outline-none focus:border-[#1B4332] text-sm font-medium dark:text-gray-200 resize-none h-32"
+                  />
+                </div>
+
+                <button 
+                  onClick={async () => {
+                    await handleValorar();
+                  }}
+                  disabled={enviandoVal || valoracion.estrellas === 0}
+                  className="px-10 py-4 w-full bg-[#1B4332] text-white font-black uppercase text-xs tracking-widest rounded-2xl hover:bg-emerald-800 transition-all shadow-lg shadow-emerald-900/20 disabled:opacity-50"
+                >
+                  {enviandoVal ? 'Enviando...' : 'Enviar Calificación'}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Toast */}
       {toast && (

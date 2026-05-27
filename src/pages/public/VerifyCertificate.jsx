@@ -3,37 +3,31 @@ import { useParams, Link } from 'react-router-dom'
 import { ShieldCheck, User, Calendar, CheckCircle2, XCircle, ArrowLeft, Loader2, Award } from 'lucide-react'
 import { supabase } from '../../services/supabase'
 
+const PROGRAMA_ABBR = {
+  sistemas:            'ISC',
+  innovacion_agricola: 'IIAS',
+  contaduria:          'LC',
+}
+
 export default function VerifyCertificate() {
   const { codigo } = useParams()
   const [loading, setLoading] = useState(true)
   const [datos, setDatos] = useState(null)
   const [error, setError] = useState(null)
 
-  useEffect(() => {
-    if (codigo) {
-      verificar()
-    } else {
-      setLoading(false)
-    }
-  }, [codigo])
-
-  async function verificar() {
+  const verificar = async () => {
     try {
       setLoading(true)
       setError(null)
       
-      // El formato del código es VERIFY-[estudiante_id_prefix]-[jornada_id_prefix]
-      // En una implementación real, buscaríamos por una tabla de 'certificados' 
-      // o validaríamos el hash. Aquí buscaremos al estudiante por el prefijo.
-      
       const parts = codigo.split('-')
-      if (parts.length < 11 || parts[0] !== 'VERIFY') {
+      
+      if (parts.length < 7 || parts[0] !== 'VERIFY') {
         throw new Error('Formato de código inválido')
       }
 
       const studentId = parts.slice(1, 6).join('-').toLowerCase()
       
-      // Buscar estudiante de forma exacta con su UUID
       const { data: est, error: eErr } = await supabase
         .from('estudiantes')
         .select(`
@@ -45,7 +39,6 @@ export default function VerifyCertificate() {
 
       if (eErr || !est) throw new Error('Constancia no encontrada en nuestros registros')
 
-      // Verificar que tenga al menos una asistencia para ser válida
       if (!est.asistencias || est.asistencias.length === 0) {
         throw new Error('Esta constancia no cuenta con asistencias verificadas')
       }
@@ -57,6 +50,14 @@ export default function VerifyCertificate() {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    if (codigo) {
+      verificar()
+    } else {
+      setLoading(false)
+    }
+  }, [codigo])
 
   return (
     <div className="min-h-screen bg-[#F8FAFB] dark:bg-[#0A1A11] flex items-center justify-center p-4 sm:p-8">
@@ -109,7 +110,9 @@ export default function VerifyCertificate() {
                     </div>
                     <div>
                       <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Carrera</p>
-                      <p className="font-bold text-gray-700 dark:text-gray-300 uppercase truncate">{datos.programa_academico?.slice(0,15)}...</p>
+                      <p className="font-bold text-gray-700 dark:text-gray-300 uppercase truncate">
+                        {PROGRAMA_ABBR[datos.programa_academico] || datos.programa_academico}
+                      </p>
                     </div>
                   </div>
 

@@ -358,19 +358,25 @@ export async function generateAgendaPDF(jornada, sesiones, options = {}) {
   drawPDFPortada(doc, jornada, imgUES, imgUMB, logosConImagen)
 
   let pageNum = 1
-  diasAIncluir.forEach((dia, idx) => {
+  for (let idx = 0; idx < diasAIncluir.length; idx++) {
+    const dia = diasAIncluir[idx]
     doc.addPage()
     const sesDia = [...(sesionesPorDia[dia.id] || [])].sort(
       (a, b) => (a.hora_inicio || '').localeCompare(b.hora_inicio || '')
     )
     doc.setFillColor(249, 247, 242)
     doc.rect(0, 0, PAGE_W, PAGE_H, 'F')
+    
+    // Cargar imagen temática del día
+    const imgUrl = dia.imagen_url || IMAGENES_POR_DIA[dia.nombre_dia]
+    const loadedImg = imgUrl ? await tryLoadImage(imgUrl) : null
+
     drawPDFHeader(doc, jornada, dia, false, imgUES, imgUMB)
     drawSessionsColumn(doc, sesDia, incluyePonentes)
-    drawPhotoPlaceholder(doc, imagenesTematicas[idx])
+    drawPhotoPlaceholder(doc, loadedImg)
     drawPDFFooter(doc, logosConImagen, jornada, pageNum, totalPaginas - 1)
     pageNum++
-  })
+  }
 
   const safeNombre = (jornada.nombre || 'Jornada').replace(/\s+/g, '-').replace(/[^\w-]/g, '')
   doc.save(`Programa-${safeNombre}-UESSJR.pdf`)
@@ -380,7 +386,7 @@ export async function generateConstanciaPDF(estudiante, jornada) {
   const { jsPDF } = await import('jspdf')
   const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'landscape' })
   
-  const validCode = `VERIFY-${estudiante.id.split('-')[0]}-${jornada?.id.split('-')[0]}`.toUpperCase()
+  const validCode = `VERIFY-${estudiante.id}-${jornada?.id.split('-')[0]}`.toUpperCase()
   const verifyUrl = `${window.location.origin}/verificar/${validCode}`
   const qrImgUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(verifyUrl)}&margin=1&format=png`
 
@@ -429,24 +435,24 @@ export async function generateConstanciaPDF(estudiante, jornada) {
   }
 
   // 4. Logos Institucionales Superiores
-  if (imgUMB) doc.addImage(imgUMB, 'PNG', 25, 22, 45, 22)
-  if (imgUES) doc.addImage(imgUES, 'PNG', 227, 22, 45, 22)
+  if (imgUMB) doc.addImage(imgUMB, 'PNG', 20, 16, 38, 18)
+  if (imgUES) doc.addImage(imgUES, 'PNG', 239, 16, 38, 18)
 
   // 5. Encabezado Institucional
   doc.setFont('times', 'bold')
-  doc.setFontSize(24)
+  doc.setFontSize(22)
   doc.setTextColor(27, 67, 50)
-  doc.text('UNIVERSIDAD MEXIQUENSE DEL BICENTENARIO', cx, 38, { align: 'center' })
+  doc.text('UNIVERSIDAD MEXIQUENSE DEL BICENTENARIO', cx, 42, { align: 'center' })
   
   doc.setFont('helvetica', 'normal')
-  doc.setFontSize(13)
+  doc.setFontSize(12)
   doc.setTextColor(75, 85, 99)
-  doc.text('UNIDAD DE ESTUDIOS SUPERIORES SAN JOSÉ DEL RINCÓN', cx, 45, { align: 'center' })
+  doc.text('UNIDAD DE ESTUDIOS SUPERIORES SAN JOSÉ DEL RINCÓN', cx, 48, { align: 'center' })
 
   // Línea divisoria encabezado
   doc.setDrawColor(212, 160, 23)
   doc.setLineWidth(0.4)
-  doc.line(cx - 70, 51, cx + 70, 51)
+  doc.line(cx - 70, 53, cx + 70, 53)
 
   // 6. Título del Documento
   doc.setFont('times', 'bold')
@@ -527,10 +533,122 @@ export async function generateConstanciaPDF(estudiante, jornada) {
   }
 
   // Identificador único textual
-  doc.setFont('helvetica', 'normal')
+  doc.setFont('helvetica', 'bold')
   doc.setFontSize(6)
-  doc.setTextColor(180, 180, 180)
-  doc.text(`ID: ${validCode}`, 36, 195, { align: 'center' })
+  doc.setTextColor(0, 0, 0) // Negro para mejor legibilidad
+  doc.text(`ID: ${validCode}`, 22, 193.5, { align: 'left' })
 
   doc.save(`Constancia-${estudiante.nombre.replace(/\s+/g, '_')}-UESSJR.pdf`)
+}
+
+export async function generatePersonalAgendaPDF(estudiante, jornada, inscripciones) {
+  const { jsPDF } = await import('jspdf')
+  const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'landscape' })
+  
+  const [imgUES, imgUMB] = await Promise.all([
+    tryLoadImage('/images/logos/ues-sjr.png'),
+    tryLoadImage('/images/logos/umb.png')
+  ])
+
+  // Cargar instituciones para la portada
+  const { data: instituciones } = await supabase.from('instituciones').select('*').order('orden')
+  const subsetInst = (instituciones || []).slice(0, 5)
+  const instLogos = await Promise.all(subsetInst.map(l => tryLoadImage(l.logotipo_url)))
+
+  const logosConImagen = subsetInst.map((l, i) => ({
+    ...l,
+    imgData: instLogos[i]
+  }))
+
+  // Filtrar solo sesiones confirmadas
+  const misInscripciones = inscripciones.filter(i => i.estado === 'confirmada' && i.sesiones)
+  
+  if (misInscripciones.length === 0) {
+    throw new Error('No tienes sesiones confirmadas para generar la agenda.')
+  }
+
+  // Agrupar por día (usando fecha en lugar de id ya que no se consulta el id)
+  const agrupadas = misInscripciones.reduce((acc, insc) => {
+    const dia = insc.sesiones?.dias_jornada || { fecha: 'sin-fecha', nombre_dia: 'Por definir' }
+    const key = dia.fecha || 'sin-fecha'
+    
+    if (!acc[key]) {
+      acc[key] = { dia, sesiones: [] }
+    }
+    acc[key].sesiones.push(insc.sesiones)
+    return acc
+  }, {})
+
+  const diasIds = Object.keys(agrupadas).sort((a, b) => {
+    if (a === 'sin-fecha') return 1;
+    if (b === 'sin-fecha') return -1;
+    return new Date(agrupadas[a].dia.fecha) - new Date(agrupadas[b].dia.fecha)
+  })
+
+  // Dibujar portada en la primera página
+  drawPDFPortada(doc, jornada, imgUES, imgUMB, logosConImagen)
+
+  const totalPaginas = diasIds.length
+  let pageNum = 1
+
+  diasIds.forEach((diaId) => {
+    doc.addPage()
+    
+    const { dia, sesiones } = agrupadas[diaId]
+    const sesSorted = [...sesiones].sort((a, b) => (a.hora_inicio || '').localeCompare(b.hora_inicio || ''))
+
+    // Fondo
+    doc.setFillColor(249, 247, 242)
+    doc.rect(0, 0, PAGE_W, PAGE_H, 'F')
+
+    // Header Personalizado
+    const cx = PAGE_W / 2
+    doc.setDrawColor(27, 67, 50)
+    doc.setLineWidth(1.5)
+    doc.line(0, 0, PAGE_W, 0)
+    
+    if (imgUMB) doc.addImage(imgUMB, 'PNG', MARGIN, 3, 30, 16)
+    if (imgUES) doc.addImage(imgUES, 'PNG', PAGE_W - MARGIN - 30, 3, 30, 16)
+
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(14)
+    doc.setTextColor(27, 67, 50)
+    doc.text('MI AGENDA PERSONAL', cx, 10, { align: 'center' })
+    
+    doc.setFontSize(9)
+    doc.setTextColor(100, 100, 100)
+    doc.text(`${estudiante.nombre} ${estudiante.apellidos}`.toUpperCase(), cx, 15, { align: 'center' })
+
+    doc.setFontSize(8)
+    doc.setTextColor(212, 160, 23)
+    const tituloDia = dia.fecha === 'sin-fecha' ? 'Sesiones sin fecha asignada' : formatDayLong(dia.fecha)
+    doc.text(tituloDia.toUpperCase(), cx, 21, { align: 'center' })
+
+    doc.setDrawColor(212, 160, 23)
+    doc.setLineWidth(1)
+    doc.line(MARGIN, HEADER_H - 2, PAGE_W - MARGIN, HEADER_H - 2)
+
+    // Columnas de sesiones
+    drawSessionsColumn(doc, sesSorted, true)
+    
+    // Footer
+    const fy = FOOTER_Y
+    doc.setDrawColor(229, 231, 235)
+    doc.setLineWidth(0.6)
+    doc.line(MARGIN, fy, PAGE_W - MARGIN, fy)
+    
+    const raw = (jornada?.lema || 'Cultura que inspira, conocimiento que transforma').replace(/^"|"$/g, '')
+    doc.setFont('helvetica', 'italic')
+    doc.setFontSize(7)
+    doc.setTextColor(107, 114, 128)
+    doc.text(`"${raw}"`, cx, fy + 12, { align: 'center' })
+    
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(6.5)
+    doc.text(`Página ${pageNum} de ${totalPaginas}`, PAGE_W - MARGIN, fy + 12, { align: 'right' })
+    
+    pageNum++
+  })
+
+  doc.save(`Mi-Agenda-${estudiante.nombre.replace(/\s+/g, '-')}.pdf`)
 }

@@ -10,6 +10,12 @@ import { supabase } from '../../services/supabase'
 import { sesionesService } from '../../services/sesiones.service'
 import { telegramService } from '../../services/telegram.service'
 
+const PROGRAMA_ABBR = {
+  sistemas:            'ISC',
+  innovacion_agricola: 'IIAS',
+  contaduria:          'LC',
+}
+
 export default function CheckInScanner() {
   const navigate = useNavigate()
   const [sesiones, setSesiones] = useState([])
@@ -96,11 +102,11 @@ export default function CheckInScanner() {
       try {
         const { data } = await supabase
           .from('estudiantes')
-          .select('id, nombre, apellidos, matricula, programa_academico, telegram_chat_id')
+          .select('id, nombre, apellidos, matricula, programa_academico, telegram_chat_id, qr_token')
         if (data) {
           const map = {}
           data.forEach(est => {
-            map[est.id] = est
+            if (est.qr_token) map[est.qr_token] = est
           })
           localStorage.setItem('cached_students', JSON.stringify(map))
           setCachedStudents(map)
@@ -115,11 +121,12 @@ export default function CheckInScanner() {
   }, [isOnline])
 
   // 4. Lógica de registro de asistencias offline
-  const registerOffline = (studentId, qrMatricula) => {
-    let est = cachedStudentsRef.current[studentId]
+  const registerOffline = (qrToken, qrMatricula) => {
+    let est = cachedStudentsRef.current[qrToken]
     if (!est) {
       est = {
-        id: studentId,
+        id: null,
+        qr_token: qrToken,
         nombre: 'Estudiante',
         apellidos: '(Modo Offline)',
         matricula: qrMatricula,
@@ -130,7 +137,10 @@ export default function CheckInScanner() {
     const stored = localStorage.getItem('offline_checkins')
     const checkins = stored ? JSON.parse(stored) : []
     
-    const yaRegistradoOffline = checkins.some(c => c.estudiante_id === studentId && c.sesion_id === sesionIdRef.current)
+    const yaRegistradoOffline = checkins.some(c => 
+      c.sesion_id === sesionIdRef.current && 
+      (c.estudiante_id === est.id || c.qr_token === qrToken)
+    )
     if (yaRegistradoOffline) {
       setLastResult({ 
         success: false, 
@@ -141,7 +151,8 @@ export default function CheckInScanner() {
     }
 
     const nuevoCheckin = {
-      estudiante_id: studentId,
+      estudiante_id: est.id,
+      qr_token: qrToken,
       sesion_id: sesionIdRef.current,
       hora_entrada: new Date().toLocaleTimeString('it-IT'),
       estudiante_datos: est
@@ -173,10 +184,28 @@ export default function CheckInScanner() {
 
     for (const item of checkins) {
       try {
+        let realEstudianteId = item.estudiante_id;
+
+        // Si no teníamos el ID (desconocido offline), buscarlo por qr_token
+        if (!realEstudianteId && item.qr_token) {
+          const { data: estData } = await supabase
+            .from('estudiantes')
+            .select('id')
+            .eq('qr_token', item.qr_token)
+            .maybeSingle();
+          if (estData) {
+            realEstudianteId = estData.id;
+          } else {
+            throw new Error('Estudiante no existe (QR falso)');
+          }
+        }
+
+        if (!realEstudianteId) throw new Error('ID no resuelto');
+
         const { data: exist } = await supabase
           .from('asistencias')
           .select('id')
-          .eq('estudiante_id', item.estudiante_id)
+          .eq('estudiante_id', realEstudianteId)
           .eq('sesion_id', item.sesion_id)
           .maybeSingle()
 
@@ -184,7 +213,7 @@ export default function CheckInScanner() {
           const { error } = await supabase
             .from('asistencias')
             .insert([{
-              estudiante_id: item.estudiante_id,
+              estudiante_id: realEstudianteId,
               sesion_id: item.sesion_id,
               hora_entrada: item.hora_entrada
             }])
@@ -229,14 +258,14 @@ export default function CheckInScanner() {
       return
     }
 
-    const studentId = parts[1]
+    const qrToken = parts[1]
     const qrMatricula = parts[2] || 'S/M'
     setProcessing(true)
     
     // Si no hay internet, ir directamente a registro offline
     if (!isOnlineRef.current) {
       setProcessing(false)
-      registerOffline(studentId, qrMatricula)
+      registerOffline(qrToken, qrMatricula)
       return
     }
 
@@ -244,11 +273,13 @@ export default function CheckInScanner() {
       // A. Verificar si el alumno existe y obtener sus datos
       const { data: est, error: eErr } = await supabase
         .from('estudiantes')
-        .select('*')
-        .eq('id', studentId)
+        .select('id, nombre, apellidos, matricula, programa_academico, telegram_chat_id')
+        .eq('qr_token', qrToken)
         .single()
       
       if (eErr || !est) throw new Error('Estudiante no encontrado')
+
+      const studentId = est.id
 
       // B. Verificar si ya tiene asistencia en esta sesión
       const { data: exist } = await supabase
@@ -313,7 +344,7 @@ export default function CheckInScanner() {
     } catch (err) {
       if (err.message.includes('fetch') || err.message.includes('Network') || err.message.includes('Failed')) {
         // Error de red detectado durante la consulta online, guardar localmente
-        registerOffline(studentId, qrMatricula)
+        registerOffline(qrToken, qrMatricula)
       } else {
         setLastResult({ success: false, msg: err.message })
       }
@@ -324,11 +355,14 @@ export default function CheckInScanner() {
 
   // 3. Inicializar / Destruir Scanner
   useEffect(() => {
+    let isMounted = true;
     let html5QrCode = null;
 
     async function startScanner() {
       if (scanning && sesionId) {
+        // Pequeño delay para asegurar que el div renderizó
         await new Promise(r => setTimeout(r, 100));
+        if (!isMounted) return;
         
         const element = document.getElementById("reader");
         if (!element) {
@@ -353,10 +387,18 @@ export default function CheckInScanner() {
               // Ignorar errores de "no se encuentra QR en frame"
             }
           );
-          scannerRef.current = html5QrCode
+          
+          // Verificar si el componente se desmontó MIENTRAS la cámara inicializaba
+          if (!isMounted) {
+            html5QrCode.stop().then(() => html5QrCode.clear()).catch(console.warn);
+          } else {
+            scannerRef.current = html5QrCode;
+          }
         } catch (err) {
-          console.error("Error al iniciar cámara:", err)
-          setLastResult({ success: false, msg: "Error de cámara: Permite el acceso a la cámara en tu navegador." })
+          if (isMounted) {
+            console.error("Error al iniciar cámara:", err)
+            setLastResult({ success: false, msg: "Error de cámara: Permite el acceso a la cámara en tu navegador." })
+          }
         }
       }
     }
@@ -364,13 +406,27 @@ export default function CheckInScanner() {
     startScanner();
 
     return () => {
+      isMounted = false;
       if (scannerRef.current) {
-        scannerRef.current.stop().then(() => {
-          scannerRef.current.clear()
-        }).catch(err => {
-          console.warn("Error al detener el escáner:", err);
-        })
-        scannerRef.current = null
+        try {
+          if (scannerRef.current.isScanning) {
+            scannerRef.current.stop().then(() => {
+              scannerRef.current.clear();
+            }).catch(console.warn);
+          } else {
+            scannerRef.current.clear();
+          }
+        } catch (e) {
+          console.warn("Error al limpiar escáner:", e);
+        }
+        scannerRef.current = null;
+      } else if (html5QrCode) {
+        // Caso de borde: se empezó a crear la instancia pero no se asignó a scannerRef
+        try {
+          if (html5QrCode.isScanning) {
+            html5QrCode.stop().then(() => html5QrCode.clear()).catch(console.warn);
+          }
+        } catch (e) {}
       }
     }
   }, [scanning, sesionId])
@@ -511,7 +567,9 @@ export default function CheckInScanner() {
                       </div>
                       <div>
                         <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Carrera</p>
-                        <p className="font-bold text-gray-700 dark:text-gray-300 text-xs uppercase">{lastResult.student.programa_academico?.slice(0,10)}...</p>
+                        <p className="font-bold text-gray-700 dark:text-gray-300 text-xs uppercase">
+                          {PROGRAMA_ABBR[lastResult.student.programa_academico] || lastResult.student.programa_academico}
+                        </p>
                       </div>
                     </div>
                   </div>

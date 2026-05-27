@@ -1,13 +1,51 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { Trophy, Users, Calendar, ChevronRight, Award, Star, MapPin, Clock, ArrowRight, Download } from 'lucide-react'
+import { Trophy, Users, Calendar, ChevronRight, Award, Star, MapPin, Clock, ArrowRight } from 'lucide-react'
 import { sesionesService } from '../../../services/sesiones.service'
 import { supabase } from '../../../services/supabase'
+
+/* ─── CSS de animaciones (Unificado con ActiveEventView) ─────────────────── */
+const ANIM_CSS = `
+  @keyframes fadeUp    { from { opacity:0; transform:translateY(24px) } to { opacity:1; transform:translateY(0) } }
+  @keyframes scaleIn   { from { opacity:0; transform:scale(.93)       } to { opacity:1; transform:scale(1)     } }
+  @keyframes floatSlow { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-18px)} }
+  @keyframes floatMed  { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+  @keyframes shimmer   { from{background-position:200% 0} to{background-position:-200% 0} }
+
+  .anim-fade-up   { animation: fadeUp  .6s ease both }
+  .anim-scale-in  { animation: scaleIn .6s ease both }
+  .anim-delay-100 { animation-delay:.10s }
+  .anim-delay-200 { animation-delay:.20s }
+  .anim-delay-300 { animation-delay:.30s }
+  .anim-delay-400 { animation-delay:.40s }
+  .anim-delay-800 { animation-delay:.80s }
+`
+
+/* ─── Intersection Observer Hook ────────────────────────────────────────── */
+function useInView(threshold = 0.12) {
+  const ref = useRef(null)
+  const [vis, setVis] = useState(false)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const obs = new IntersectionObserver(
+      ([e]) => { if (e.isIntersecting) { setVis(true); obs.disconnect() } },
+      { threshold }
+    )
+    obs.observe(el)
+    return () => obs.disconnect()
+  }, [threshold])
+  return [ref, vis]
+}
 
 export default function PostEventView({ jornada }) {
   const [topSesiones, setTopSesiones] = useState([])
   const [stats, setStats] = useState({ totalParticipantes: 0, totalSesiones: 0 })
   const [loading, setLoading] = useState(true)
+
+  const [statsRef,  statsVis]  = useInView()
+  const [fameRef,   fameVis]   = useInView()
+  const [cierreRef, cierreVis] = useInView()
 
   useEffect(() => {
     async function cargarResumen() {
@@ -50,6 +88,7 @@ export default function PostEventView({ jornada }) {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#0A1A11]">
+      <style>{ANIM_CSS}</style>
       
       {/* 1. Hero: Agradecimiento */}
       <section className="relative pt-32 pb-20 bg-[#0D2B1D] overflow-hidden">
@@ -77,14 +116,18 @@ export default function PostEventView({ jornada }) {
       </section>
 
       {/* 2. Stats Dashboard */}
-      <section className="max-w-7xl mx-auto px-4 -mt-10 relative z-20">
+      <section className="max-w-7xl mx-auto px-4 -mt-10 relative z-20" ref={statsRef}>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
             { label: 'Participantes Reales', value: stats.totalParticipantes, icon: Users, color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/20' },
             { label: 'Sesiones Impartidas', value: stats.totalSesiones, icon: Calendar, color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
             { label: 'Instituciones Aliadas', value: '12+', icon: Award, color: 'text-amber-500', bg: 'bg-amber-50 dark:bg-amber-900/20' }
           ].map((stat, i) => (
-            <div key={i} className="bg-white dark:bg-[#122A1C] p-8 rounded-[2rem] shadow-xl border border-gray-100 dark:border-emerald-900/30 flex items-center gap-6 anim-fade-up" style={{ animationDelay: `${i * 0.1}s` }}>
+            <div 
+              key={i} 
+              className={`bg-white dark:bg-[#122A1C] p-8 rounded-[2rem] shadow-xl border border-gray-100 dark:border-emerald-900/30 flex items-center gap-6 ${statsVis ? 'anim-fade-up' : 'opacity-0'}`} 
+              style={{ animationDelay: `${i * 0.1}s` }}
+            >
               <div className={`w-16 h-16 rounded-2xl ${stat.bg} flex items-center justify-center shrink-0`}>
                 <stat.icon className={`w-8 h-8 ${stat.color}`} />
               </div>
@@ -98,8 +141,8 @@ export default function PostEventView({ jornada }) {
       </section>
 
       {/* 3. Hall of Fame (Top Sesiones) */}
-      <section className="py-24 max-w-7xl mx-auto px-4">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+      <section className="py-24 max-w-7xl mx-auto px-4" ref={fameRef}>
+        <div className={`flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 ${fameVis ? 'anim-fade-up' : 'opacity-0'}`}>
           <div>
             <h2 className="text-3xl font-black text-gray-900 dark:text-white mb-2">Lo más <span className="text-[#1B4332] dark:text-emerald-500">destacado</span></h2>
             <p className="text-gray-500 dark:text-gray-400 font-medium">Las sesiones que marcaron tendencia en esta edición.</p>
@@ -112,7 +155,11 @@ export default function PostEventView({ jornada }) {
           {loading ? (
             [1,2,3].map(i => <div key={i} className="h-64 rounded-3xl bg-gray-200 dark:bg-emerald-900/20 animate-pulse" />)
           ) : topSesiones.map((ses, i) => (
-            <div key={ses.id} className="group relative bg-white dark:bg-[#122A1C] rounded-[2.5rem] p-8 border border-gray-100 dark:border-emerald-900/30 shadow-sm hover:shadow-2xl transition-all hover:-translate-y-2">
+            <div 
+              key={ses.id} 
+              className={`group relative bg-white dark:bg-[#122A1C] rounded-[2.5rem] p-8 border border-gray-100 dark:border-emerald-900/30 shadow-sm hover:shadow-2xl transition-all hover:-translate-y-2 ${fameVis ? 'anim-fade-up' : 'opacity-0'}`}
+              style={{ animationDelay: `${0.1 + i * 0.1}s` }}
+            >
               <div className="absolute -top-4 -right-4 w-12 h-12 bg-amber-400 rounded-2xl flex items-center justify-center text-[#0D2B1D] font-black shadow-lg transform rotate-12 group-hover:rotate-0 transition-transform">
                 #{i+1}
               </div>
@@ -153,8 +200,8 @@ export default function PostEventView({ jornada }) {
       </section>
 
       {/* 4. Banner de cierre */}
-      <section className="bg-white dark:bg-[#0E1F15] py-20">
-        <div className="max-w-4xl mx-auto px-4 text-center">
+      <section className="bg-white dark:bg-[#0E1F15] py-20" ref={cierreRef}>
+        <div className={`max-w-4xl mx-auto px-4 text-center ${cierreVis ? 'anim-fade-up' : 'opacity-0'}`}>
           <h2 className="text-3xl font-black text-gray-900 dark:text-white mb-6">¡Nos vemos en la siguiente edición!</h2>
           <p className="text-gray-500 dark:text-gray-400 mb-10 leading-relaxed italic">
             "La educación es el arma más poderosa que puedes usar para cambiar el mundo."

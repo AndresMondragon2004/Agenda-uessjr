@@ -1222,18 +1222,22 @@ const EXPORT_ROWS = [
 
                     ) : (
                       <div className="w-full h-full flex flex-col p-4" style={{ background: '#F9F7F2' }}>
-                        <div className="flex items-center justify-between border-b border-[#D4A017] pb-2 mb-4">
-                          <div className="text-left flex-1">
-                            <p className="text-[8px] font-black text-[#1B4332]">UES SJR</p>
-                            <p className="text-[6px] font-bold text-gray-400 uppercase truncate max-w-[100px]">{jornada?.nombre}</p>
+                        <div className="flex items-start justify-between border-b-2 border-[#D4A017] pb-2 mb-4 relative">
+                          <div className="w-10 h-6 flex items-center justify-center shrink-0">
+                            {incluyeLogos ? <img src="/images/logos/umb.png" alt="UMB" className="max-h-full object-contain opacity-80" onError={(e) => e.target.style.display='none'} /> : <div className="w-8 h-4 border border-dashed border-gray-300"></div>}
                           </div>
-                          <div className="text-center px-4">
-                            <p className="text-[7px] font-black text-[#D4A017] uppercase tracking-widest">
-                              {diasParaPDF[paginaPreview - 2] ? formatShortDay(diasParaPDF[paginaPreview - 2]) : '—'}
+                          
+                          <div className="flex-1 flex flex-col items-center text-center px-2">
+                            <h4 className="text-[8px] font-black text-[#1B4332] uppercase tracking-wider leading-none">UES SAN JOSÉ DEL RINCÓN</h4>
+                            <h5 className="text-[6px] font-black text-[#D4A017] uppercase tracking-widest leading-none mt-1">{jornada?.nombre}</h5>
+                            <p className="text-[5px] font-bold text-gray-500 uppercase mt-1">
+                              {diasParaPDF[paginaPreview - 2] ? new Date(diasParaPDF[paginaPreview - 2].fecha + 'T12:00:00').toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' }) : '—'}
                             </p>
                           </div>
-                          <div className="flex-1 text-right">
-                             <p className="text-[6px] text-gray-300">Pág. {paginaPreview - 1}</p>
+
+                          <div className="w-10 h-6 flex items-center justify-center shrink-0 relative">
+                            {incluyeLogos ? <img src="/images/logos/ues-sjr.png" alt="UES" className="max-h-full object-contain opacity-80" onError={(e) => e.target.style.display='none'} /> : <div className="w-8 h-4 border border-dashed border-gray-300"></div>}
+                            <p className="absolute -top-2 -right-2 text-[4px] text-gray-400 font-bold">Pág. {paginaPreview - 1}</p>
                           </div>
                         </div>
 

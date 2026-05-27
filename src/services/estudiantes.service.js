@@ -18,7 +18,7 @@ export const estudiantesService = {
         *,
         inscripciones(
           *,
-          sesiones(nombre, hora_inicio, hora_fin,
+          sesiones(id, nombre, hora_inicio, hora_fin,
             dias_jornada(nombre_dia, fecha),
             escenarios(nombre))
         )

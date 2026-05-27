@@ -163,6 +163,14 @@ export default function Navbar() {
                     >
                       {isAdmin ? "Ir al panel" : "Mi agenda"}
                     </Link>
+                    {!isAdmin && (
+                      <Link
+                        to={`/ticket/${estudiante?.id}`}
+                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-emerald-900/30 hover:text-[#1B4332] dark:hover:text-emerald-400 transition-colors"
+                      >
+                        Mi ticket (QR)
+                      </Link>
+                    )}
                     <button
                       onClick={async () => { try { await signOut() } catch (e) {} }}
                       className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors border-t border-gray-100 dark:border-emerald-900/40 mt-1"
@@ -283,6 +291,14 @@ export default function Navbar() {
               >
                 {isAdmin ? "Panel Admin" : "Mi agenda"}
               </NavLink>
+              {!isAdmin && (
+                <NavLink
+                  to={`/ticket/${estudiante?.id}`} onClick={closeDrawer}
+                  className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-semibold text-[#1B4332] dark:text-emerald-400 border border-[#1B4332]/30 dark:border-emerald-700/50 hover:bg-[#1B4332]/5 dark:hover:bg-emerald-900/30 transition-colors"
+                >
+                  Mi ticket (QR)
+                </NavLink>
+              )}
               <button
                 onClick={async () => { try { await signOut() } catch (e) {} closeDrawer() }}
                 className="w-full py-2.5 rounded-xl text-sm font-semibold text-red-500 dark:text-red-400 border border-red-200 dark:border-red-900/40 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
