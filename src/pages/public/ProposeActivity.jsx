@@ -274,6 +274,20 @@ export default function ProposeActivity() {
     </div>
   )
 
+  if (loading) return (
+    <div className="min-h-screen bg-[#F8FAFB] dark:bg-[#0A1A11] animate-pulse pt-32 px-4">
+      <div className="max-w-3xl mx-auto space-y-8">
+        <div className="h-10 bg-gray-200 dark:bg-emerald-900/30 rounded-lg w-1/3"></div>
+        <div className="h-6 bg-gray-200 dark:bg-emerald-900/30 rounded-lg w-1/2"></div>
+        <div className="space-y-4">
+          <div className="h-16 bg-white dark:bg-[#122A1C] rounded-2xl border border-gray-100 dark:border-emerald-900/40"></div>
+          <div className="h-16 bg-white dark:bg-[#122A1C] rounded-2xl border border-gray-100 dark:border-emerald-900/40"></div>
+          <div className="h-16 bg-white dark:bg-[#122A1C] rounded-2xl border border-gray-100 dark:border-emerald-900/40"></div>
+        </div>
+      </div>
+    </div>
+  )
+
   if (finalizada) return (
     <div className="max-w-4xl mx-auto px-4 py-32 text-center min-h-[70vh] flex flex-col items-center justify-center">
       <div className="w-24 h-24 bg-amber-50 dark:bg-amber-950/30 rounded-3xl flex items-center justify-center mx-auto mb-8 border-2 border-amber-200 dark:border-amber-900/50 shadow-xl shadow-amber-900/10 anim-scale-in">

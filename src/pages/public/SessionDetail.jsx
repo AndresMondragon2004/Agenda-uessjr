@@ -692,9 +692,8 @@ export default function SessionDetail() {
         </div>
       )}
 
-      {/* Toast */}
       {toast && (
-        <div className={`fixed bottom-6 right-6 z-50 px-6 py-3.5 rounded-2xl shadow-xl text-sm font-semibold flex items-center gap-2 anim-fade-up ${
+        <div className={`fixed bottom-6 left-4 right-4 sm:left-auto sm:right-6 z-50 px-6 py-3.5 rounded-2xl shadow-xl text-sm font-semibold flex items-center gap-2 anim-fade-up ${
           toast.type === 'error' ? 'bg-red-600 text-white' : 'bg-[#1B4332] text-white'
         }`}>
           {toast.type === 'error' ? '⚠️' : '✓'} {toast.msg}

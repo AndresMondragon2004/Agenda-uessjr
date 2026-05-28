@@ -4,6 +4,7 @@ export function InstallPWA() {
   const [deferredPrompt, setDeferredPrompt] = useState(null)
   const [isInstallable, setIsInstallable] = useState(false)
   const [isDismissed, setIsDismissed] = useState(false)
+  const [isIosPrompt, setIsIosPrompt] = useState(false)
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (e) => {
@@ -22,6 +23,18 @@ export function InstallPWA() {
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
     window.addEventListener('appinstalled', handleAppInstalled)
+
+    // Detectar iOS
+    const isIos = () => {
+      const userAgent = window.navigator.userAgent.toLowerCase();
+      return /iphone|ipad|ipod/.test(userAgent);
+    }
+    // Detectar si ya está instalada en iOS
+    const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone);
+
+    if (isIos() && !isInStandaloneMode()) {
+      setIsIosPrompt(true)
+    }
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
@@ -45,7 +58,7 @@ export function InstallPWA() {
     setDeferredPrompt(null)
   }
 
-  if (!isInstallable || isDismissed) {
+  if ((!isInstallable && !isIosPrompt) || isDismissed) {
     return null
   }
 
@@ -58,20 +71,24 @@ export function InstallPWA() {
       </div>
       <div className="flex-1">
         <h3 className="text-sm font-bold text-gray-900 dark:text-white">Instalar App</h3>
-        <p className="text-xs text-gray-500 dark:text-gray-400">Guarda tu código QR para usarlo sin internet</p>
+        <p className="text-xs text-gray-500 dark:text-gray-400">
+          {isIosPrompt ? 'Toca "Compartir" y luego "Agregar a inicio"' : 'Guarda tu código QR para usarlo sin internet'}
+        </p>
       </div>
       <div className="flex flex-col gap-2">
-        <button 
-          onClick={handleInstallClick}
-          className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-1.5 rounded-lg text-xs font-semibold transition-colors shadow-sm"
-        >
-          Instalar
-        </button>
+        {!isIosPrompt && (
+          <button 
+            onClick={handleInstallClick}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-1.5 rounded-lg text-xs font-semibold transition-colors shadow-sm"
+          >
+            Instalar
+          </button>
+        )}
         <button 
           onClick={() => setIsDismissed(true)}
           className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-[10px] font-medium"
         >
-          Ahora no
+          {isIosPrompt ? 'Entendido' : 'Ahora no'}
         </button>
       </div>
       

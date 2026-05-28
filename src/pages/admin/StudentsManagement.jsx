@@ -259,7 +259,94 @@ function EditModal({ estudiante, onClose, onSaved }) {
   )
 }
 
-// ─── Delete Modal ──────────────────────────────────────────────────────────
+// ─── Add Student Modal ───────────────────────────────────────────────────
+function AddEstudianteModal({ onClose, onSaved }) {
+  const [formData, setFormData] = useState({
+    nombre: '', apellidos: '', matricula: '', correo: '', programa_academico: 'sistemas', telefono: ''
+  })
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState(null)
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    try {
+      setSaving(true)
+      setError(null)
+      const newEstudiante = await estudiantesService.create(formData)
+      onSaved(newEstudiante)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
+      <form onSubmit={handleSubmit} className="bg-white dark:bg-[#122A1C] rounded-3xl shadow-2xl w-full max-w-xl overflow-hidden animate-scale-in">
+        <div className="p-6 border-b border-gray-100 dark:border-emerald-900/40 flex items-center justify-between">
+          <h2 className="text-xl font-black text-gray-900 dark:text-gray-100">Registrar Estudiante</h2>
+          <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+            <X size={20} />
+          </button>
+        </div>
+
+        <div className="p-6 space-y-4">
+          {error && (
+            <div className="bg-red-50 text-red-600 p-4 rounded-xl text-xs font-bold border border-red-100">{error}</div>
+          )}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Nombre(s)</label>
+              <input required value={formData.nombre} onChange={e => setFormData({ ...formData, nombre: e.target.value })}
+                     className="w-full px-4 py-2 bg-gray-50 dark:bg-emerald-950/30 border border-gray-100 dark:border-emerald-900/40 rounded-xl text-sm font-bold text-gray-800 dark:text-gray-200 focus:outline-none focus:border-[#1B4332] dark:focus:border-emerald-500" />
+            </div>
+            <div>
+              <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Apellidos</label>
+              <input required value={formData.apellidos} onChange={e => setFormData({ ...formData, apellidos: e.target.value })}
+                     className="w-full px-4 py-2 bg-gray-50 dark:bg-emerald-950/30 border border-gray-100 dark:border-emerald-900/40 rounded-xl text-sm font-bold text-gray-800 dark:text-gray-200 focus:outline-none focus:border-[#1B4332] dark:focus:border-emerald-500" />
+            </div>
+          </div>
+          <div>
+            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Correo Electrónico</label>
+            <input required type="email" value={formData.correo} onChange={e => setFormData({ ...formData, correo: e.target.value })}
+                   className="w-full px-4 py-2 bg-gray-50 dark:bg-emerald-950/30 border border-gray-100 dark:border-emerald-900/40 rounded-xl text-sm font-bold text-gray-800 dark:text-gray-200 focus:outline-none focus:border-[#1B4332] dark:focus:border-emerald-500" />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Matrícula</label>
+              <input value={formData.matricula} onChange={e => setFormData({ ...formData, matricula: e.target.value })}
+                     className="w-full px-4 py-2 bg-gray-50 dark:bg-emerald-950/30 border border-gray-100 dark:border-emerald-900/40 rounded-xl text-sm font-bold text-gray-800 dark:text-gray-200 focus:outline-none focus:border-[#1B4332] dark:focus:border-emerald-500" />
+            </div>
+            <div>
+              <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Teléfono (Telegram)</label>
+              <input value={formData.telefono} onChange={e => setFormData({ ...formData, telefono: e.target.value })}
+                     className="w-full px-4 py-2 bg-gray-50 dark:bg-emerald-950/30 border border-gray-100 dark:border-emerald-900/40 rounded-xl text-sm font-bold text-gray-800 dark:text-gray-200 focus:outline-none focus:border-[#1B4332] dark:focus:border-emerald-500" />
+            </div>
+          </div>
+          <div>
+            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Programa</label>
+            <select value={formData.programa_academico} onChange={e => setFormData({ ...formData, programa_academico: e.target.value })}
+                    className="w-full px-4 py-2 bg-gray-50 dark:bg-emerald-950/30 border border-gray-100 dark:border-emerald-900/40 rounded-xl text-sm font-bold text-gray-800 dark:text-gray-200 focus:outline-none focus:border-[#1B4332] dark:focus:border-emerald-500">
+              {PROGRAMAS_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+              <option value="externo">Externo</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-3 mt-4 p-6 bg-gray-50 dark:bg-emerald-900/20 border-t border-gray-100 dark:border-emerald-900/40">
+          <button type="button" onClick={onClose} className="px-5 py-2.5 text-gray-500 font-bold hover:bg-gray-100 dark:hover:bg-emerald-900/40 rounded-xl transition-all uppercase tracking-widest text-xs">Cancelar</button>
+          <button type="submit" disabled={saving} className="px-8 py-2.5 bg-[#1B4332] text-white font-black hover:bg-emerald-800 rounded-xl shadow-lg shadow-emerald-900/20 transition-all flex items-center gap-2 uppercase tracking-widest text-xs">
+            {saving ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={16} />}
+            Guardar Estudiante
+          </button>
+        </div>
+      </form>
+    </div>
+  )
+}
+
+// ─── Delete Modal ────────────────────────────────────────────────────────
 function DeleteModal({ estudiante, onClose, onConfirm, deleting }) {
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
@@ -312,6 +399,7 @@ export default function StudentsManagement() {
   const [deleting,                setDeleting]                = useState(false)
   const [showEditModal,           setShowEditModal]           = useState(false)
   const [estudianteAEditar,       setEstudianteAEditar]       = useState(null)
+  const [showAddModal,            setShowAddModal]            = useState(false)
   const [toast,                   setToast]                   = useState(null)
   const [currentPage,             setCurrentPage]             = useState(1)
   const itemsPerPage = 20
@@ -403,6 +491,12 @@ export default function StudentsManagement() {
     setShowDeleteModal(true)
   }
 
+  const handleAddSaved = (newEst) => {
+    setEstudiantes([newEst, ...estudiantes])
+    setShowAddModal(false)
+    showToast('Estudiante registrado con éxito')
+  }
+
   const handleDeleteClose = () => { setShowDeleteModal(false); setEstudianteAEliminar(null) }
   const handleDeleteConfirm = async () => {
     try {
@@ -425,6 +519,9 @@ export default function StudentsManagement() {
           <div className="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/30 text-[#1B4332] dark:text-emerald-400 rounded-xl text-[10px] font-black uppercase tracking-widest border border-emerald-100 dark:border-emerald-900/50">
             {estudiantesFiltrados.length} / {estudiantes.length}
           </div>
+          <button onClick={() => setShowAddModal(true)} className="flex items-center gap-2 px-3 py-1.5 bg-[#1B4332] text-white rounded-xl text-[10px] font-black uppercase tracking-widest border border-[#1B4332] hover:bg-[#0F2018] active:scale-95 transition-all shadow-md">
+            + Nuevo Estudiante
+          </button>
           <button
             onClick={() => {
               if (estudiantesFiltrados.length === 0) return
@@ -634,8 +731,15 @@ export default function StudentsManagement() {
         <DeleteModal estudiante={estudianteAEliminar} onClose={handleDeleteClose} onConfirm={handleDeleteConfirm} deleting={deleting} />
       )}
 
+      {showAddModal && (
+        <AddEstudianteModal
+          onClose={() => setShowAddModal(false)}
+          onSaved={handleAddSaved}
+        />
+      )}
+
       {toast && (
-        <div className="fixed bottom-8 right-8 z-50 bg-[#1B4332] text-white px-8 py-4 rounded-2xl shadow-2xl font-black text-sm flex items-center gap-3 animate-slide-up">
+        <div className="fixed bottom-8 left-4 right-4 sm:left-auto sm:right-8 z-50 bg-[#1B4332] text-white px-8 py-4 rounded-2xl shadow-2xl font-black text-sm flex items-center gap-3 animate-slide-up">
           <Check className="w-5 h-5" strokeWidth={4} />
           {toast}
         </div>

@@ -512,9 +512,8 @@ export default function MyAgenda() {
         )}
       </div>
 
-      {/* Toast */}
       {toast && (
-        <div className="fixed bottom-4 right-4 z-50 bg-emerald-600 text-white
+        <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 z-50 bg-emerald-600 text-white
                         px-6 py-3 rounded-xl shadow-lg text-sm font-semibold">
           ✓ {toast}
         </div>

@@ -581,9 +581,8 @@ export default function SessionsManagement() {
         />
       )}
 
-      {/* Toast */}
       {toast && (
-        <div className="fixed bottom-8 right-8 z-50 bg-[#1B4332] text-white
+        <div className="fixed bottom-8 left-4 right-4 sm:left-auto sm:right-8 z-50 bg-[#1B4332] text-white
                         px-8 py-4 rounded-2xl shadow-2xl font-black text-sm
                         flex items-center gap-3">
           <Check className="w-5 h-5" strokeWidth={3} />

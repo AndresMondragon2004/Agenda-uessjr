@@ -493,7 +493,7 @@ export default function SessionDetailAdmin() {
 
       {/* Toast */}
       {toast && (
-        <div className="fixed bottom-8 right-8 z-50 bg-emerald-600 text-white
+        <div className="fixed bottom-8 left-4 right-4 sm:left-auto sm:right-8 z-50 bg-emerald-600 text-white
                         px-8 py-4 rounded-2xl shadow-2xl text-sm font-black flex items-center gap-3 animate-bounce">
           <div className="bg-white/20 p-1 rounded-full"><Check className="w-4 h-4" /></div>
           {toast}

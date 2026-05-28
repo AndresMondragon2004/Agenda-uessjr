@@ -40,6 +40,16 @@ export const estudiantesService = {
     return data
   },
 
+  async create(datos) {
+    const { data, error } = await supabase
+      .from('estudiantes')
+      .insert([datos])
+      .select()
+      .single()
+    if (error) throw error
+    return data
+  },
+
   async delete(id) {
     const { error } = await supabase
       .from('estudiantes')

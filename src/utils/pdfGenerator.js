@@ -652,3 +652,138 @@ export async function generatePersonalAgendaPDF(estudiante, jornada, inscripcion
 
   doc.save(`Mi-Agenda-${estudiante.nombre.replace(/\s+/g, '-')}.pdf`)
 }
+
+export async function generateConstanciasPonentesMasivoPDF(sesiones, jornada) {
+  const { jsPDF } = await import('jspdf')
+  const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'landscape' })
+  
+  const [imgUES, imgUMB] = await Promise.all([
+    tryLoadImage('/images/logos/ues-sjr.png'),
+    tryLoadImage('/images/logos/umb.png')
+  ])
+
+  const cx = 297 / 2
+  const cy = 210 / 2
+
+  let isFirstPage = true
+
+  for (const sesion of sesiones) {
+    if (!isFirstPage) {
+      doc.addPage()
+    }
+    isFirstPage = false
+
+    // 1. Fondo base elegante (Papel hueso sutil)
+    doc.setFillColor(252, 252, 250)
+    doc.rect(0, 0, 297, 210, 'F')
+    
+    // 2. Marcos Perimetrales Estilo Diploma
+    doc.setDrawColor(27, 67, 50)
+    doc.setLineWidth(3.5)
+    doc.rect(10, 10, 277, 190)
+    
+    doc.setDrawColor(212, 160, 23)
+    doc.setLineWidth(0.6)
+    doc.rect(15, 15, 267, 180)
+
+    doc.setDrawColor(212, 160, 23)
+    doc.setLineWidth(2)
+    const l = 15
+    doc.line(13, 13, 13 + l, 13); doc.line(13, 13, 13, 13 + l);
+    doc.line(284, 13, 284 - l, 13); doc.line(284, 13, 284, 13 + l);
+    doc.line(13, 197, 13 + l, 197); doc.line(13, 197, 13, 197 - l);
+    doc.line(284, 197, 284 - l, 197); doc.line(284, 197, 284, 197 - l);
+
+    // 3. Marca de Agua
+    if (imgUES) {
+      doc.setGState(new doc.GState({ opacity: 0.05 }))
+      doc.addImage(imgUES, 'PNG', cx - 60, cy - 30, 120, 60)
+      doc.setGState(new doc.GState({ opacity: 1.0 }))
+    }
+
+    // 4. Logos
+    if (imgUMB) doc.addImage(imgUMB, 'PNG', 20, 16, 38, 18)
+    if (imgUES) doc.addImage(imgUES, 'PNG', 239, 16, 38, 18)
+
+    // 5. Encabezado
+    doc.setFont('times', 'bold')
+    doc.setFontSize(22)
+    doc.setTextColor(27, 67, 50)
+    doc.text('UNIVERSIDAD MEXIQUENSE DEL BICENTENARIO', cx, 42, { align: 'center' })
+    
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(12)
+    doc.setTextColor(75, 85, 99)
+    doc.text('UNIDAD DE ESTUDIOS SUPERIORES SAN JOSÉ DEL RINCÓN', cx, 48, { align: 'center' })
+
+    doc.setDrawColor(212, 160, 23)
+    doc.setLineWidth(0.4)
+    doc.line(cx - 70, 53, cx + 70, 53)
+
+    // 6. Título
+    doc.setFont('times', 'bold')
+    doc.setFontSize(36)
+    doc.setTextColor(212, 160, 23)
+    doc.text('CONSTANCIA', cx, 75, { align: 'center' })
+
+    // 7. Cuerpo
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(14)
+    doc.setTextColor(100, 100, 100)
+    doc.text('Otorga la presente a:', cx, 95, { align: 'center' })
+
+    // Nombre Ponente
+    doc.setFont('times', 'italic')
+    doc.setFontSize(34)
+    doc.setTextColor(17, 24, 39)
+    const grado = sesion.ponente_grado || ''
+    const nombre = sesion.ponente_nombre || ''
+    const fullName = `${grado} ${nombre}`.trim().toUpperCase()
+    doc.text(fullName, cx, 115, { align: 'center' })
+
+    doc.setDrawColor(180, 180, 180)
+    doc.setLineWidth(0.5)
+    const nameWidth = doc.getTextWidth(fullName)
+    doc.line(cx - (nameWidth/2) - 10, 118, cx + (nameWidth/2) + 10, 118)
+
+    // Motivo
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(13)
+    doc.setTextColor(75, 85, 99)
+    const textoMotivo = `Por su destacada participación como PONENTE impartiendo la sesión:`
+    doc.text(textoMotivo, cx, 134, { align: 'center' })
+
+    // Nombre de la Sesión
+    doc.setFont('times', 'bold')
+    doc.setFontSize(18)
+    doc.setTextColor(27, 67, 50)
+    const nombreSesion = `"${sesion.nombre}"`
+    
+    // Auto-wrap the session name if it's too long
+    const splitTitle = doc.splitTextToSize(nombreSesion, 220)
+    doc.text(splitTitle, cx, 144, { align: 'center' })
+
+    // Fechas / Jornada
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(11)
+    doc.setTextColor(107, 114, 128)
+    const yOffset = 144 + (splitTitle.length - 1) * 7
+    const dateStr = `En el marco de la ${jornada?.edicion || '12va'} Jornada Académica y Cultural, realizada del ${new Date(jornada?.fecha_inicio + 'T12:00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'long' })} al ${new Date(jornada?.fecha_fin + 'T12:00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' })}.`
+    doc.text(dateStr, cx, yOffset + 12, { align: 'center' })
+
+    // 8. Firmas
+    doc.setDrawColor(100, 100, 100)
+    doc.setLineWidth(0.5)
+    doc.line(cx - 45, 180, cx + 45, 180)
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(11)
+    doc.setTextColor(27, 67, 50)
+    doc.text('DIRECCIÓN ACADÉMICA', cx, 186, { align: 'center' })
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(9)
+    doc.setTextColor(100, 100, 100)
+    doc.text('UES SAN JOSÉ DEL RINCÓN', cx, 191, { align: 'center' })
+  }
+
+  doc.save(`Constancias-Ponentes-${jornada?.nombre.replace(/\s+/g, '_') || 'Jornada'}.pdf`)
+}

@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Download, ChevronLeft, ChevronRight, Check, FileText, FileSpreadsheet, Filter } from 'lucide-react'
+import { Download, ChevronLeft, ChevronRight, Check, FileText, FileSpreadsheet, Filter, X } from 'lucide-react'
 import { jornadaService } from '../../services/jornada.service'
 import { sesionesService } from '../../services/sesiones.service'
 import { estudiantesService } from '../../services/estudiantes.service'
 import { propuestasService } from '../../services/propuestas.service'
 import { supabase } from '../../services/supabase'
+import { generateConstanciasPonentesMasivoPDF } from '../../utils/pdfGenerator'
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 const TIPO_LABELS = {
@@ -412,6 +413,129 @@ const IMAGENES_POR_DIA = {
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
+// ─── Image Adjuster Modal (Cropper) ──────────────────────────────────────
+function ImageAdjusterModal({ data, onCancel, onConfirm, loading }) {
+  const [offset, setOffset] = useState({ x: 50, y: 50 }); // Porcentaje de posición
+  const [zoom, setZoom] = useState(100);
+  const canvasRef = useRef(null);
+
+  const handleSave = () => {
+    const canvas = canvasRef.current;
+    const img = document.getElementById('crop-source');
+    if (!canvas || !img) return;
+
+    const ctx = canvas.getContext('2d');
+    // Dimensiones objetivo (basadas en la proporción del PDF)
+    const targetW = 800;
+    const targetH = 1200; // Aprox 1:1.5
+    canvas.width = targetW;
+    canvas.height = targetH;
+
+    // Calcular recorte basado en zoom y offset
+    const imgRatio = img.naturalWidth / img.naturalHeight;
+    const targetRatio = targetW / targetH;
+
+    let sourceW, sourceH, sourceX, sourceY;
+
+    if (imgRatio > targetRatio) {
+      sourceH = img.naturalHeight / (zoom / 100);
+      sourceW = sourceH * targetRatio;
+      sourceY = (img.naturalHeight - sourceH) / 2;
+      sourceX = (img.naturalWidth - sourceW) * (offset.x / 100);
+    } else {
+      sourceW = img.naturalWidth / (zoom / 100);
+      sourceH = sourceW / targetRatio;
+      sourceX = (img.naturalWidth - sourceW) / 2;
+      sourceY = (img.naturalHeight - sourceH) * (offset.y / 100);
+    }
+
+    ctx.drawImage(img, sourceX, sourceY, sourceW, sourceH, 0, 0, targetW, targetH);
+    
+    canvas.toBlob((blob) => {
+      onConfirm(blob);
+    }, 'image/jpeg', 0.9);
+  };
+
+  return (
+    <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+      <div className="bg-white dark:bg-[#122A1C] w-full max-w-lg max-h-[95vh] flex flex-col rounded-[2.5rem] overflow-hidden shadow-2xl animate-scale-in">
+        <div className="p-8 border-b border-gray-100 dark:border-emerald-900/40 flex items-center justify-between shrink-0">
+          <div>
+            <h3 className="font-black text-xl text-[#1B4332] dark:text-emerald-400 uppercase">Encuadre del Programa</h3>
+            <p className="text-xs text-gray-500 font-bold uppercase tracking-widest mt-1">Elige el área que saldrá en el PDF</p>
+          </div>
+          <button onClick={onCancel} className="text-gray-400 hover:text-red-500 transition-colors">
+            <X size={24} />
+          </button>
+        </div>
+
+        <div className="p-8 space-y-8 overflow-y-auto">
+          {/* Área de Preview */}
+          <div className="relative mx-auto w-64 h-96 bg-gray-100 dark:bg-black/20 rounded-2xl border-4 border-dashed border-emerald-500/30 overflow-hidden shadow-inner flex items-center justify-center">
+            <img 
+              id="crop-source"
+              src={data.previewUrl} 
+              className="absolute max-w-none transition-all duration-75"
+              style={{
+                width: `${zoom}%`,
+                left: '50%',
+                top: '50%',
+                transform: `translate(-${offset.x}%, -${offset.y}%)`,
+                filter: 'brightness(1.05)'
+              }}
+              alt="Preview"
+            />
+            {/* Guía visual */}
+            <div className="absolute inset-0 pointer-events-none border-[1px] border-white/20 grid grid-cols-3 grid-rows-3">
+              {[...Array(8)].map((_, i) => <div key={i} className="border-[0.5px] border-white/10" />)}
+            </div>
+          </div>
+
+          {/* Controles */}
+          <div className="space-y-6">
+            <div>
+              <div className="flex justify-between mb-2">
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Posición Horizontal</label>
+                <span className="text-[10px] font-bold text-emerald-500">{offset.x}%</span>
+              </div>
+              <input type="range" min="0" max="100" value={offset.x} onChange={(e) => setOffset(p => ({...p, x: e.target.value}))} 
+                className="w-full h-1.5 bg-gray-100 dark:bg-emerald-900/40 rounded-lg appearance-none cursor-pointer accent-[#1B4332]" />
+            </div>
+            
+            <div>
+              <div className="flex justify-between mb-2">
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Posición Vertical</label>
+                <span className="text-[10px] font-bold text-emerald-500">{offset.y}%</span>
+              </div>
+              <input type="range" min="0" max="100" value={offset.y} onChange={(e) => setOffset(p => ({...p, y: e.target.value}))} 
+                className="w-full h-1.5 bg-gray-100 dark:bg-emerald-900/40 rounded-lg appearance-none cursor-pointer accent-[#1B4332]" />
+            </div>
+
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Zoom Escala</label>
+                <input type="range" min="100" max="300" value={zoom} onChange={(e) => setZoom(e.target.value)} 
+                  className="w-full h-1.5 bg-gray-100 dark:bg-emerald-900/40 rounded-lg appearance-none cursor-pointer accent-[#1B4332]" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-8 bg-gray-50 dark:bg-emerald-900/20 flex gap-4 shrink-0">
+          <button onClick={onCancel} className="flex-1 py-4 text-gray-500 font-black uppercase text-xs tracking-widest hover:bg-gray-100 dark:hover:bg-emerald-900/40 rounded-2xl transition-all">
+            Cancelar
+          </button>
+          <button onClick={handleSave} disabled={loading} className="flex-2 px-10 py-4 bg-[#1B4332] text-white font-black uppercase text-xs tracking-widest rounded-2xl hover:bg-emerald-800 shadow-xl shadow-emerald-950/20 transition-all flex items-center justify-center gap-2">
+            {loading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Check size={16} />}
+            Aplicar y Subir
+          </button>
+        </div>
+        <canvas ref={canvasRef} className="hidden" />
+      </div>
+    </div>
+  );
+}
+
 export default function Reports() {
   const navigate = useNavigate()
 
@@ -430,6 +554,7 @@ export default function Reports() {
   const [paginaPreview,      setPaginaPreview]     = useState(1)
   const [showModalImagenes,  setShowModalImagenes] = useState(false)
   const [loadingImagen,      setLoadingImagen]     = useState(null) // ID del día cargando
+  const [cropFile,           setCropFile]          = useState(null) // { diaId, file, previewUrl }
 
   const showToast = (msg, tipo = 'ok') => {
     setToast({ msg, tipo })
@@ -847,6 +972,34 @@ const handleExportarMaestroAsistencia = async () => {
   }
 }
 
+const handleExportarConstanciasPonentes = async () => {
+  if (!jornada || !sesiones || sesiones.length === 0) {
+    showToast('No hay datos suficientes para generar las constancias', 'error')
+    return
+  }
+  
+  try {
+    setExportando('constancias-ponentes')
+    // Filtrar sesiones válidas para constancia de ponente
+    const sesionesValidas = sesiones.filter(s => 
+      s.ponente_nombre && 
+      !['protocolo', 'inauguracion', 'cierre'].includes(s.tipo)
+    )
+
+    if (sesionesValidas.length === 0) {
+      showToast('No se encontraron ponentes en esta jornada', 'error')
+      return
+    }
+
+    await generateConstanciasPonentesMasivoPDF(sesionesValidas, jornada)
+    showToast(`Se generaron ${sesionesValidas.length} constancias`)
+  } catch (err) {
+    showToast('Error al generar constancias: ' + err.message, 'error')
+  } finally {
+    setExportando(null)
+  }
+}
+
 const EXPORT_ROWS = [
   { key: 'maestro', label: 'Reporte maestro de asistencia', format: 'CSV', desc: 'Métrica individual de asistencia real por cada alumno registrado.', fn: handleExportarMaestroAsistencia },
   { key: 'inscritos', label: 'Inscripciones por sesión', format: 'CSV', desc: 'Listado de todos los confirmados en cada sesión.', fn: handleExportarInscritos },
@@ -854,20 +1007,21 @@ const EXPORT_ROWS = [
   { key: 'programa', label: 'Métrica por carrera', format: 'CSV', desc: 'Resumen cuantitativo por programa académico.', fn: handleExportarResumenPrograma },
   { key: 'propuestas', label: 'Banco de propuestas', format: 'CSV', desc: 'Historial de actividades propuestas por ponentes.', fn: handleExportarPropuestas },
   { key: 'inscritos-sesion', label: 'Listas de asistencia', format: 'PDF', desc: 'Documentos imprimibles para control de firmas.', fn: handleExportarInscritosPorSesion },
+  { key: 'constancias-ponentes', label: 'Constancias de Ponentes', format: 'PDF', desc: 'Certificados en lote para todos los ponentes de la jornada.', fn: handleExportarConstanciasPonentes },
 ]
 
   // ... (handleExportarInscritosPorSesion and other export functions)
 
-  const handleUploadImagenDia = async (diaId, file) => {
-    if (!file) return
+  const handleFinalizeUpload = async (blob) => {
+    if (!cropFile) return
+    const { diaId, file } = cropFile
     try {
       setLoadingImagen(diaId)
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${Date.now()}-dia-${diaId}.${fileExt}`
+      const fileName = `${Date.now()}-dia-${diaId}.jpg`
       
       const { error: uploadError } = await supabase.storage
         .from('logos')
-        .upload(fileName, file)
+        .upload(fileName, blob)
       if (uploadError) throw uploadError
 
       const { data: { publicUrl } } = supabase.storage
@@ -879,20 +1033,26 @@ const EXPORT_ROWS = [
         .update({ imagen_url: publicUrl })
         .eq('id', diaId)
       
-      if (dbError) {
-        if (dbError.code === 'PGRST204' || dbError.message.includes('imagen_url')) {
-          throw new Error('La base de datos no tiene la columna imagen_url. Por favor, ejecuta el script SQL.')
-        }
-        throw dbError
-      }
+      if (dbError) throw dbError
 
-      showToast('Imagen actualizada correctamente')
+      showToast('Imagen encuadrada y actualizada')
+      setCropFile(null)
       cargarDatos()
     } catch (err) {
       showToast(err.message, 'error')
     } finally {
       setLoadingImagen(null)
     }
+  }
+
+  const handleStartCrop = (diaId, file) => {
+    if (!file) return
+    const previewUrl = URL.createObjectURL(file)
+    setCropFile({ diaId, file, previewUrl })
+  }
+
+  const handleUploadImagenDia = async (diaId, file) => {
+    handleStartCrop(diaId, file)
   }
 
   const handleUploadLogo = async (e) => {
@@ -1388,9 +1548,19 @@ const EXPORT_ROWS = [
         </div>
       )}
 
+      {/* Editor de Encuadre (NUEVO) */}
+      {cropFile && (
+        <ImageAdjusterModal 
+          data={cropFile}
+          loading={loadingImagen !== null}
+          onCancel={() => setCropFile(null)}
+          onConfirm={handleFinalizeUpload}
+        />
+      )}
+
       {/* Toast Notificación */}
       {toast && (
-        <div className={`fixed bottom-8 right-8 z-50 px-8 py-4 rounded-2xl shadow-2xl text-sm font-black text-white flex items-center gap-3 animate-slide-up
+        <div className={`fixed bottom-8 left-4 right-4 sm:left-auto sm:right-8 z-50 px-8 py-4 rounded-2xl shadow-2xl text-sm font-black text-white flex items-center gap-3 animate-slide-up
           ${toast.tipo === 'error' ? 'bg-red-600' : 'bg-[#1B4332]'}`}>
           {toast.tipo === 'error' ? '✗' : <Check className="w-4 h-4" strokeWidth={4} />}
           {toast.msg}
