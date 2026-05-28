@@ -267,7 +267,7 @@ export default function SessionDetail() {
     <div className="min-h-screen bg-gray-50 dark:bg-[#0A1A11] pb-12">
 
       {/* Hero banner — thematic background */}
-      <div className="relative pt-32 lg:pt-36 pb-12 overflow-hidden">
+      <div className="relative pt-32 lg:pt-36 pb-20 overflow-hidden">
         {/* Background Layer */}
         <div className="absolute inset-0 bg-[#0A1A11]" />
         {(sesion.dias_jornada?.imagen_url || IMAGENES_POR_DIA[sesion.dias_jornada?.nombre_dia]) ? (
@@ -333,7 +333,7 @@ export default function SessionDetail() {
       </div>
 
       {/* Body */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
           {/* LEFT — Main content */}
@@ -372,27 +372,9 @@ export default function SessionDetail() {
                       </p>
                     )}
                   </div>
-
-                  {/* ── SECCIÓN DE FEEDBACK (PRO) ── */}
-                  {yaAsistio && (
-                    <div className="mt-12 bg-white dark:bg-[#122A1C] rounded-[2.5rem] p-8 sm:p-12 shadow-sm border border-gray-100 dark:border-emerald-900/30 text-center anim-fade-up">
-                      <div className="max-w-2xl mx-auto">
-                        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-                          {yaValoro ? 'Tu calificación está registrada' : '¿Qué te pareció esta sesión?'}
-                        </h2>
-                        <button 
-                          onClick={() => setShowRatingModal(true)}
-                          className="px-8 py-4 bg-[#1B4332] text-white font-black uppercase text-xs tracking-widest rounded-2xl hover:bg-emerald-800 transition-all shadow-lg shadow-emerald-900/20"
-                        >
-                          {yaValoro ? 'Ver mi calificación' : 'Calificar sesión'}
-                        </button>
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
-            )
-          }
+            )}
 
 
             {/* Descripción */}
@@ -612,6 +594,29 @@ export default function SessionDetail() {
                 <Share2 size={14} /> Copiar enlace
               </button>
             </div>
+
+            {/* SECCIÓN DE FEEDBACK (EN SIDEBAR) */}
+            {yaAsistio && (
+              <div className="mt-6 bg-white dark:bg-[#122A1C] rounded-2xl p-8 shadow-md border border-gray-100 dark:border-emerald-900/40 text-center anim-fade-up">
+                <div className="w-16 h-16 bg-emerald-50 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Star size={32} className={yaValoro ? 'text-amber-400 fill-amber-400' : 'text-emerald-500'} />
+                </div>
+                <h3 className="font-bold text-gray-900 dark:text-gray-100 text-base mb-2">
+                  {yaValoro ? 'Sesión Calificada' : '¿Qué te pareció?'}
+                </h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-6 font-medium leading-relaxed">
+                  {yaValoro 
+                    ? 'Gracias por ayudarnos a mejorar con tu opinión.' 
+                    : 'Tu feedback es muy valioso para el ponente y la universidad.'}
+                </p>
+                <button 
+                  onClick={() => setShowRatingModal(true)}
+                  className="w-full py-4 bg-[#1B4332] text-white font-black uppercase text-xs tracking-widest rounded-2xl hover:bg-emerald-800 transition-all shadow-lg shadow-emerald-900/20"
+                >
+                  {yaValoro ? 'Ver mi calificación' : 'Calificar sesión'}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
