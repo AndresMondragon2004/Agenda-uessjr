@@ -34,7 +34,39 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
         // Aumentar el límite de tamaño de archivo para cachear si hay assets grandes
-        maximumFileSizeToCacheInBytes: 4000000 
+        maximumFileSizeToCacheInBytes: 4000000,
+        runtimeCaching: [
+          {
+            // Cachear peticiones GET de Supabase (tablas como sesiones, inscripciones, escenarios)
+            urlPattern: /^https:\/\/ydcybysimlvatvadpbaz\.supabase\.co\/rest\/v1\/.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'supabase-api-cache',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24 * 7 // 1 semana
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          {
+            // Cachear imágenes públicas de Supabase Storage
+            urlPattern: /^https:\/\/ydcybysimlvatvadpbaz\.supabase\.co\/storage\/v1\/object\/public\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'supabase-storage-cache',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24 * 30 // 30 días
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          }
+        ]
       }
     })
   ],

@@ -231,47 +231,24 @@ export default function AnunciosMensajes() {
       }
     } catch (e) { console.error('Error Web Notif:', e) }
 
-    // 2. Telegram & Email (Batch processing)
-    const batchSize = 15
-    for (let i = 0; i < destinatarios.length; i += batchSize) {
-      const batch = destinatarios.slice(i, i + batchSize)
-      const promises = []
-
-      batch.forEach(est => {
-        // Telegram
-        if (channels.telegram && est.telegram_chat_id) {
-          promises.push(
-            telegramService.sendMessage(est.telegram_chat_id, mensaje)
-              .catch(() => fallidosTelegram++)
-          )
-        }
-        // Email
-        if (channels.email && est.correo) {
-          promises.push(
-            gasService.sendEmail({
-              to: est.correo,
-              subject: 'Aviso Importante: Jornada UESSJR',
-              type: 'WELCOME', // Usamos WELCOME que es más común que esté configurado
-              data: {
-                nombre: est.nombre,
-                mensaje: mensaje,
-                action_url: window.location.origin,
-                action_text: 'Ver en la plataforma'
-              }
-            }).catch(e => console.error('Email Error:', e))
-          )
-        }
-      })
-
-      if (promises.length > 0) await Promise.allSettled(promises)
-      
-      totalEnviados += batch.length
-      setProgress(totalEnviados)
-      
-      // Delay sutil para no saturar APIs
-      if (i + batchSize < destinatarios.length) {
-        await new Promise(r => setTimeout(r, 800))
+    // 2. Telegram & Email (Delegado a Edge Function)
+    if (channels.telegram || channels.email) {
+      try {
+        const { data, error } = await supabase.functions.invoke('broadcast', {
+          body: {
+            mensaje,
+            programa,
+            channels
+          }
+        })
+        if (error) throw error
+        totalEnviados = destinatarios.length // La función asume a todos los destinatarios
+      } catch (err) {
+        console.error('Error en el envío masivo (Edge Function):', err)
+        // Opcional: mostrar error al usuario
       }
+    } else {
+      totalEnviados = destinatarios.length // Solo web
     }
 
     const newEntry = {
