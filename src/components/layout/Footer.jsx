@@ -2,10 +2,11 @@ import { Link } from 'react-router-dom'
 import { GraduationCap, Mail, MapPin, ArrowRight } from 'lucide-react'
 
 const LINKS = [
-  { label: 'Inicio',             to: '/'               },
-  { label: 'Agenda',             to: '/agenda'         },
-  { label: 'Conferencistas',     to: '/conferencistas' },
-  { label: 'Proponer actividad', to: '/proponer'       },
+  { label: 'Inicio',               to: '/'               },
+  { label: 'Agenda',               to: '/agenda'         },
+  { label: 'Conferencistas',       to: '/conferencistas' },
+  { label: 'Portal para Ponentes', to: '/ponente/login'  },
+  { label: 'Proponer actividad',   to: '/proponer'       },
 ]
 
 export default function Footer() {

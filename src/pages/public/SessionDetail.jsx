@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { Clock, MapPin, CalendarDays, Users, Share2, ChevronRight, CheckCircle2, Download, Star, X, MessageSquare, Send } from 'lucide-react'
+import { Clock, MapPin, CalendarDays, Users, Share2, ChevronRight, CheckCircle2, Download, Star, X, MessageSquare, Send, ThumbsUp, BarChart, Briefcase, Heart, ThumbsDown, Smile } from 'lucide-react'
 import { sesionesService } from '../../services/sesiones.service'
 import { inscripcionesService } from '../../services/inscripciones.service'
 import { useAuth }         from '../../context/AuthContext'
@@ -65,6 +65,20 @@ export default function SessionDetail() {
   const [preguntas, setPreguntas] = useState([])
   const [nuevaPregunta, setNuevaPregunta] = useState('')
   const [enviandoPregunta, setEnviandoPregunta] = useState(false)
+  const [preguntasVotadas, setPreguntasVotadas] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('voted_preguntas') || '[]') } catch { return [] }
+  })
+
+  // Pro Features
+  const [encuestas, setEncuestas] = useState([])
+  const [encuestasVotadas, setEncuestasVotadas] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('voted_encuestas') || '[]') } catch { return [] }
+  })
+  const [encuestasOcultas, setEncuestasOcultas] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('hidden_encuestas') || '[]') } catch { return [] }
+  })
+  const [compartioNetworking, setCompartioNetworking] = useState(false)
+
 
   useEffect(() => {
     if (error) window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -130,6 +144,17 @@ export default function SessionDetail() {
           }
 
           // Cargar Preguntas (siempre visible para todos si la sesión es hoy o en vivo)
+          
+          // Cargar Encuestas
+          const { data: encData } = await supabase.from('sesion_encuestas').select('*').eq('sesion_id', id).eq('estado', 'activa')
+          if (encData) setEncuestas(encData)
+
+          // Verificar Networking
+          if (estudiante?.id) {
+             const { data: net } = await supabase.from('sesion_networking').select('*').eq('sesion_id', id).eq('estudiante_id', estudiante.id).maybeSingle()
+             setCompartioNetworking(!!net)
+          }
+
           const { data: qData } = await supabase
             .from('sesion_preguntas')
             .select('id, pregunta, estado, votos, estudiantes(nombre)')
@@ -147,6 +172,18 @@ export default function SessionDetail() {
     }
     cargar()
   }, [id, estudiante])
+
+  useEffect(() => {
+    if (!id) return
+    const channel = supabase.channel(`public:sesion_encuestas:${id}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'sesion_encuestas', filter: `sesion_id=eq.${id}` }, async () => {
+         const { data: encData } = await supabase.from('sesion_encuestas').select('*').eq('sesion_id', id).eq('estado', 'activa')
+         if (encData) setEncuestas(encData)
+      })
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [id])
+
 
   const handleValorar = async () => {
     if (valoracion.estrellas === 0) {
@@ -201,6 +238,81 @@ export default function SessionDetail() {
     } finally {
       setEnviandoPregunta(false)
     }
+  }
+
+  const toggleVote = async (preguntaId) => {
+    if (!isLoggedIn) {
+      showToast('Debes iniciar sesión para votar', 'error')
+      return
+    }
+
+    const hasVoted = preguntasVotadas.includes(preguntaId)
+
+    try {
+      // Optimizacion optimista
+      setPreguntas(prev => prev.map(p => p.id === preguntaId ? { ...p, votos: Math.max(0, p.votos + (hasVoted ? -1 : 1)) } : p))
+      setPreguntasVotadas(prev => {
+        const nuevos = hasVoted ? prev.filter(id => id !== preguntaId) : [...prev, preguntaId]
+        localStorage.setItem('voted_preguntas', JSON.stringify(nuevos))
+        return nuevos
+      })
+
+      const { error } = await supabase.rpc(hasVoted ? 'downvote_pregunta' : 'upvote_pregunta', { p_id: preguntaId })
+      if (error) throw error
+    } catch (err) {
+      // Revertir
+      setPreguntas(prev => prev.map(p => p.id === preguntaId ? { ...p, votos: Math.max(0, p.votos + (hasVoted ? 1 : -1)) } : p))
+      setPreguntasVotadas(prev => {
+        const revertidos = hasVoted ? [...prev, preguntaId] : prev.filter(id => id !== preguntaId)
+        localStorage.setItem('voted_preguntas', JSON.stringify(revertidos))
+        return revertidos
+      })
+      showToast('Error al procesar el voto', 'error')
+    }
+  }
+
+  
+  const handleCompartirPerfil = async () => {
+    if (!isLoggedIn || !estudiante) { navigate('/login'); return }
+    try {
+      const { error } = await supabase.from('sesion_networking').insert([{ sesion_id: id, estudiante_id: estudiante.id }])
+      if (error) throw error
+      setCompartioNetworking(true)
+      showToast('Perfil compartido exitosamente con el ponente')
+    } catch (e) {
+      showToast('Error al compartir perfil', 'error')
+    }
+  }
+
+  const handleOcultarEncuesta = (encuestaId) => {
+    const nuevas = [...encuestasOcultas, encuestaId]
+    setEncuestasOcultas(nuevas)
+    localStorage.setItem('hidden_encuestas', JSON.stringify(nuevas))
+  }
+
+  const handleVoteEncuesta = async (encuestaId, opcionIndex) => {
+    if (!isLoggedIn || !estudiante) { navigate('/login'); return }
+    if (encuestasVotadas.includes(encuestaId)) return
+
+    try {
+      const nuevasVotadas = [...encuestasVotadas, encuestaId]
+      setEncuestasVotadas(nuevasVotadas)
+      localStorage.setItem('voted_encuestas', JSON.stringify(nuevasVotadas))
+      
+      const { error } = await supabase.rpc('votar_encuesta', { p_encuesta_id: encuestaId, p_estudiante_id: estudiante.id, p_opcion_index: opcionIndex })
+      if (error) throw error
+    } catch (e) {
+      showToast('Error al votar en encuesta', 'error')
+    }
+  }
+
+  const sendReaction = (type) => {
+    supabase.channel(`speaker_realtime:${id}`).send({
+      type: 'broadcast',
+      event: 'reaction',
+      payload: { type }
+    })
+    showToast('¡Reacción enviada!', 'success')
   }
 
   const handleInscribirse = async () => {
@@ -311,6 +423,16 @@ export default function SessionDetail() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#0A1A11] pb-12">
+
+      {/* Reactions Bar Flotante (Solo si la sesion no ha finalizado) */}
+      {!finalizada && (
+        <div className="fixed right-4 bottom-24 sm:bottom-8 z-50 flex flex-col gap-3">
+          <button onClick={() => sendReaction('clap')} className="w-12 h-12 bg-white dark:bg-[#122A1C] rounded-full shadow-2xl border border-gray-100 dark:border-emerald-900/40 flex items-center justify-center text-2xl hover:scale-110 active:scale-90 transition-all">👏</button>
+          <button onClick={() => sendReaction('mindblown')} className="w-12 h-12 bg-white dark:bg-[#122A1C] rounded-full shadow-2xl border border-gray-100 dark:border-emerald-900/40 flex items-center justify-center text-2xl hover:scale-110 active:scale-90 transition-all">🤯</button>
+          <button onClick={() => sendReaction('heart')} className="w-12 h-12 bg-white dark:bg-[#122A1C] rounded-full shadow-2xl border border-gray-100 dark:border-emerald-900/40 flex items-center justify-center text-2xl hover:scale-110 active:scale-90 transition-all">❤️</button>
+        </div>
+      )}
+
 
       {/* Hero banner — thematic background */}
       <div className="relative pt-32 lg:pt-36 pb-20 overflow-hidden">
@@ -529,11 +651,24 @@ export default function SessionDetail() {
                   ) : (
                     preguntas.map(p => (
                       <div key={p.id} className={`p-4 rounded-xl border ${p.estado === 'respondida' ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-900/50' : 'bg-gray-50 dark:bg-[#0F2018] border-gray-100 dark:border-emerald-900/30'}`}>
-                        <div className="flex justify-between items-center mb-1">
-                          <span className="text-xs font-bold text-gray-900 dark:text-gray-100">{p.estudiantes?.nombre || 'Anónimo'}</span>
-                          {p.estado === 'respondida' && <span className="text-[10px] font-black uppercase text-emerald-600 tracking-wider">Respondida ✓</span>}
+                        <div className="flex justify-between items-start mb-1">
+                          <div>
+                            <span className="text-xs font-bold text-gray-900 dark:text-gray-100 block">{p.estudiantes?.nombre || 'Anónimo'}</span>
+                            {p.estado === 'respondida' && <span className="text-[10px] font-black uppercase text-emerald-600 tracking-wider">Respondida ✓</span>}
+                          </div>
+                          <button 
+                            onClick={() => toggleVote(p.id)}
+                            disabled={p.estado === 'respondida'}
+                            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                              preguntasVotadas.includes(p.id) 
+                                ? 'bg-amber-100 text-amber-700 hover:bg-amber-200 dark:bg-amber-900/40 dark:text-amber-400 dark:hover:bg-amber-900/60' 
+                                : 'bg-gray-100 hover:bg-gray-200 text-gray-600 dark:bg-emerald-900/30 dark:hover:bg-emerald-800/40 dark:text-gray-300'
+                            } ${p.estado === 'respondida' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          >
+                            <ThumbsUp size={12} className={preguntasVotadas.includes(p.id) ? 'fill-current' : ''} /> {p.votos}
+                          </button>
                         </div>
-                        <p className="text-sm text-gray-700 dark:text-gray-300">{p.pregunta}</p>
+                        <p className="text-sm text-gray-700 dark:text-gray-300 text-justify mt-1">{p.pregunta}</p>
                       </div>
                     ))
                   )}
@@ -691,7 +826,79 @@ export default function SessionDetail() {
               </button>
             </div>
 
+            
+            {/* Seccion de Encuestas Activas */}
+            {yaInscrito && encuestas.filter(e => !encuestasOcultas.includes(e.id)).length > 0 && (
+              <div className="bg-emerald-50 dark:bg-emerald-900/10 rounded-2xl shadow-sm border border-emerald-100 dark:border-emerald-900/40 p-6 mt-8">
+                <h2 className="font-bold text-emerald-900 dark:text-emerald-400 text-lg border-l-4 border-emerald-500 pl-3 mb-4 flex items-center gap-2">
+                  <BarChart size={20} /> Encuesta del Ponente
+                </h2>
+                <div className="space-y-6">
+                  {encuestas.filter(e => !encuestasOcultas.includes(e.id)).map(e => (
+                    <div key={e.id} className="bg-white dark:bg-[#122A1C] p-6 rounded-2xl shadow-sm relative group">
+                      <button 
+                        onClick={() => handleOcultarEncuesta(e.id)}
+                        title="Ocultar encuesta"
+                        className="absolute top-4 right-4 text-gray-400 hover:text-red-500 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all bg-gray-50 dark:bg-emerald-950/30 p-1.5 rounded-lg"
+                      >
+                        <X size={16} />
+                      </button>
+                      <p className="font-black text-gray-900 dark:text-gray-100 text-lg mb-4 pr-8">{e.pregunta}</p>
+                      {encuestasVotadas.includes(e.id) ? (
+                        <div className="space-y-3">
+                          {e.opciones.map((opt, i) => {
+                            const totalVotos = e.opciones.reduce((acc, curr) => acc + curr.votos, 0)
+                            const pct = totalVotos === 0 ? 0 : Math.round((opt.votos / totalVotos) * 100)
+                            return (
+                              <div key={i} className="relative bg-gray-50 dark:bg-black/20 rounded-xl p-3 overflow-hidden">
+                                <div className="absolute inset-0 bg-emerald-100 dark:bg-emerald-900/30 transition-all duration-1000" style={{ width: `${pct}%` }} />
+                                <div className="relative z-10 flex justify-between font-bold text-sm">
+                                  <span className="text-gray-800 dark:text-gray-200">{opt.texto}</span>
+                                  <span className="text-emerald-700 dark:text-emerald-400">{pct}%</span>
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          {e.opciones.map((opt, i) => (
+                            <button 
+                              key={i} 
+                              onClick={() => handleVoteEncuesta(e.id, i)}
+                              className="w-full text-left px-4 py-3 bg-gray-50 hover:bg-emerald-50 dark:bg-[#0F2018] dark:hover:bg-emerald-900/30 rounded-xl font-bold text-sm text-gray-700 dark:text-gray-200 transition-colors border border-gray-100 dark:border-emerald-900/50"
+                            >
+                              {opt.texto}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Seccion de Networking (Bolsa de Trabajo) */}
+            {yaAsistio && !compartioNetworking && (
+              <div className="bg-blue-50 dark:bg-blue-900/10 rounded-2xl shadow-sm border border-blue-100 dark:border-blue-900/40 p-6 mt-8 anim-fade-up">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center shrink-0">
+                    <Briefcase size={24} />
+                  </div>
+                  <div>
+                    <h2 className="font-black text-blue-900 dark:text-blue-400 text-lg mb-1">Networking Exclusivo</h2>
+                    <p className="text-sm text-blue-800 dark:text-blue-300/80 mb-4 text-justify">El ponente ha habilitado una bolsa de trabajo. Comparte tu perfil profesional de la universidad para ser contactado por oportunidades.</p>
+                    <button onClick={handleCompartirPerfil} className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-sm transition-colors shadow-lg shadow-blue-900/20 active:scale-95">
+                      Compartir mi Perfil
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* SECCIÓN DE FEEDBACK (EN SIDEBAR) */}
+
             {yaAsistio && (
               <div className="mt-6 bg-white dark:bg-[#122A1C] rounded-2xl p-8 shadow-md border border-gray-100 dark:border-emerald-900/40 text-center anim-fade-up">
                 <div className="w-16 h-16 bg-emerald-50 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-4">

@@ -2,7 +2,7 @@
 
 # UESSJR Agenda — Sistema de Gestión de Jornadas Académicas
 
-<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=24&duration=3000&pause=1000&color=1B4332&center=true&vCenter=true&width=600&lines=Gestión+de+Eventos+Académicos;Inscripción+e+IA+Concierge;Control+de+Asistencia+Offline" alt="Typing SVG" />
+<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=24&duration=3000&pause=1000&color=1B4332&center=true&vCenter=true&width=600&lines=Gestión+de+Eventos+Académicos;Interacción+en+Tiempo+Real+(WebSockets);Control+de+Asistencia+Offline" alt="Typing SVG" />
 
 <br/>
 
@@ -13,13 +13,41 @@
 
 ---
 
-## Sobre el Proyecto
+## 📖 Sobre el Proyecto
 
-Sistema integral diseñado para la **Unidad de Estudios Superiores San José del Rincón**. Permite la organización, registro y seguimiento de la Jornada Académica y Cultural, optimizando la experiencia tanto para estudiantes como para el personal administrativo mediante herramientas digitales modernas.
+Sistema integral diseñado para la **Unidad de Estudios Superiores San José del Rincón**. Permite la organización, registro y seguimiento de la Jornada Académica y Cultural. Su objetivo principal es transformar la experiencia de conferencias tradicionales en eventos altamente interactivos mediante herramientas digitales modernas y comunicación en tiempo real.
 
 ---
 
-## Tech Stack
+## 🚀 Características Principales (Features)
+
+### 👥 Para Estudiantes y Asistentes
+| Módulo | Funcionalidad |
+|:---|:---|
+| **Gestión de Agenda** | Visualización de sesiones, horarios y sedes con indicadores de cupo en tiempo real. |
+| **Inscripciones Inteligentes** | Sistema de bloqueo anti-traslapes de horario y gestión automática de listas de espera. |
+| **Bolsa de Trabajo (Networking)** | Compartición de perfil profesional (One-Click) con los ponentes que buscan talento. |
+| **Q&A Interactivo** | Envío de preguntas al ponente y sistema de **Upvoting (👍)** colaborativo. |
+| **Concierge IA** | Bot de Telegram integrado para consultas automatizadas sobre la agenda. |
+
+### 🎙️ Portal Exclusivo para Ponentes (Pro Features)
+| Herramienta | Descripción |
+|:---|:---|
+| **Modo Escenario (Teleprompter)** | Interfaz a pantalla completa libre de distracciones que muestra las preguntas más votadas del público en texto gigante. |
+| **Lluvia de Reacciones** | Recepción en vivo de emojis flotantes (👏, 🤯, ❤️) enviados por el público mediante **WebSockets**. |
+| **Encuestas en Vivo (Live Polls)** | Creación de sondeos dinámicos; los estudiantes responden desde sus celulares y las gráficas se actualizan al instante. |
+| **Gestión de Networking** | Visualización de estudiantes interesados en oportunidades laborales y exportación a **CSV** en 1 clic. |
+
+### 👨‍💻 Administración y Logística
+| Herramienta | Descripción |
+|:---|:---|
+| **Asistencia Offline** | Escáner de Códigos QR para gafetes con soporte de registro sin conexión y sincronización posterior. |
+| **Constancias Automatizadas** | Generación de certificados en PDF basados en asistencias verificadas y firmas digitales. |
+| **Notificaciones Push** | Avisos masivos vía Telegram y correo electrónico para notificar sobre cupos liberados o cambios de sede. |
+
+---
+
+## 🛠️ Tech Stack
 
 <div align="center">
 
@@ -27,32 +55,20 @@ Sistema integral diseñado para la **Unidad de Estudios Superiores San José del
 ![React](https://img.shields.io/badge/React-61DAFB?style=flat-square&logo=react&logoColor=black)
 ![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white)
 ![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
+![Zustand](https://img.shields.io/badge/Zustand-764ABC?style=flat-square&logo=react&logoColor=white)
 ![Lucide](https://img.shields.io/badge/Lucide_Icons-F7DF1E?style=flat-square&logo=lucide&logoColor=black)
 
 ### Backend & Infraestructura
 ![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=flat-square&logo=supabase&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=flat-square&logo=postgresql&logoColor=white)
+![WebSockets](https://img.shields.io/badge/WebSockets-010101?style=flat-square&logo=socket.io&logoColor=white)
 ![Deno](https://img.shields.io/badge/Deno-000000?style=flat-square&logo=deno&logoColor=white)
-![Google Apps Script](https://img.shields.io/badge/Google_Apps_Script-4285F4?style=flat-square&logo=google&logoColor=white)
 
 </div>
 
 ---
 
-## Características Principales
-
-| Módulo | Funcionalidad |
-|:---|:---|
-| **Gestión de Agenda** | Visualización de sesiones, horarios y sedes en tiempo real con control de cupos. |
-| **Inscripciones** | Sistema inteligente que evita traslapes de horario y gestiona listas de espera. |
-| **Asistencia Offline** | Escáner de QR con soporte para registro sin conexión y sincronización posterior. |
-| **Concierge IA** | Bot de Telegram integrado para consultas automatizadas sobre la agenda. |
-| **Constancias** | Generación automática de certificados en PDF basados en asistencias verificadas. |
-| **Notificaciones** | Avisos masivos vía Telegram y correo electrónico para cambios de última hora. |
-
----
-
-## Configuración del Entorno
+## ⚙️ Configuración del Entorno
 
 ### Variables de Entorno
 Crea un archivo `.env` en la raíz del proyecto con las siguientes claves:
@@ -79,11 +95,11 @@ supabase functions deploy telegram-reminders
 
 ---
 
-## Seguridad
+## 🔒 Seguridad y Arquitectura
 
-- **Políticas RLS**: Seguridad a nivel de fila en Supabase para proteger datos sensibles.
-- **Validación Pública**: Sistema de verificación de constancias mediante códigos UUID únicos.
-- **Gestión de Secretos**: Los tokens de bots se gestionan mediante secretos de Supabase (Vault).
+- **Row Level Security (RLS)**: Cada tabla en Supabase está protegida con políticas a nivel de fila que vinculan el `auth.uid()` con el registro de estudiantes.
+- **Actualizaciones Optimistas (Optimistic UI)**: Modificaciones a la interfaz en *0ms* (ej. envío de encuestas y likes), mejorando drásticamente la UX frente a redes lentas.
+- **Bypass Seguro con RPC**: Uso de funciones PostgreSQL con `SECURITY DEFINER` para permitir a usuarios no autenticados (como Ponentes mediante tokens públicos) ejecutar acciones específicas de manera controlada.
 
 ---
 

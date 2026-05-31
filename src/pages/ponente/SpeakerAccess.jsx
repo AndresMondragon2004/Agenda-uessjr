@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { KeyRound, ArrowRight, Loader2, GraduationCap } from 'lucide-react'
+import { useNavigate, Link } from 'react-router-dom'
+import { KeyRound, ArrowRight, Loader2, GraduationCap, ArrowLeft } from 'lucide-react'
 import SEO from '../../components/SEO'
 
 export default function SpeakerAccess() {
@@ -81,6 +81,12 @@ export default function SpeakerAccess() {
                     </>
                   )}
                 </button>
+              </div>
+              
+              <div className="pt-4 text-center">
+                <Link to="/" className="inline-flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-[#1B4332] dark:text-gray-400 dark:hover:text-emerald-400 transition-colors">
+                  <ArrowLeft size={14} /> Volver a la vista pública
+                </Link>
               </div>
             </form>
           </div>
