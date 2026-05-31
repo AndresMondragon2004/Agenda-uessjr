@@ -1,4 +1,4 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState, useRef } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { supabase } from '../../services/supabase';
@@ -6,6 +6,7 @@ import { Calendar, ArrowLeft, Download, Share2 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { toast } from 'react-hot-toast';
+import { useAuth } from '../../context/AuthContext';
 
 const PROGRAMA_ABBR = {
   sistemas:            'ISC',
@@ -15,10 +16,20 @@ const PROGRAMA_ABBR = {
 
 export default function DigitalTicket() {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { isLoggedIn, loading: authLoading } = useAuth();
+
   const [estudiante, setEstudiante] = useState(null);
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(false);
   const ticketRef = useRef(null);
+
+  // Redirigir al inicio si el usuario cierra sesión
+  useEffect(() => {
+    if (!authLoading && !isLoggedIn) {
+      navigate('/');
+    }
+  }, [isLoggedIn, authLoading, navigate]);
 
   useEffect(() => {
     async function cargarEstudiante() {

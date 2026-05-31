@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { CheckCircle2, Loader2, Users, Send, Clock, Ticket, Download } from 'lucide-react'
+import { CheckCircle2, Loader2, Users, Send, Clock, Ticket, Download, Trophy } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { supabase } from '../../services/supabase'
 import { generateConstanciaPDF, generatePersonalAgendaPDF } from '../../utils/pdfGenerator'
@@ -41,6 +41,7 @@ export default function MyAgenda() {
   const [loading,       setLoading]       = useState(true)
   const [generating,    setGenerating]    = useState(false)
   const [jornada,       setJornada]       = useState(null)
+  const [finalizada,    setFinalizada]    = useState(false)
   const [cancelando,    setCancelando]    = useState(null)
   const [confirmando,   setConfirmando]   = useState(null)
   const [toast,         setToast]         = useState(null)
@@ -61,10 +62,21 @@ export default function MyAgenda() {
   async function cargarDatos() {
     try {
       setLoading(true)
-      
-      // 0. Cargar jornada activa
-      const { data: jor } = await supabase.from('jornadas').select('*').eq('estado', 'activa').maybeSingle()
+
+      // 0. Cargar la jornada más reciente (activa o finalizada)
+      const { data: jor } = await supabase
+        .from('jornadas')
+        .select('*')
+        .order('fecha_inicio', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+
       setJornada(jor)
+      if (jor) {
+        const hoy = new Date()
+        const fin = new Date(jor.fecha_fin + 'T23:59:59')
+        setFinalizada(hoy > fin || jor.estado === 'finalizada')
+      }
 
       // 1. Cargar inscripciones
       const { data: insc, error: iErr } = await supabase
@@ -152,11 +164,17 @@ export default function MyAgenda() {
 
   // ─── Estadísticas de Progreso ───
   const statsProgreso = (() => {
+    // Solo sesiones donde el alumno está confirmado
     const inscripcionesConfirmadas = inscripciones.filter(i => i.estado === 'confirmada')
     if (inscripcionesConfirmadas.length === 0) return { asistidos: 0, total: 0, porcentaje: 0, programas: 0 }
-    const asistidos = asistencias.length
+    
+    // Contar asistencias SOLO si existe una inscripción confirmada para esa sesión
+    // Esto evita que asistencias 'coladas' inflen el porcentaje
+    const asistidos = inscripcionesConfirmadas.filter(i => checkAsistencia(i.sesion_id)).length
     const total = inscripcionesConfirmadas.length
-    const porcentaje = Math.round((asistidos / total) * 100)
+    
+    // Limitar al 100% por seguridad
+    const porcentaje = Math.min(100, Math.round((asistidos / total) * 100))
     
     const programas = new Set()
     inscripcionesConfirmadas.forEach(i => {
@@ -208,12 +226,20 @@ export default function MyAgenda() {
 
           {/* Acciones Rápidas de Acceso y Programación */}
           <div className="mt-6 flex flex-wrap gap-3">
-            <Link
-              to={`/ticket/${estudiante?.id}`}
-              className="flex-1 sm:flex-none px-6 py-3 bg-[#1B4332] text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-emerald-800 transition-all shadow-lg shadow-emerald-950/20 flex items-center justify-center gap-2 transform hover:-translate-y-0.5 active:scale-95"
-            >
-              <Ticket size={14} /> Ver Mi Ticket (QR)
-            </Link>
+            {!finalizada && (
+              <Link
+                to={`/ticket/${estudiante?.id}`}
+                className="flex-1 sm:flex-none px-6 py-3 bg-[#1B4332] text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-emerald-800 transition-all shadow-lg shadow-emerald-950/20 flex items-center justify-center gap-2 transform hover:-translate-y-0.5 active:scale-95"
+              >
+                <Ticket size={14} /> Ver Mi Ticket (QR)
+              </Link>
+            )}
+
+            {finalizada && (
+              <div className="flex-1 sm:flex-none px-6 py-3 bg-amber-100 text-amber-800 text-[10px] font-black uppercase tracking-[0.2em] rounded-xl flex items-center justify-center gap-2 border border-amber-200">
+                <Trophy size={14} /> Evento Finalizado
+              </div>
+            )}
 
             {inscripciones.length > 0 && (
               <button
@@ -235,7 +261,7 @@ export default function MyAgenda() {
           </div>
 
           {/* Banner de Telegram para todos los usuarios sin vincular */}
-          {estudiante && !estudiante.telegram_chat_id && (
+          {!finalizada && estudiante && !estudiante.telegram_chat_id && (
             <div className="mt-6 bg-[#E8F4F8] dark:bg-[#0088cc]/10 border border-[#0088cc]/20 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
               <div className="flex items-start gap-4">
                 <div className="p-3 bg-[#0088cc]/10 dark:bg-[#0088cc]/20 rounded-xl shrink-0 mt-0.5 sm:mt-0">
@@ -470,34 +496,36 @@ export default function MyAgenda() {
                                 >
                                   Ver detalles
                                 </Link>
-                                {confirmando === insc.id ? (
-                                  <div className="flex gap-2">
+                                {!finalizada && (
+                                  confirmando === insc.id ? (
+                                    <div className="flex gap-2">
+                                      <button
+                                        type="button"
+                                        onClick={() => { cancelarInscripcion(insc.id); setConfirmando(null) }}
+                                        disabled={cancelando === insc.id}
+                                        className="flex-1 py-2.5 text-xs font-bold text-white bg-red-500 rounded-xl hover:bg-red-600 transition-all disabled:opacity-50 min-h-[40px]"
+                                      >
+                                        {cancelando === insc.id ? '...' : 'Sí, cancelar'}
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => setConfirmando(null)}
+                                        className="flex-1 py-2.5 text-xs font-bold text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-emerald-900/40 rounded-xl hover:bg-gray-50 dark:hover:bg-emerald-900/20 transition-all min-h-[40px]"
+                                      >
+                                        Mantener
+                                      </button>
+                                    </div>
+                                  ) : (
                                     <button
                                       type="button"
-                                      onClick={() => { cancelarInscripcion(insc.id); setConfirmando(null) }}
+                                      onClick={() => setConfirmando(insc.id)}
                                       disabled={cancelando === insc.id}
-                                      className="flex-1 py-2.5 text-xs font-bold text-white bg-red-500 rounded-xl hover:bg-red-600 transition-all disabled:opacity-50 min-h-[40px]"
+                                      className="w-full px-4 py-2.5 text-xs font-bold text-red-500 border border-red-100 dark:border-red-900/30
+                                                 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/30 transition-all disabled:opacity-50"
                                     >
-                                      {cancelando === insc.id ? '...' : 'Sí, cancelar'}
+                                      Cancelar inscripción
                                     </button>
-                                    <button
-                                      type="button"
-                                      onClick={() => setConfirmando(null)}
-                                      className="flex-1 py-2.5 text-xs font-bold text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-emerald-900/40 rounded-xl hover:bg-gray-50 dark:hover:bg-emerald-900/20 transition-all min-h-[40px]"
-                                    >
-                                      Mantener
-                                    </button>
-                                  </div>
-                                ) : (
-                                  <button
-                                    type="button"
-                                    onClick={() => setConfirmando(insc.id)}
-                                    disabled={cancelando === insc.id}
-                                    className="w-full px-4 py-2.5 text-xs font-bold text-red-500 border border-red-100 dark:border-red-900/30
-                                               rounded-xl hover:bg-red-50 dark:hover:bg-red-950/30 transition-all disabled:opacity-50"
-                                  >
-                                    Cancelar inscripción
-                                  </button>
+                                  )
                                 )}
                               </div>
                             </div>

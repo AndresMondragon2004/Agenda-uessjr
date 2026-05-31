@@ -494,9 +494,18 @@ export default function SessionDetail() {
 
               {/* Ya inscrito o Finalizada */}
               {finalizada ? (
-                <div className="p-4 bg-gray-100 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl text-center">
-                  <p className="text-gray-600 dark:text-gray-400 font-bold text-sm">Esta sesión ha finalizado</p>
-                  <p className="text-gray-500 dark:text-gray-500 text-xs mt-0.5">La jornada académica concluyó exitosamente.</p>
+                <div className="space-y-3">
+                  <div className="p-4 bg-gray-100 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl text-center">
+                    <p className="text-gray-600 dark:text-gray-400 font-bold text-sm">Esta sesión ha finalizado</p>
+                    <p className="text-gray-500 dark:text-gray-500 text-xs mt-0.5">La jornada académica concluyó exitosamente.</p>
+                  </div>
+                  {yaAsistio && (
+                    <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/50 rounded-xl text-center">
+                      <p className="text-emerald-700 dark:text-emerald-300 font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2">
+                        <CheckCircle2 size={12} /> Asistencia Verificada
+                      </p>
+                    </div>
+                  )}
                 </div>
               ) : yaInscrito ? (
                 <div className="space-y-3">
@@ -554,7 +563,7 @@ export default function SessionDetail() {
               )}
 
               {/* Calendarios */}
-              {sesion.dias_jornada?.fecha && sesion.hora_inicio && (
+              {!finalizada && sesion.dias_jornada?.fecha && sesion.hora_inicio && (
                 <div className="space-y-2 mb-3">
                   <a
                     href={(() => {

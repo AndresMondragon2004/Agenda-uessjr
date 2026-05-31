@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { User, Lock, Eye, EyeOff, Info, Moon, Sun } from 'lucide-react'
+import { User, Lock, Eye, EyeOff, Info, Moon, Sun, ArrowLeft } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import AuthLayout from '../../components/layout/AuthLayout'
 
@@ -79,6 +79,15 @@ export default function Login() {
 
   return (
     <AuthLayout>
+      <div className="mb-6">
+        <Link 
+          to="/" 
+          className="inline-flex items-center gap-2 text-xs font-bold text-gray-400 dark:text-gray-500 hover:text-[#1B4332] dark:hover:text-emerald-400 transition-colors uppercase tracking-widest"
+        >
+          <ArrowLeft size={14} /> Volver al inicio
+        </Link>
+      </div>
+
       <div className="flex justify-between items-start mb-8">
         <div className="flex-1">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2 tracking-tight tracking-tight">¡Te damos la bienvenida!</h2>

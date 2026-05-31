@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { Trophy, Users, Calendar, ChevronRight, Award, Star, MapPin, Clock, ArrowRight } from 'lucide-react'
+import { Trophy, Users, Calendar, ChevronRight, Award, Star, MapPin, Clock, ArrowRight, Loader2, Download, CheckCircle2 } from 'lucide-react'
 import { sesionesService } from '../../../services/sesiones.service'
 import { supabase } from '../../../services/supabase'
+import { useAuth } from '../../../context/AuthContext'
+import { generateConstanciaPDF } from '../../../utils/pdfGenerator'
 
 /* ─── CSS de animaciones (Unificado con ActiveEventView) ─────────────────── */
 const ANIM_CSS = `
@@ -39,11 +41,16 @@ function useInView(threshold = 0.12) {
 }
 
 export default function PostEventView({ jornada }) {
+  const { estudiante, isLoggedIn } = useAuth()
   const [topSesiones, setTopSesiones] = useState([])
   const [stats, setStats] = useState({ totalParticipantes: 0, totalSesiones: 0 })
   const [loading, setLoading] = useState(true)
+  const [asistencias, setAsistencias] = useState([])
+  const [certLoading, setCertLoading] = useState(false)
+  const [generating, setGenerating] = useState(false)
 
   const [statsRef,  statsVis]  = useInView()
+  const [certRef,   certVis]   = useInView()
   const [fameRef,   fameVis]   = useInView()
   const [cierreRef, cierreVis] = useInView()
 
@@ -54,29 +61,28 @@ export default function PostEventView({ jornada }) {
         const ses = await sesionesService.getByJornada(jornada.id)
         const activas = (ses || []).filter(s => s.estado === 'activa')
         
-        // Calcular participantes ÚNICOS (Alumnos reales)
-        const sesionIds = activas.map(s => s.id)
-        let alumnosUnicos = 0
-
-        if (sesionIds.length > 0) {
-          const { data: inscData, error: inscError } = await supabase
-            .from('inscripciones')
-            .select('estudiante_id')
-            .in('sesion_id', sesionIds)
-            .eq('estado', 'confirmada')
-          
-          if (inscError) throw inscError
-          alumnosUnicos = new Set((inscData || []).map(i => i.estudiante_id)).size
-        }
+        // Calcular total de inscripciones confirmadas (Bypass RLS usando la data ya cargada por el RPC)
+        const totalConfirmados = activas.reduce((acc, s) => acc + (s.total_inscritos || 0), 0)
 
         setStats({ 
-          totalParticipantes: alumnosUnicos, 
+          totalParticipantes: totalConfirmados, 
           totalSesiones: activas.length 
         })
 
         // Top 3 sesiones
         const sorted = [...activas].sort((a, b) => (b.total_inscritos || 0) - (a.total_inscritos || 0))
         setTopSesiones(sorted.slice(0, 3))
+
+        // Cargar asistencias del estudiante si está logueado
+        if (isLoggedIn && estudiante?.id) {
+          setCertLoading(true)
+          const { data: asist } = await supabase
+            .from('asistencias')
+            .select('id')
+            .eq('estudiante_id', estudiante.id)
+          setAsistencias(asist || [])
+          setCertLoading(false)
+        }
       } catch (err) {
         console.error('Error al cargar resumen post-evento:', err)
       } finally {
@@ -84,7 +90,20 @@ export default function PostEventView({ jornada }) {
       }
     }
     cargarResumen()
-  }, [jornada])
+  }, [jornada, isLoggedIn, estudiante])
+
+  const handleDescargarConstancia = async () => {
+    if (!jornada || !estudiante) return
+    try {
+      setGenerating(true)
+      await generateConstanciaPDF(estudiante, jornada)
+    } catch (err) {
+      console.error(err)
+      alert('Error al generar la constancia')
+    } finally {
+      setGenerating(false)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#0A1A11]">
@@ -102,7 +121,7 @@ export default function PostEventView({ jornada }) {
             <Trophy className="w-10 h-10 text-amber-400" />
           </div>
           <h1 className="text-4xl sm:text-6xl font-black text-white mb-6 tracking-tight anim-fade-up">
-            ¡Misión <span className="text-amber-300">Cumplida!</span>
+            ¡Misión <span className="text-amber-300">cumplida!</span>
           </h1>
           <p className="text-white/70 text-xl max-w-2xl mx-auto mb-10 anim-fade-up anim-delay-100">
             La {jornada?.edicion || '12va'} Jornada Académica y Cultural ha finalizado con éxito rotundo. Gracias por ser parte de esta experiencia transformadora.
@@ -119,7 +138,7 @@ export default function PostEventView({ jornada }) {
       <section className="max-w-7xl mx-auto px-4 -mt-10 relative z-20" ref={statsRef}>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
-            { label: 'Participantes Reales', value: stats.totalParticipantes, icon: Users, color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/20' },
+            { label: 'Inscripciones Totales', value: stats.totalParticipantes, icon: Users, color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/20' },
             { label: 'Sesiones Impartidas', value: stats.totalSesiones, icon: Calendar, color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
             { label: 'Instituciones Aliadas', value: '12+', icon: Award, color: 'text-amber-500', bg: 'bg-amber-50 dark:bg-amber-900/20' }
           ].map((stat, i) => (
@@ -139,6 +158,67 @@ export default function PostEventView({ jornada }) {
           ))}
         </div>
       </section>
+
+      {/* 2.5 Personalized Certificate Section */}
+      {isLoggedIn && estudiante && (
+        <section className="max-w-4xl mx-auto px-4 py-16" ref={certRef}>
+          <div className={`bg-white dark:bg-[#122A1C] rounded-[3rem] p-8 sm:p-12 border border-gray-100 dark:border-emerald-900/30 shadow-2xl relative overflow-hidden ${certVis ? 'anim-fade-up' : 'opacity-0'}`}>
+            <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full -translate-y-32 translate-x-32" />
+
+            <div className="relative z-10 flex flex-col md:flex-row items-center gap-10">
+              <div className="shrink-0">
+                <div className="w-32 h-32 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center relative">
+                  <Award className="w-16 h-16 text-[#1B4332] dark:text-emerald-500" />
+                  {asistencias.length >= 6 && (
+                    <div className="absolute -bottom-2 -right-2 bg-amber-400 text-[#0D2B1D] p-2 rounded-xl shadow-lg transform rotate-12">
+                      <CheckCircle2 size={24} />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex-1 text-center md:text-left">
+                <h2 className="text-3xl font-black text-gray-900 dark:text-white mb-4 tracking-tight">
+                  {asistencias.length >= 6 ? '¡Tu certificación está lista!' : 'Sobre tu participación'}
+                </h2>
+
+                {certLoading ? (
+                  <div className="flex items-center gap-2 text-gray-400">
+                    <Loader2 size={16} className="animate-spin" />
+                    <span className="text-sm font-bold uppercase tracking-widest">Verificando asistencias...</span>
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-gray-500 dark:text-gray-400 mb-8 leading-relaxed font-medium">
+                      {asistencias.length >= 6 
+                        ? `Felicidades ${estudiante.nombre}, has completado satisfactoriamente la jornada con ${asistencias.length} asistencias verificadas. Ya puedes descargar tu constancia digital.`
+                        : `Hola ${estudiante.nombre}, registramos ${asistencias.length} ${asistencias.length === 1 ? 'asistencia' : 'asistencias'} durante el evento. Recuerda que para obtener la constancia digital se requerían un mínimo de 6 asistencias.`
+                      }
+                    </p>
+
+                    <div className="flex flex-wrap justify-center md:justify-start gap-4">
+                      {asistencias.length >= 6 ? (
+                        <button
+                          onClick={handleDescargarConstancia}
+                          disabled={generating}
+                          className="bg-[#1B4332] hover:bg-emerald-800 text-white px-8 py-4 rounded-2xl font-black uppercase text-xs tracking-[0.2em] transition-all shadow-xl shadow-emerald-950/20 flex items-center gap-3 disabled:opacity-50"
+                        >
+                          {generating ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
+                          Descargar Constancia
+                        </button>
+                      ) : (
+                        <Link to="/agenda" className="bg-gray-100 dark:bg-emerald-900/20 text-gray-600 dark:text-emerald-400 px-8 py-4 rounded-2xl font-black uppercase text-xs tracking-[0.2em] border border-gray-200 dark:border-emerald-800/50 hover:bg-gray-200 transition-all flex items-center gap-3">
+                           Ver Mi Actividad
+                        </Link>
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* 3. Hall of Fame (Top Sesiones) */}
       <section className="py-24 max-w-7xl mx-auto px-4" ref={fameRef}>

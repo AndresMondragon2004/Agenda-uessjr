@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { jornadaService } from '../../services/jornada.service'
 import { parseSafeDate } from '../../utils/dateHelper'
+import { supabase } from '../../services/supabase'
 import SEO from '../../components/SEO'
 
 // Importar las 3 vistas del ciclo de vida
@@ -16,17 +17,38 @@ export default function Landing() {
   useEffect(() => {
     async function cargar() {
       try {
-        const j = await jornadaService.getActiva()
+        // 1. Intentar obtener la jornada activa
+        let j = await jornadaService.getActiva().catch(() => null)
+        
+        // 2. Si no hay activa, buscar la más reciente (podría ser una finalizada)
+        if (!j) {
+          const { data: lastJor } = await supabase
+            .from('jornadas')
+            .select('*, dias_jornada(*)')
+            .order('fecha_inicio', { ascending: false })
+            .limit(1)
+            .maybeSingle()
+          
+          if (lastJor && lastJor.dias_jornada) {
+            lastJor.dias_jornada.sort((a, b) => new Date(a.fecha) - new Date(b.fecha))
+          }
+          j = lastJor
+        }
+
         setJornada(j)
         
         if (!j) {
-          setState('PRE') // O un estado por defecto si no hay jornada activa
+          setState('PRE')
+          return
+        }
+
+        // 3. Prioridad al estado 'finalizada' de la base de datos
+        if (j.estado === 'finalizada') {
+          setState('POST')
           return
         }
 
         const ahora = new Date()
-        
-        // Configurar fechas límites (asegurando comparación correcta cross-browser)
         const inicio = parseSafeDate(j.fecha_inicio, '00:00:00')
         const fin    = parseSafeDate(j.fecha_fin, '23:59:59')
 
@@ -39,7 +61,7 @@ export default function Landing() {
         }
       } catch (err) {
         console.error('Error en controlador de Landing:', err)
-        setState('PRE') // Fallback
+        setState('PRE')
       } finally {
         setLoading(false)
       }

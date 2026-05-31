@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Eye, EyeOff, Info, User, Mail, BookOpen, Lock, Sun, Moon, Send, Phone } from 'lucide-react'
+import { Eye, EyeOff, Info, User, Mail, BookOpen, Lock, Sun, Moon, Send, Phone, ArrowLeft } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import AuthLayout from '../../components/layout/AuthLayout'
 
@@ -125,6 +125,15 @@ export default function Register() {
 
   return (
     <AuthLayout>
+      <div className="mb-6">
+        <Link 
+          to="/" 
+          className="inline-flex items-center gap-2 text-xs font-bold text-gray-400 dark:text-gray-500 hover:text-[#1B4332] dark:hover:text-emerald-400 transition-colors uppercase tracking-widest"
+        >
+          <ArrowLeft size={14} /> Volver al inicio
+        </Link>
+      </div>
+
       <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2 tracking-tight">Crea tu cuenta</h2>
       <p className="text-gray-500 dark:text-gray-400 text-sm mb-8">
         Regístrate para inscribirte a sesiones y llevar tu agenda personalizada.
