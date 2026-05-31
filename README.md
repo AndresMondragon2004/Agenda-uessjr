@@ -2,7 +2,7 @@
 
 # UESSJR Agenda — Sistema de Gestión de Jornadas Académicas
 
-<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=24&duration=3000&pause=1000&color=1B4332&center=true&vCenter=true&width=600&lines=Gestión+de+Eventos+Académicos;Interacción+en+Tiempo+Real+(WebSockets);Control+de+Asistencia+Offline" alt="Typing SVG" />
+<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=24&duration=3000&pause=1000&color=1B4332&center=true&vCenter=true&width=600&lines=Gesti%C3%B3n+de+Eventos+Acad%C3%A9micos;Interacci%C3%B3n+en+Tiempo+Real;Control+de+Asistencia+Offline" alt="Typing SVG" />
 
 <br/>
 
