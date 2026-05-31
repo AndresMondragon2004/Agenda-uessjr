@@ -12,7 +12,7 @@ export default function CommandPalette({ isOpen, onClose }) {
   const [activeIndex, setActiveIndex] = useState(0)
 
   const STATIC_PAGES = [
-    { id: 'p1',  title: 'Panel de Control',                  path: '/admin/dashboard',      icon: LayoutDashboard },
+    { id: 'p1',  title: 'Panel de control',                  path: '/admin/dashboard',      icon: LayoutDashboard },
     { id: 'p2',  title: 'Gestión de Sesiones',               path: '/admin/sesiones',       icon: Calendar },
     { id: 'p6',  title: 'Crear nueva sesión',                path: '/admin/sesiones/nueva', icon: Calendar, highlight: true },
     { id: 'p3',  title: 'Propuestas de actividad',           path: '/admin/propuestas',     icon: FileText },
@@ -95,6 +95,7 @@ export default function CommandPalette({ isOpen, onClose }) {
           <input
             autoFocus
             type="text"
+            aria-label="Buscar en la paleta de comandos"
             placeholder="Buscar alumnos, sesiones o acciones rápidas... (Ctrl+K)"
             className="flex-1 bg-transparent border-none outline-none text-gray-900 dark:text-gray-100 font-bold placeholder:text-gray-400"
             value={query}

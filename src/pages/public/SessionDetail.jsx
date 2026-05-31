@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { Clock, MapPin, CalendarDays, Users, Share2, ChevronRight, CheckCircle2, Download, Star, X } from 'lucide-react'
+import { Clock, MapPin, CalendarDays, Users, Share2, ChevronRight, CheckCircle2, Download, Star, X, MessageSquare, Send } from 'lucide-react'
 import { sesionesService } from '../../services/sesiones.service'
 import { inscripcionesService } from '../../services/inscripciones.service'
 import { useAuth }         from '../../context/AuthContext'
@@ -61,6 +61,11 @@ export default function SessionDetail() {
   const [showRatingModal, setShowRatingModal] = useState(false)
   const [toast,          setToast]          = useState(null)
 
+  // Q&A
+  const [preguntas, setPreguntas] = useState([])
+  const [nuevaPregunta, setNuevaPregunta] = useState('')
+  const [enviandoPregunta, setEnviandoPregunta] = useState(false)
+
   useEffect(() => {
     if (error) window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [error])
@@ -114,16 +119,27 @@ export default function SessionDetail() {
           // 3. Verificar si ya calificó
           const { data: val } = await supabase
             .from('valoraciones')
-            .select('*')
+            .select('estrellas, comentario')
             .eq('sesion_id', id)
             .eq('estudiante_id', estudiante.id)
             .maybeSingle()
-          if (val) {
-            setYaValoro(true)
-            setValoracion({ estrellas: val.estrellas, comentario: val.comentario })
+            if (val) {
+              setYaValoro(true)
+              setValoracion({ estrellas: val.estrellas, comentario: val.comentario })
+            }
           }
-        }
-      } catch (err) {
+
+          // Cargar Preguntas (siempre visible para todos si la sesión es hoy o en vivo)
+          const { data: qData } = await supabase
+            .from('sesion_preguntas')
+            .select('id, pregunta, estado, votos, estudiantes(nombre)')
+            .eq('sesion_id', id)
+            .order('votos', { ascending: false })
+            .order('created_at', { ascending: false })
+          
+          if (qData) setPreguntas(qData)
+
+        } catch (err) {
         setError(err.message)
       } finally {
         setLoading(false)
@@ -154,6 +170,36 @@ export default function SessionDetail() {
       showToast(err.message, 'error')
     } finally {
       setEnviandoVal(false)
+    }
+  }
+
+  const handleEnviarPregunta = async () => {
+    if (!isLoggedIn || !estudiante) {
+      showToast('Debes iniciar sesión para preguntar', 'error')
+      return
+    }
+    if (!nuevaPregunta.trim()) return
+
+    try {
+      setEnviandoPregunta(true)
+      const { data, error: qErr } = await supabase
+        .from('sesion_preguntas')
+        .insert([{
+          sesion_id: id,
+          estudiante_id: estudiante.id,
+          pregunta: nuevaPregunta.trim()
+        }])
+        .select('id, pregunta, estado, votos, estudiantes(nombre)')
+        .single()
+      
+      if (qErr) throw qErr
+      setPreguntas([data, ...preguntas])
+      setNuevaPregunta('')
+      showToast('Pregunta enviada')
+    } catch (err) {
+      showToast('Error al enviar pregunta', 'error')
+    } finally {
+      setEnviandoPregunta(false)
     }
   }
 
@@ -383,7 +429,7 @@ export default function SessionDetail() {
                 <h2 className="font-bold text-gray-900 dark:text-gray-100 text-lg border-l-4 border-[#1B4332] dark:border-emerald-600 pl-3 mb-4">
                   Acerca de esta sesión
                 </h2>
-                <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{sesion.descripcion}</p>
+                <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-justify">{sesion.descripcion}</p>
               </div>
             )}
 
@@ -453,6 +499,47 @@ export default function SessionDetail() {
                 )}
               </dl>
             </div>
+
+            {/* Q&A Section */}
+            {yaInscrito && (
+              <div className="bg-white dark:bg-[#122A1C] rounded-2xl shadow-sm border border-gray-100 dark:border-emerald-900/40 p-6 mt-8">
+                <h2 className="font-bold text-gray-900 dark:text-gray-100 text-lg border-l-4 border-[#1B4332] dark:border-emerald-600 pl-3 mb-4 flex items-center gap-2">
+                  <MessageSquare size={20} /> Preguntas y Respuestas
+                </h2>
+                <div className="mb-6 flex gap-3">
+                  <input
+                    type="text"
+                    value={nuevaPregunta}
+                    onChange={(e) => setNuevaPregunta(e.target.value)}
+                    placeholder="Pregunta algo al ponente..."
+                    className="flex-1 px-4 py-3 bg-gray-50 dark:bg-[#0F2018] rounded-xl outline-none focus:border-[#1B4332] text-sm text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-emerald-900/50"
+                  />
+                  <button
+                    onClick={handleEnviarPregunta}
+                    disabled={enviandoPregunta || !nuevaPregunta.trim()}
+                    className="px-4 py-3 bg-[#1B4332] text-white rounded-xl hover:bg-emerald-800 transition-colors disabled:opacity-50 shrink-0 flex items-center gap-2"
+                  >
+                    <Send size={16} /> <span className="hidden sm:inline">Enviar</span>
+                  </button>
+                </div>
+
+                <div className="space-y-4 max-h-80 overflow-y-auto pr-2 scrollbar-hide">
+                  {preguntas.length === 0 ? (
+                    <p className="text-gray-500 dark:text-gray-400 text-sm text-center py-4">Aún no hay preguntas. ¡Sé el primero!</p>
+                  ) : (
+                    preguntas.map(p => (
+                      <div key={p.id} className={`p-4 rounded-xl border ${p.estado === 'respondida' ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-900/50' : 'bg-gray-50 dark:bg-[#0F2018] border-gray-100 dark:border-emerald-900/30'}`}>
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-xs font-bold text-gray-900 dark:text-gray-100">{p.estudiantes?.nombre || 'Anónimo'}</span>
+                          {p.estado === 'respondida' && <span className="text-[10px] font-black uppercase text-emerald-600 tracking-wider">Respondida ✓</span>}
+                        </div>
+                        <p className="text-sm text-gray-700 dark:text-gray-300">{p.pregunta}</p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* RIGHT — Sidebar inscripción */}

@@ -348,9 +348,9 @@ export default function ScenariosManagement() {
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3].map(i => (
-              <div key={i} className="bg-white rounded-3xl p-6 border border-gray-100 animate-pulse space-y-4 shadow-sm">
-                <div className="h-6 w-32 bg-gray-50 rounded" />
-                <div className="h-20 w-full bg-gray-50 rounded-2xl" />
+              <div key={i} className="bg-white dark:bg-[#122A1C] rounded-3xl p-6 border border-gray-100 dark:border-emerald-900/40 animate-pulse space-y-4 shadow-sm">
+                <div className="h-6 w-32 bg-gray-100 dark:bg-emerald-900/20 rounded" />
+                <div className="h-20 w-full bg-gray-100 dark:bg-emerald-900/20 rounded-2xl" />
               </div>
             ))}
           </div>

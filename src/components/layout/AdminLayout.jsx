@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Outlet, useNavigate, useLocation } from 'react-router-dom'
+import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom'
 import { LayoutDashboard, CalendarDays, MapPin, ListVideo, FileText, Users, BarChart3, LogOut, Sun, Moon, Search, Shield, Brain, Sparkles, Megaphone } from 'lucide-react'
 import { jornadaService } from '../../services/jornada.service'
 import { useAuth } from '../../context/AuthContext'
@@ -18,7 +18,7 @@ function InstitutionalLogo({ className = '' }) {
 // ─── LogoutModal ───────────────────────────────────────────────────────────
 function LogoutModal({ onClose, onConfirm, loggingOut }) {
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center
+    <div className="fixed inset-0 bg-black/50 z-[90] flex items-center
                     justify-center p-4">
       <div className="bg-white dark:bg-[#122A1C] rounded-2xl shadow-2xl p-8 max-w-md w-full
                       text-center">
@@ -70,24 +70,28 @@ function Sidebar({ navigate, location, open, onClose, user, onLogoutClick, onTog
   return (
     <>
       {open && (
-        <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={onClose} />
+        <div className="fixed inset-0 bg-black/50 z-[70] lg:hidden" onClick={onClose} />
       )}
 
       <aside className={`
-        fixed inset-y-0 left-0 z-50 w-64 bg-[#001F12] flex flex-col
+        fixed inset-y-0 left-0 z-[80] w-64 bg-[#001F12] flex flex-col
         transform transition-transform duration-300 ease-in-out
         ${open ? 'translate-x-0' : '-translate-x-full'}
         lg:translate-x-0 border-r border-white/5
       `}>
 
         {/* Logo Section */}
-        <div className="px-6 py-8 flex items-center gap-3">
+        <Link 
+          to="/admin/dashboard"
+          onClick={onClose}
+          className="px-6 py-8 flex items-center gap-3 hover:opacity-80 transition-opacity"
+        >
           <InstitutionalLogo className="w-10 h-10" />
           <div className="min-w-0">
             <p className="text-white font-extrabold text-[15px] tracking-tight leading-none truncate">UESSJR</p>
             <p className="text-[#34D399] font-bold text-[10px] tracking-wider uppercase mt-1">Agenda Admin</p>
           </div>
-        </div>
+        </Link>
 
         {/* Search Shortcut Hint */}
         <div className="px-4 mb-4">
@@ -173,7 +177,7 @@ function Sidebar({ navigate, location, open, onClose, user, onLogoutClick, onTog
               : <Moon className="w-4 h-4 shrink-0 opacity-60" />
             }
             <span className="font-bold text-xs uppercase tracking-widest">
-              {onDarkMode ? 'Modo Claro' : 'Modo Oscuro'}
+              {onDarkMode ? 'Modo claro' : 'Modo oscuro'}
             </span>
           </button>
 
@@ -252,16 +256,17 @@ export default function AdminLayout() {
           <button
             type="button"
             onClick={() => setSidebarOpen(true)}
+            aria-label="Abrir menú de navegación"
             className="text-white p-2 rounded-lg hover:bg-white/10"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-          <div className="ml-3 flex items-center gap-2">
+          <Link to="/admin/dashboard" className="ml-3 flex items-center gap-2 hover:opacity-80 transition-opacity">
             <InstitutionalLogo className="w-7 h-7" />
             <span className="text-white font-bold text-sm tracking-tight">UESSJR Agenda</span>
-          </div>
+          </Link>
         </div>
         
         <button 

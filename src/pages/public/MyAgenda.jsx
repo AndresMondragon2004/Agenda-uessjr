@@ -66,7 +66,7 @@ export default function MyAgenda() {
       // 0. Cargar la jornada más reciente (activa o finalizada)
       const { data: jor } = await supabase
         .from('jornadas')
-        .select('*')
+        .select('id, nombre, fecha_inicio, fecha_fin, estado, lema')
         .order('fecha_inicio', { ascending: false })
         .limit(1)
         .maybeSingle()

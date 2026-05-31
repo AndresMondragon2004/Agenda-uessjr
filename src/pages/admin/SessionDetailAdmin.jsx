@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Edit2, Trash2, ExternalLink, Download, FileSpreadsheet, UserCheck, Loader2, Check } from 'lucide-react'
+import { ArrowLeft, Edit2, Trash2, ExternalLink, Download, FileSpreadsheet, UserCheck, Loader2, Check, Copy, KeyRound } from 'lucide-react'
 import { sesionesService } from '../../services/sesiones.service'
 import { supabase } from '../../services/supabase'
 
@@ -476,6 +476,38 @@ export default function SessionDetailAdmin() {
                 <span className="text-xs font-bold uppercase tracking-widest">Ver en agenda pública</span>
                 <ExternalLink className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
               </button>
+
+              {/* Speaker Portal Access */}
+              {sesion.acceso_ponente_token && (
+                <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl p-6 border border-emerald-100 dark:border-emerald-800/30">
+                  <h3 className="text-[10px] text-emerald-700 dark:text-emerald-400 uppercase font-black tracking-widest mb-3 flex items-center gap-2">
+                    <KeyRound size={14} /> Acceso Portal Ponente
+                  </h3>
+                  <div className="flex flex-col gap-2">
+                    <p className="text-xs text-emerald-800 dark:text-emerald-300">
+                      Comparte este código o enlace con el ponente para que pueda acceder a su panel de control.
+                    </p>
+                    <div className="flex gap-2">
+                      <input 
+                        type="text" 
+                        readOnly 
+                        value={sesion.acceso_ponente_token} 
+                        className="flex-1 bg-white dark:bg-[#122A1C] border border-emerald-200 dark:border-emerald-800 rounded-xl px-3 py-2 text-xs font-mono text-gray-600 dark:text-gray-300 outline-none"
+                      />
+                      <button 
+                        onClick={() => {
+                          navigator.clipboard.writeText(`${window.location.origin}/ponente/${sesion.acceso_ponente_token}`)
+                          showToast('Enlace de ponente copiado al portapapeles')
+                        }}
+                        className="px-3 py-2 bg-[#1B4332] hover:bg-emerald-800 text-white rounded-xl transition-colors shrink-0"
+                        title="Copiar enlace directo"
+                      >
+                        <Copy size={16} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}

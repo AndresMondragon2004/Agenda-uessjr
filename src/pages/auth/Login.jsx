@@ -114,7 +114,7 @@ export default function Login() {
 
       <form onSubmit={handleLogin} className="space-y-6">
         <div>
-          <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 tracking-wider mb-2 uppercase">
+          <label htmlFor="input-correo" className="block text-xs font-bold text-gray-500 dark:text-gray-400 tracking-wider mb-2 uppercase">
             Matrícula o correo institucional
           </label>
           <div className="relative">
@@ -122,6 +122,7 @@ export default function Login() {
               <User size={16} />
             </div>
             <input
+              id="input-correo"
               type="text"
               value={correo}
               onChange={e => setCorreo(e.target.value)}
@@ -132,7 +133,7 @@ export default function Login() {
         </div>
 
         <div>
-          <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 tracking-wider mb-2 uppercase">
+          <label htmlFor="input-password" className="block text-xs font-bold text-gray-500 dark:text-gray-400 tracking-wider mb-2 uppercase">
             Contraseña
           </label>
           <div className="relative">
@@ -140,6 +141,7 @@ export default function Login() {
               <Lock size={16} />
             </div>
             <input
+              id="input-password"
               type={showPass ? 'text' : 'password'}
               value={password}
               onChange={e => setPassword(e.target.value)}
@@ -149,6 +151,7 @@ export default function Login() {
             <button
               type="button"
               onClick={() => setShowPass(!showPass)}
+              aria-label={showPass ? "Ocultar contraseña" : "Mostrar contraseña"}
               className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
             >
               {showPass ? <EyeOff size={16} /> : <Eye size={16} />}

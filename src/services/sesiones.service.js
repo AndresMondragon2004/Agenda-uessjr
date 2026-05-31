@@ -18,7 +18,7 @@ export const sesionesService = {
   },
 
   async getByJornada(jornadaId) {
-    const [{ data, error }, { data: conteos }] = await Promise.all([
+    const [sesionesResult, conteosResult] = await Promise.all([
       supabase
         .from('sesiones')
         .select(`
@@ -30,12 +30,13 @@ export const sesionesService = {
         .order('hora_inicio', { ascending: true }),
       supabase.rpc('get_inscritos_por_jornada', { jornada_uuid: jornadaId })
     ])
-    if (error) throw error
+    if (sesionesResult.error) throw sesionesResult.error
+    if (conteosResult.error) throw conteosResult.error
 
     const countMap = Object.fromEntries(
-      (conteos || []).map(r => [r.sesion_id, Number(r.total)])
+      (conteosResult.data || []).map(r => [r.sesion_id, Number(r.total)])
     )
-    return (data || []).map(s => ({ ...s, total_inscritos: countMap[s.id] || 0 }))
+    return (sesionesResult.data || []).map(s => ({ ...s, total_inscritos: countMap[s.id] || 0 }))
   },
 
   async getById(id) {

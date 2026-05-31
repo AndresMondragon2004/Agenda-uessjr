@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState, useMemo } from 'react'
 import { supabase } from '../services/supabase'
 import { gasService } from '../services/gas.service'
 import { telegramService } from '../services/telegram.service'
@@ -14,11 +14,16 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     // Obtener sesión actual
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
-      if (session?.user) cargarPerfil(session.user)
-      else setLoading(false)
-    })
+    supabase.auth.getSession()
+      .then(({ data: { session } }) => {
+        setUser(session?.user ?? null)
+        if (session?.user) cargarPerfil(session.user)
+        else setLoading(false)
+      })
+      .catch((err) => {
+        console.error('Error inicial de auth:', err)
+        setLoading(false)
+      })
 
     // Escuchar cambios de auth
     const { data: { subscription } } = supabase.auth
@@ -166,7 +171,7 @@ export function AuthProvider({ children }) {
     if (error) throw error
   }
 
-  const value = {
+  const value = useMemo(() => ({
     user,
     estudiante,
     isAdmin,
@@ -176,7 +181,7 @@ export function AuthProvider({ children }) {
     signUp,
     signOut,
     isLoggedIn: !!user,
-  }
+  }), [user, estudiante, isAdmin, isSuperAdmin, loading])
 
   return (
     <AuthContext.Provider value={value}>

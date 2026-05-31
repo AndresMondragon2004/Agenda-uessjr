@@ -33,8 +33,8 @@ function Logo() {
       </NavLink>
       
       <div className="hidden sm:flex items-center gap-3 pl-4 border-l border-gray-100 dark:border-emerald-900/30">
-        <img src="https://sic.cultura.gob.mx/imagenes_cache/universidad_4260_g_74199.png" alt="Logo UMB" className="h-7 object-contain opacity-90 hover:opacity-100 transition-opacity" />
-        <img src="/images/logos/ues-sjr.png" alt="Logo UES SJR" className="h-7 object-contain opacity-80 hover:opacity-100 transition-opacity dark:brightness-0 dark:invert" />
+        <img src="https://sic.cultura.gob.mx/imagenes_cache/universidad_4260_g_74199.png" alt="Universidad Mexiquense del Bicentenario" className="h-7 object-contain opacity-90 hover:opacity-100 transition-opacity" />
+        <img src="/images/logos/ues-sjr.png" alt="UES San José del Rincón" className="h-7 object-contain opacity-80 hover:opacity-100 transition-opacity dark:brightness-0 dark:invert" />
       </div>
     </div>
   )

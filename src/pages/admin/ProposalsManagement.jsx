@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { X, ChevronRight, Search, Edit2, Save, Loader2, FileText, Phone, Calendar, ArrowLeft, Trash2, Check, AlertCircle, Clock, Users } from 'lucide-react'
 import { propuestasService } from '../../services/propuestas.service'
@@ -88,7 +88,7 @@ function ViewPropuestaModal({ propuesta, onClose, onEdit, onDelete, onCambiarEst
                   <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full" /> Descripción de la actividad
                 </h4>
                 <div className="bg-gray-50/50 dark:bg-[#0F2018]/50 p-6 rounded-3xl border border-gray-100 dark:border-emerald-900/20">
-                  <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed font-medium italic">
+                  <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed font-medium italic text-justify">
                     "{propuesta.descripcion || 'Sin descripción proporcionada'}"
                   </p>
                 </div>
@@ -436,20 +436,22 @@ export default function ProposalsManagement() {
 
   useEffect(() => { cargar() }, [])
 
-  const propuestasFiltradas = propuestas
-    .filter(p => tabActivo === 'todas' || p.estado === tabActivo)
-    .filter(p => {
-      if (!busqueda) return true
-      const q = norm(busqueda)
-      return (
-        norm(p.nombre_completo).includes(q) ||
-        norm(p.titulo).includes(q) ||
-        norm(p.correo).includes(q) ||
-        norm(p.descripcion).includes(q) ||
-        norm(p.tipo_actividad).includes(q) ||
-        norm(p.relacion_institucion).includes(q)
-      )
-    })
+  const propuestasFiltradas = useMemo(() => {
+    return propuestas
+      .filter(p => tabActivo === 'todas' || p.estado === tabActivo)
+      .filter(p => {
+        if (!busqueda) return true
+        const q = norm(busqueda)
+        return (
+          norm(p.nombre_completo).includes(q) ||
+          norm(p.titulo).includes(q) ||
+          norm(p.correo).includes(q) ||
+          norm(p.descripcion).includes(q) ||
+          norm(p.tipo_actividad).includes(q) ||
+          norm(p.relacion_institucion).includes(q)
+        )
+      })
+  }, [propuestas, tabActivo, busqueda])
 
   const handleCambiarEstado = async (id, nuevoEstado) => {
     try {

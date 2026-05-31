@@ -200,7 +200,7 @@ export default function DigitalTicket() {
           disabled={downloading}
           className="flex-1 bg-white/10 hover:bg-white/20 text-white py-4 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 backdrop-blur-md disabled:opacity-50"
         >
-          <Download size={18} /> {downloading ? 'Generando...' : 'Descargar Ticket'}
+          <Download size={18} /> {downloading ? 'Generando...' : 'Descargar ticket'}
         </button>
         <button 
           onClick={handleShare}

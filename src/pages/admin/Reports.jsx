@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Download, ChevronLeft, ChevronRight, Check, FileText, FileSpreadsheet, Filter, X } from 'lucide-react'
 import { jornadaService } from '../../services/jornada.service'
@@ -583,14 +583,20 @@ export default function Reports() {
     cargarDatos()
   }, [])
 
-  const sesionesFiltradas = diasSeleccionados === 'todos'
-    ? sesiones
-    : sesiones.filter(s => s.dia_jornada_id === diasSeleccionados)
+  const sesionesFiltradas = useMemo(() => {
+    return diasSeleccionados === 'todos'
+      ? sesiones
+      : sesiones.filter(s => s.dia_jornada_id === diasSeleccionados)
+  }, [diasSeleccionados, sesiones])
 
-  const dias = jornada?.dias_jornada?.sort((a, b) => new Date(a.fecha) - new Date(b.fecha)) || []
+  const dias = useMemo(() => {
+    return jornada?.dias_jornada?.sort((a, b) => new Date(a.fecha) - new Date(b.fecha)) || []
+  }, [jornada])
 
   // Para el preview, las páginas son: portada + días filtrados
-  const diasParaPDF = diasSeleccionados === 'todos' ? dias : dias.filter(d => d.id === diasSeleccionados)
+  const diasParaPDF = useMemo(() => {
+    return diasSeleccionados === 'todos' ? dias : dias.filter(d => d.id === diasSeleccionados)
+  }, [diasSeleccionados, dias])
   const totalPages      = 1 + Math.max(diasParaPDF.length, 1)
   const diaActualParaPreview = paginaPreview > 1 ? diasParaPDF[paginaPreview - 2] : null
   const sesionesDelDiaPreview = diaActualParaPreview 

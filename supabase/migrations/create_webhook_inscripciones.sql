@@ -21,7 +21,8 @@ BEGIN
     url := 'https://ydcybysimlvatvadpbaz.supabase.co/functions/v1/notify-inscription',
     headers := jsonb_build_object(
       'Content-Type', 'application/json',
-      'Authorization', 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlkY3lieXNpbWx2YXR2YWRwYmF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMTU3MDAsImV4cCI6MjA5Mjg5MTcwMH0.IkwXKJkmJiArWyOToTURtAS1RpmcDCHa7cgF2gYX-PY'
+      -- IMPORTANTE: No hardcodear tokens aquí. Usar Supabase Vault: `(select decrypted_secret from vault.decrypted_secrets where name = 'webhook_token')`
+      'Authorization', 'Bearer <REEMPLAZAR_CON_TOKEN_SEGURO>'
     ),
     body := jsonb_build_object(
       'type', TG_OP,

@@ -332,7 +332,7 @@ export default function Agenda() {
         {loading ? (
           <div className="space-y-4">
             {[1, 2, 3, 4].map(i => (
-              <div key={i} className="bg-white dark:bg-[#122A1C] rounded-2xl h-28 shimmer-bg border border-gray-100 dark:border-emerald-900/40" />
+              <div key={i} className="bg-white dark:bg-[#122A1C] rounded-2xl h-28 animate-pulse border border-gray-100 dark:border-emerald-900/40" />
             ))}
           </div>
         ) : sesionesAgrupadas.length === 0 ? (
@@ -455,6 +455,7 @@ export default function Agenda() {
                             <button
                               onClick={(e) => { e.preventDefault(); handleShare(ses.id) }}
                               className="px-3 py-2.5 bg-gray-100 dark:bg-emerald-900/30 text-gray-500 dark:text-gray-400 hover:text-[#1B4332] dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/50 rounded-xl transition-all min-h-[42px]"
+                              aria-label="Copiar enlace"
                               title="Copiar enlace"
                             >
                               {copiedLink === ses.id ? <Check size={16} className="text-emerald-500" /> : <Share2 size={16} />}

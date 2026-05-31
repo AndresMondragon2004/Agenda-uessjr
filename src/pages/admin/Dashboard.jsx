@@ -515,7 +515,7 @@ export default function Dashboard() {
         
         const { data: props, count: propCount } = await supabase
           .from('propuestas')
-          .select('*', { count: 'exact' })
+          .select('id, titulo, estado, created_at', { count: 'exact' })
           .eq('estado', 'pendiente')
           .order('created_at', { ascending: false })
           .limit(5)

@@ -18,6 +18,8 @@ import ForgotPassword from '../pages/auth/ForgotPassword'
 import ResetPassword from '../pages/auth/ResetPassword'
 import Terms from '../pages/auth/Terms'
 import Privacy from '../pages/auth/Privacy'
+import SpeakerAccess from '../pages/ponente/SpeakerAccess'
+import SpeakerDashboard from '../pages/ponente/SpeakerDashboard'
 import Dashboard from '../pages/admin/Dashboard'
 import JornadaManagement from '../pages/admin/JornadaManagement'
 import ScenariosManagement from '../pages/admin/ScenariosManagement'
@@ -61,6 +63,8 @@ export const router = createBrowserRouter([
   { path: '/nueva-contrasena', element: <ResetPassword /> },
   { path: '/terminos', element: <Terms /> },
   { path: '/privacidad', element: <Privacy /> },
+  { path: '/ponente/login', element: <SpeakerAccess /> },
+  { path: '/ponente/:token', element: <SpeakerDashboard /> },
   { path: '/admin', element: <Navigate to="/login" replace /> },
   {
     element: (

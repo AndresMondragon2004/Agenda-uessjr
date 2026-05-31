@@ -7,20 +7,15 @@ export default function AuthLayout({ children }) {
   const location = useLocation()
   const isLogin = location.pathname === '/login'
 
-  const [sessionCards, setSessionCards] = useState([
-    { tipo: 'PROTOCOLO', nombre: 'Inauguración' },
-    { tipo: 'TALLER', nombre: 'Taller de programación' },
-    { tipo: 'CONFERENCIA', nombre: 'De cero a AI Engineer' },
-  ])
+  const [loadingSessions, setLoadingSessions] = useState(true)
+  const [sessionCards, setSessionCards] = useState([])
 
   useEffect(() => {
     const loadSessions = async () => {
       try {
+        setLoadingSessions(true)
         const data = await sesionesService.getAll()
         if (data && data.length >= 3) {
-          // Tomar las primeras 3 (o basarse en fechas reales para "pasado, presente, futuro")
-          // Como la fecha de los eventos es Dic 2026, simplemente tomamos las primeras 3
-          // para la demostración.
           setSessionCards([
             { tipo: data[0].tipo || 'SESIÓN', nombre: data[0].nombre },
             { tipo: data[1].tipo || 'SESIÓN', nombre: data[1].nombre },
@@ -29,6 +24,8 @@ export default function AuthLayout({ children }) {
         }
       } catch (err) {
         console.error('Error cargando sesiones para AuthLayout', err)
+      } finally {
+        setLoadingSessions(false)
       }
     }
     loadSessions()
@@ -60,22 +57,32 @@ export default function AuthLayout({ children }) {
 
           {/* Cards Stack */}
           <div className="relative h-40 xl:h-48 mt-2 xl:mt-4">
-            {/* Card 1 (Back) */}
-            <div className="absolute top-0 left-0 w-72 xl:w-80 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-3 xl:p-4 shadow-lg transform transition-transform hover:-translate-y-1">
-              <p className="text-white/60 text-[10px] xl:text-xs font-semibold tracking-wider mb-1 uppercase">{sessionCards[0]?.tipo}</p>
-              <p className="text-white font-medium text-sm xl:text-base truncate">{sessionCards[0]?.nombre}</p>
-            </div>
-            {/* Card 2 (Middle) */}
-            <div className="absolute top-8 xl:top-10 left-4 xl:left-6 w-72 xl:w-80 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-3 xl:p-4 shadow-lg transform transition-transform hover:-translate-y-1 z-10">
-              <div className="w-1 h-6 xl:h-8 bg-[#e0a96d] absolute left-0 top-3 rounded-r-full"></div>
-              <p className="text-white/60 text-[10px] xl:text-xs font-semibold tracking-wider mb-1 uppercase pl-3">{sessionCards[1]?.tipo}</p>
-              <p className="text-white font-medium text-sm xl:text-base pl-3 truncate">{sessionCards[1]?.nombre}</p>
-            </div>
-            {/* Card 3 (Front) */}
-            <div className="absolute top-16 xl:top-20 left-8 xl:left-12 w-72 xl:w-80 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-3 xl:p-4 shadow-lg transform transition-transform hover:-translate-y-1 z-20">
-              <p className="text-white/60 text-[10px] xl:text-xs font-semibold tracking-wider mb-1 uppercase">{sessionCards[2]?.tipo}</p>
-              <p className="text-white font-medium text-sm xl:text-base truncate">{sessionCards[2]?.nombre}</p>
-            </div>
+            {loadingSessions ? (
+              <>
+                <div className="absolute top-0 left-0 w-72 xl:w-80 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl shadow-lg animate-pulse h-[72px] xl:h-[84px]" />
+                <div className="absolute top-8 xl:top-10 left-4 xl:left-6 w-72 xl:w-80 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl shadow-lg animate-pulse h-[72px] xl:h-[84px] z-10" />
+                <div className="absolute top-16 xl:top-20 left-8 xl:left-12 w-72 xl:w-80 bg-white/20 backdrop-blur-md border border-white/30 rounded-xl shadow-lg animate-pulse h-[72px] xl:h-[84px] z-20" />
+              </>
+            ) : (
+              <>
+                {/* Card 1 (Back) */}
+                <div className="absolute top-0 left-0 w-72 xl:w-80 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-3 xl:p-4 shadow-lg transform transition-transform hover:-translate-y-1">
+                  <p className="text-white/60 text-[10px] xl:text-xs font-semibold tracking-wider mb-1 uppercase">{sessionCards[0]?.tipo}</p>
+                  <p className="text-white font-medium text-sm xl:text-base truncate">{sessionCards[0]?.nombre}</p>
+                </div>
+                {/* Card 2 (Middle) */}
+                <div className="absolute top-8 xl:top-10 left-4 xl:left-6 w-72 xl:w-80 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-3 xl:p-4 shadow-lg transform transition-transform hover:-translate-y-1 z-10">
+                  <div className="w-1 h-6 xl:h-8 bg-[#e0a96d] absolute left-0 top-3 rounded-r-full"></div>
+                  <p className="text-white/60 text-[10px] xl:text-xs font-semibold tracking-wider mb-1 uppercase pl-3">{sessionCards[1]?.tipo}</p>
+                  <p className="text-white font-medium text-sm xl:text-base pl-3 truncate">{sessionCards[1]?.nombre}</p>
+                </div>
+                {/* Card 3 (Front) */}
+                <div className="absolute top-16 xl:top-20 left-8 xl:left-12 w-72 xl:w-80 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-3 xl:p-4 shadow-lg transform transition-transform hover:-translate-y-1 z-20">
+                  <p className="text-white/60 text-[10px] xl:text-xs font-semibold tracking-wider mb-1 uppercase">{sessionCards[2]?.tipo}</p>
+                  <p className="text-white font-medium text-sm xl:text-base truncate">{sessionCards[2]?.nombre}</p>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
