@@ -46,7 +46,7 @@ function ViewPropuestaModal({ propuesta, onClose, onEdit, onDelete, onCambiarEst
       <div className="bg-white dark:bg-[#122A1C] rounded-3xl shadow-2xl w-full max-w-4xl my-8 overflow-hidden anim-scale-in">
         <div className="p-6 sm:p-8 border-b border-gray-100 dark:border-emerald-900/40 flex items-center justify-between bg-gray-50/50 dark:bg-[#0F2018]/50">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-[#1B4332] text-white flex items-center justify-center shadow-lg shadow-emerald-900/20">
+            <div className="w-12 h-12 rounded-2xl bg-[#0F5B3C] text-white flex items-center justify-center shadow-lg shadow-emerald-900/20">
               <FileText size={24} />
             </div>
             <div>
@@ -66,7 +66,7 @@ function ViewPropuestaModal({ propuesta, onClose, onEdit, onDelete, onCambiarEst
                 <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border ${ESTADO_COLORS[propuesta.estado]}`}>
                   {ESTADO_LABELS[propuesta.estado]}
                 </span>
-                <span className="px-3 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 text-[10px] font-black text-[#1B4332] dark:text-emerald-400 uppercase border border-emerald-100 dark:border-emerald-800/50">
+                <span className="px-3 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 text-[10px] font-black text-[#0F5B3C] dark:text-emerald-400 uppercase border border-emerald-100 dark:border-emerald-800/50">
                   {TIPO_LABELS[propuesta.tipo_actividad] || propuesta.tipo_actividad}
                 </span>
                 {isProgrammed && (
@@ -112,7 +112,7 @@ function ViewPropuestaModal({ propuesta, onClose, onEdit, onDelete, onCambiarEst
                 <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Público objetivo</h4>
                 <div className="flex flex-wrap gap-2">
                   {(propuesta.dirigido_a || []).map((d, i) => (
-                    <span key={i} className="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/30 text-[10px] font-black text-[#1B4332] dark:text-emerald-400 uppercase rounded-xl border border-emerald-100 dark:border-emerald-900/50">
+                    <span key={i} className="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/30 text-[10px] font-black text-[#0F5B3C] dark:text-emerald-400 uppercase rounded-xl border border-emerald-100 dark:border-emerald-900/50">
                       {d}
                     </span>
                   ))}
@@ -123,7 +123,7 @@ function ViewPropuestaModal({ propuesta, onClose, onEdit, onDelete, onCambiarEst
             <div className="space-y-8">
               <section>
                 <h4 className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] mb-4">Información del ponente</h4>
-                <div className="bg-[#1B4332] dark:bg-[#0F2018] rounded-3xl p-6 text-white shadow-xl shadow-emerald-900/20">
+                <div className="bg-[#0F5B3C] dark:bg-[#0F2018] rounded-3xl p-6 text-white shadow-xl shadow-emerald-900/20">
                   <p className="text-lg font-black mb-1">{propuesta.nombre_completo}</p>
                   <p className="text-xs font-medium opacity-80 mb-6">{propuesta.correo}</p>
                   <div className="space-y-3">
@@ -183,7 +183,7 @@ function ViewPropuestaModal({ propuesta, onClose, onEdit, onDelete, onCambiarEst
                     Rechazar
                   </button>
                   <button disabled={updatingEstado} onClick={() => onCambiarEstado(propuesta.id, 'aprobada')}
-                    className="px-8 py-3 bg-[#1B4332] text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-[#002F1D] transition-all shadow-xl shadow-emerald-900/20">
+                    className="px-8 py-3 bg-[#0F5B3C] text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-[#002F1D] transition-all shadow-xl shadow-emerald-900/20">
                     Aprobar
                   </button>
                 </>
@@ -195,7 +195,7 @@ function ViewPropuestaModal({ propuesta, onClose, onEdit, onDelete, onCambiarEst
                   </div>
                 ) : (
                   <button onClick={() => navigate(`/admin/sesiones/nueva?propuesta=${propuesta.id}`)}
-                    className="px-8 py-3 bg-gradient-to-r from-[#1B4332] to-[#2D6A4F] text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:shadow-xl hover:shadow-emerald-900/20 transition-all flex items-center gap-2">
+                    className="px-8 py-3 bg-gradient-to-r from-[#0F5B3C] to-[#2D6A4F] text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:shadow-xl hover:shadow-emerald-900/20 transition-all flex items-center gap-2">
                     <Calendar size={16} /> Programar Actividad
                   </button>
                 )
@@ -275,11 +275,11 @@ function EditPropuestaModal({ propuesta, onClose, onSaved }) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
               <div>
                 <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Nombre *</label>
-                <input type="text" name="nombre_completo" value={form.nombre_completo} onChange={handleChange} className="w-full py-2 border-0 border-b border-gray-200 dark:border-emerald-900/40 text-sm bg-transparent dark:text-gray-200 outline-none focus:border-b-[#1B4332] transition-colors" />
+                <input type="text" name="nombre_completo" value={form.nombre_completo} onChange={handleChange} className="w-full py-2 border-0 border-b border-gray-200 dark:border-emerald-900/40 text-sm bg-transparent dark:text-gray-200 outline-none focus:border-b-[#0F5B3C] transition-colors" />
               </div>
               <div>
                 <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Relación con la institución</label>
-                <select name="relacion_institucion" value={form.relacion_institucion} onChange={handleChange} className="w-full py-2 border-0 border-b border-gray-200 dark:border-emerald-900/40 text-sm bg-transparent dark:text-gray-200 outline-none focus:border-b-[#1B4332] transition-colors">
+                <select name="relacion_institucion" value={form.relacion_institucion} onChange={handleChange} className="w-full py-2 border-0 border-b border-gray-200 dark:border-emerald-900/40 text-sm bg-transparent dark:text-gray-200 outline-none focus:border-b-[#0F5B3C] transition-colors">
                   <option value="">Sin especificar</option>
                   {['estudiante','egresado','docente','externo','empresa'].map(r => (
                     <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>
@@ -288,11 +288,11 @@ function EditPropuestaModal({ propuesta, onClose, onSaved }) {
               </div>
               <div>
                 <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Correo</label>
-                <input type="email" name="correo" value={form.correo} onChange={handleChange} className="w-full py-2 border-0 border-b border-gray-200 dark:border-emerald-900/40 text-sm bg-transparent dark:text-gray-200 outline-none focus:border-b-[#1B4332] transition-colors" />
+                <input type="email" name="correo" value={form.correo} onChange={handleChange} className="w-full py-2 border-0 border-b border-gray-200 dark:border-emerald-900/40 text-sm bg-transparent dark:text-gray-200 outline-none focus:border-b-[#0F5B3C] transition-colors" />
               </div>
               <div>
                 <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Teléfono</label>
-                <input type="tel" name="telefono" value={form.telefono} onChange={handleChange} className="w-full py-2 border-0 border-b border-gray-200 dark:border-emerald-900/40 text-sm bg-transparent dark:text-gray-200 outline-none focus:border-b-[#1B4332] transition-colors" />
+                <input type="tel" name="telefono" value={form.telefono} onChange={handleChange} className="w-full py-2 border-0 border-b border-gray-200 dark:border-emerald-900/40 text-sm bg-transparent dark:text-gray-200 outline-none focus:border-b-[#0F5B3C] transition-colors" />
               </div>
             </div>
           </div>
@@ -301,24 +301,24 @@ function EditPropuestaModal({ propuesta, onClose, onSaved }) {
             <div className="space-y-4">
               <div>
                 <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Título *</label>
-                <input type="text" name="titulo" value={form.titulo} onChange={handleChange} className="w-full py-2 border-0 border-b border-gray-200 dark:border-emerald-900/40 text-sm bg-transparent dark:text-gray-200 outline-none focus:border-b-[#1B4332] transition-colors" />
+                <input type="text" name="titulo" value={form.titulo} onChange={handleChange} className="w-full py-2 border-0 border-b border-gray-200 dark:border-emerald-900/40 text-sm bg-transparent dark:text-gray-200 outline-none focus:border-b-[#0F5B3C] transition-colors" />
               </div>
               <div className="grid grid-cols-2 gap-x-6">
                 <div>
                   <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Tipo</label>
-                  <select name="tipo_actividad" value={form.tipo_actividad} onChange={handleChange} className="w-full py-2 border-0 border-b border-gray-200 dark:border-emerald-900/40 text-sm bg-transparent dark:text-gray-200 outline-none focus:border-b-[#1B4332] transition-colors">
+                  <select name="tipo_actividad" value={form.tipo_actividad} onChange={handleChange} className="w-full py-2 border-0 border-b border-gray-200 dark:border-emerald-900/40 text-sm bg-transparent dark:text-gray-200 outline-none focus:border-b-[#0F5B3C] transition-colors">
                     <option value="">Sin especificar</option>
                     {Object.entries(TIPO_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Duración</label>
-                  <input type="text" name="duracion_estimada" value={form.duracion_estimada} onChange={handleChange} placeholder="Ej. 1 hora, 2 horas" className="w-full py-2 border-0 border-b border-gray-200 dark:border-emerald-900/40 text-sm bg-transparent dark:text-gray-200 outline-none focus:border-b-[#1B4332] transition-colors" />
+                  <input type="text" name="duracion_estimada" value={form.duracion_estimada} onChange={handleChange} placeholder="Ej. 1 hora, 2 horas" className="w-full py-2 border-0 border-b border-gray-200 dark:border-emerald-900/40 text-sm bg-transparent dark:text-gray-200 outline-none focus:border-b-[#0F5B3C] transition-colors" />
                 </div>
               </div>
               <div>
                 <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Descripción</label>
-                <textarea name="descripcion" value={form.descripcion} onChange={handleChange} rows={3} className="w-full py-2 border-0 border-b border-gray-200 text-sm bg-transparent outline-none focus:border-b-[#1B4332] transition-colors resize-none" />
+                <textarea name="descripcion" value={form.descripcion} onChange={handleChange} rows={3} className="w-full py-2 border-0 border-b border-gray-200 text-sm bg-transparent outline-none focus:border-b-[#0F5B3C] transition-colors resize-none" />
               </div>
             </div>
           </div>
@@ -328,13 +328,13 @@ function EditPropuestaModal({ propuesta, onClose, onSaved }) {
               <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Días disponibles</label>
               <div className="flex flex-wrap gap-2">
                 {DIAS_SEMANA.map(d => (
-                  <button key={d} type="button" onClick={() => toggleArray('dias_disponibles', d)} className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors border ${(form.dias_disponibles || []).includes(d) ? 'bg-[#1B4332] text-white border-[#1B4332]' : 'bg-white dark:bg-[#0F2018] text-gray-600 dark:text-gray-300 border-gray-200 dark:border-emerald-900/40 hover:border-[#1B4332] dark:hover:border-emerald-700'}`}>{d}</button>
+                  <button key={d} type="button" onClick={() => toggleArray('dias_disponibles', d)} className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors border ${(form.dias_disponibles || []).includes(d) ? 'bg-[#0F5B3C] text-white border-[#0F5B3C]' : 'bg-white dark:bg-[#0F2018] text-gray-600 dark:text-gray-300 border-gray-200 dark:border-emerald-900/40 hover:border-[#0F5B3C] dark:hover:border-emerald-700'}`}>{d}</button>
                 ))}
               </div>
             </div>
             <div>
               <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Horario preferido</label>
-              <select name="horario_preferido" value={form.horario_preferido} onChange={handleChange} className="w-full py-2 border-0 border-b border-gray-200 dark:border-emerald-900/40 text-sm bg-transparent dark:text-gray-200 outline-none focus:border-b-[#1B4332] transition-colors">
+              <select name="horario_preferido" value={form.horario_preferido} onChange={handleChange} className="w-full py-2 border-0 border-b border-gray-200 dark:border-emerald-900/40 text-sm bg-transparent dark:text-gray-200 outline-none focus:border-b-[#0F5B3C] transition-colors">
                 <option value="">Sin especificar</option>
                 {['Mañana','Tarde','Cualquier horario'].map(h => <option key={h} value={h}>{h}</option>)}
               </select>
@@ -350,14 +350,14 @@ function EditPropuestaModal({ propuesta, onClose, onSaved }) {
           </div>
           <div>
             <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" name="requiere_materiales" checked={form.requiere_materiales} onChange={handleChange} className="w-4 h-4 accent-[#1B4332]" />
+              <input type="checkbox" name="requiere_materiales" checked={form.requiere_materiales} onChange={handleChange} className="w-4 h-4 accent-[#0F5B3C]" />
               <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Requiere materiales</span>
             </label>
-            {form.requiere_materiales && <textarea name="materiales_descripcion" value={form.materiales_descripcion} onChange={handleChange} rows={2} placeholder="Describe los materiales necesarios..." className="mt-3 w-full py-2 border-0 border-b border-gray-200 text-sm bg-transparent outline-none focus:border-b-[#1B4332] transition-colors resize-none" />}
+            {form.requiere_materiales && <textarea name="materiales_descripcion" value={form.materiales_descripcion} onChange={handleChange} rows={2} placeholder="Describe los materiales necesarios..." className="mt-3 w-full py-2 border-0 border-b border-gray-200 text-sm bg-transparent outline-none focus:border-b-[#0F5B3C] transition-colors resize-none" />}
           </div>
           <div className="flex gap-3 pt-2 border-t border-gray-100 dark:border-emerald-900/30">
             <button type="button" onClick={onClose} className="flex-1 py-2.5 text-gray-700 dark:text-gray-300 font-semibold border border-gray-300 dark:border-emerald-900/40 rounded-xl hover:bg-gray-50 dark:hover:bg-emerald-900/20 transition-colors">Cancelar</button>
-            <button type="submit" disabled={saving} className="flex-1 py-2.5 bg-[#1B4332] text-white font-semibold rounded-xl hover:bg-emerald-800 transition-colors disabled:opacity-50 flex items-center justify-center gap-2">{saving ? <><Loader2 className="w-4 h-4 animate-spin" /> Guardando...</> : <><Save className="w-4 h-4" /> Guardar</>}</button>
+            <button type="submit" disabled={saving} className="flex-1 py-2.5 bg-[#0F5B3C] text-white font-semibold rounded-xl hover:bg-emerald-800 transition-colors disabled:opacity-50 flex items-center justify-center gap-2">{saving ? <><Loader2 className="w-4 h-4 animate-spin" /> Guardando...</> : <><Save className="w-4 h-4" /> Guardar</>}</button>
           </div>
         </form>
       </div>
@@ -525,7 +525,7 @@ export default function ProposalsManagement() {
       <div className="bg-white dark:bg-[#122A1C] border-b border-gray-100 dark:border-emerald-900/40 px-4 sm:px-8 py-4 flex items-center justify-between sticky top-14 lg:top-0 z-10">
         <h1 className="font-black text-xl text-gray-900 dark:text-gray-100 tracking-tight">Propuestas de actividad</h1>
         <div className="flex items-center gap-2">
-          <div className="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/30 text-[#1B4332] dark:text-emerald-400 rounded-xl text-[10px] font-black uppercase tracking-widest border border-emerald-100 dark:border-emerald-900/50">
+          <div className="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/30 text-[#0F5B3C] dark:text-emerald-400 rounded-xl text-[10px] font-black uppercase tracking-widest border border-emerald-100 dark:border-emerald-900/50">
             {propuestas.length} Total
           </div>
         </div>
@@ -545,7 +545,7 @@ export default function ProposalsManagement() {
             {TABS.map(tab => {
               const count = tab.key === 'todas' ? propuestas.length : countByEstado(tab.key)
               return (
-                <button key={tab.key} onClick={() => setTabActivo(tab.key)} className={`px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap border ${tabActivo === tab.key ? 'bg-[#1B4332] text-white border-[#1B4332] shadow-lg shadow-emerald-900/10' : 'bg-white dark:bg-[#122A1C] text-gray-400 dark:text-gray-500 border-gray-100 dark:border-emerald-900/40 hover:border-emerald-100 dark:hover:border-emerald-800/50 hover:text-gray-600 dark:hover:text-gray-300'}`}>
+                <button key={tab.key} onClick={() => setTabActivo(tab.key)} className={`px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap border ${tabActivo === tab.key ? 'bg-[#0F5B3C] text-white border-[#0F5B3C] shadow-lg shadow-emerald-900/10' : 'bg-white dark:bg-[#122A1C] text-gray-400 dark:text-gray-500 border-gray-100 dark:border-emerald-900/40 hover:border-emerald-100 dark:hover:border-emerald-800/50 hover:text-gray-600 dark:hover:text-gray-300'}`}>
                   {tab.label}
                   <span className={`ml-2 px-1.5 py-0.5 rounded-lg ${tabActivo === tab.key ? 'bg-white/20' : 'bg-gray-100 dark:bg-emerald-900/30'}`}>{count}</span>
                 </button>
@@ -556,7 +556,7 @@ export default function ProposalsManagement() {
 
         {loading ? (
           <div className="py-24 text-center">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#1B4332] mx-auto mb-4" />
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#0F5B3C] mx-auto mb-4" />
             <p className="text-gray-400 text-xs font-black uppercase tracking-widest">Escaneando propuestas...</p>
           </div>
         ) : (
@@ -570,13 +570,13 @@ export default function ProposalsManagement() {
               propuestasFiltradas.map(p => {
                 const isSelected = selectedIds.includes(p.id)
                 return (
-                  <div key={p.id} onClick={() => handleViewClick(p)} className={`bg-white dark:bg-[#122A1C] rounded-3xl p-6 border transition-all cursor-pointer group relative ${isSelected ? 'border-[#1B4332] shadow-xl ring-2 ring-[#1B4332]/10' : 'border-gray-100 dark:border-emerald-900/40 hover:border-emerald-200 dark:hover:border-emerald-700 hover:shadow-xl'}`}>
-                    <div onClick={(e) => toggleSelect(p.id, e)} className={`absolute top-4 left-4 w-5 h-5 rounded-lg border-2 transition-all flex items-center justify-center z-10 ${isSelected ? 'bg-[#1B4332] border-[#1B4332]' : 'bg-white/80 dark:bg-[#0F2018]/80 border-gray-200 dark:border-emerald-900/40 opacity-0 group-hover:opacity-100'}`}>
+                  <div key={p.id} onClick={() => handleViewClick(p)} className={`bg-white dark:bg-[#122A1C] rounded-3xl p-6 border transition-all cursor-pointer group relative ${isSelected ? 'border-[#0F5B3C] shadow-xl ring-2 ring-[#0F5B3C]/10' : 'border-gray-100 dark:border-emerald-900/40 hover:border-emerald-200 dark:hover:border-emerald-700 hover:shadow-xl'}`}>
+                    <div onClick={(e) => toggleSelect(p.id, e)} className={`absolute top-4 left-4 w-5 h-5 rounded-lg border-2 transition-all flex items-center justify-center z-10 ${isSelected ? 'bg-[#0F5B3C] border-[#0F5B3C]' : 'bg-white/80 dark:bg-[#0F2018]/80 border-gray-200 dark:border-emerald-900/40 opacity-0 group-hover:opacity-100'}`}>
                       {isSelected && <Check size={12} strokeWidth={4} className="text-white" />}
                     </div>
                     <div className={`flex items-start justify-between gap-4 mb-4 ${isSelected ? 'pl-4' : 'group-hover:pl-4'} transition-all`}>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-black text-gray-900 dark:text-gray-100 text-sm group-hover:text-[#1B4332] dark:group-hover:text-emerald-400 transition-colors leading-snug mb-1 truncate">{p.titulo || 'Sin título'}</h3>
+                        <h3 className="font-black text-gray-900 dark:text-gray-100 text-sm group-hover:text-[#0F5B3C] dark:group-hover:text-emerald-400 transition-colors leading-snug mb-1 truncate">{p.titulo || 'Sin título'}</h3>
                         <p className="text-[11px] font-bold text-gray-400 dark:text-gray-500 truncate">{p.nombre_completo}</p>
                       </div>
                       <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border shrink-0 ${ESTADO_COLORS[p.estado] || 'bg-gray-100 text-gray-600 border-gray-200'}`}>{ESTADO_LABELS[p.estado]}</span>
@@ -586,7 +586,7 @@ export default function ProposalsManagement() {
                     </div>
                     <div className="flex items-center justify-between pt-4 border-t border-gray-50 dark:border-emerald-900/30">
                       <span className="text-[10px] font-bold text-gray-300 dark:text-gray-600 uppercase">{timeAgo(p.created_at)}</span>
-                      <div className="flex items-center gap-1.5 text-[#1B4332] dark:text-emerald-400 text-[10px] font-black uppercase tracking-widest">Detalles <ChevronRight className="w-3.5 h-3.5" /></div>
+                      <div className="flex items-center gap-1.5 text-[#0F5B3C] dark:text-emerald-400 text-[10px] font-black uppercase tracking-widest">Detalles <ChevronRight className="w-3.5 h-3.5" /></div>
                     </div>
                   </div>
                 )
@@ -597,14 +597,14 @@ export default function ProposalsManagement() {
 
         {selectedIds.length > 0 && (
           <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-40 animate-slide-up">
-            <div className="bg-[#1B4332] text-white px-6 py-4 rounded-3xl shadow-2xl flex items-center gap-6 border border-white/10 backdrop-blur-md">
+            <div className="bg-[#0F5B3C] text-white px-6 py-4 rounded-3xl shadow-2xl flex items-center gap-6 border border-white/10 backdrop-blur-md">
               <div className="flex items-center gap-3 pr-6 border-r border-white/20">
                 <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center font-black text-sm">{selectedIds.length}</div>
                 <p className="text-xs font-bold uppercase tracking-widest whitespace-nowrap">Seleccionados</p>
               </div>
               <div className="flex items-center gap-3">
                 <button onClick={() => handleBulkUpdate('contactada')} className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">Contactar todos</button>
-                <button onClick={() => handleBulkUpdate('aprobada')} className="px-6 py-2 bg-amber-400 hover:bg-amber-300 text-[#1B4332] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">Aprobar todos</button>
+                <button onClick={() => handleBulkUpdate('aprobada')} className="px-6 py-2 bg-amber-400 hover:bg-amber-300 text-[#0F5B3C] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">Aprobar todos</button>
                 <button onClick={() => setSelectedIds([])} className="p-2 hover:bg-white/10 rounded-xl text-white/60 hover:text-white transition-all"><X size={18} /></button>
               </div>
             </div>
@@ -634,7 +634,7 @@ export default function ProposalsManagement() {
       )}
 
       {toast && (
-        <div className="fixed bottom-8 left-4 right-4 sm:left-auto sm:right-8 z-50 bg-[#1B4332] text-white px-8 py-4 rounded-2xl shadow-2xl font-black text-sm flex items-center gap-3 animate-slide-up">
+        <div className="fixed bottom-8 left-4 right-4 sm:left-auto sm:right-8 z-50 bg-[#0F5B3C] text-white px-8 py-4 rounded-2xl shadow-2xl font-black text-sm flex items-center gap-3 animate-slide-up">
           <Check className="w-5 h-5" strokeWidth={4} />
           {toast}
         </div>

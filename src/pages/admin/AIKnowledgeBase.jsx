@@ -88,12 +88,12 @@ export default function AIKnowledgeBase() {
   )
 
   return (
-    <div className="min-h-screen bg-[#F2F5F3] dark:bg-[#0A1A11] pb-20">
+    <div className="min-h-screen bg-[#F2F5F3] dark:bg-[#0B1310] pb-20">
       {/* Header */}
       <div className="bg-white dark:bg-[#122A1C] border-b border-gray-100 dark:border-emerald-900/40 px-4 sm:px-8 py-6 sticky top-0 z-20">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/40 rounded-2xl flex items-center justify-center text-[#1B4332] dark:text-emerald-400 shadow-inner">
+            <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/40 rounded-2xl flex items-center justify-center text-[#0F5B3C] dark:text-emerald-400 shadow-inner">
               <Brain size={24} />
             </div>
             <div>
@@ -105,7 +105,7 @@ export default function AIKnowledgeBase() {
           </div>
           <button 
             onClick={() => { setEditando(null); setForm({ pregunta: '', respuesta: '', categoria: 'general' }); setShowModal(true) }}
-            className="bg-[#1B4332] text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-emerald-800 transition-all shadow-lg flex items-center justify-center gap-2"
+            className="bg-[#0F5B3C] text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-emerald-800 transition-all shadow-lg flex items-center justify-center gap-2"
           >
             <Plus size={16} /> Entrenar nueva respuesta
           </button>
@@ -115,7 +115,7 @@ export default function AIKnowledgeBase() {
       <main className="max-w-6xl mx-auto px-4 sm:px-8 mt-8">
         
         {/* Intro Card */}
-        <div className="bg-gradient-to-br from-[#1B4332] to-[#0D2B1D] rounded-[2.5rem] p-8 text-white mb-8 relative overflow-hidden shadow-xl shadow-emerald-950/20">
+        <div className="bg-gradient-to-br from-[#0F5B3C] to-[#0B1310] rounded-[2.5rem] p-8 text-white mb-8 relative overflow-hidden shadow-xl shadow-emerald-950/20">
           <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12">
             <Brain size={180} />
           </div>
@@ -136,7 +136,7 @@ export default function AIKnowledgeBase() {
             placeholder="Buscar en la memoria de la IA..."
             value={busqueda}
             onChange={e => setBusqueda(e.target.value)}
-            className="w-full pl-12 pr-4 py-4 bg-white dark:bg-[#122A1C] border border-gray-100 dark:border-emerald-900/30 rounded-2xl outline-none focus:border-[#1B4332] font-bold text-sm shadow-sm"
+            className="w-full pl-12 pr-4 py-4 bg-white dark:bg-[#122A1C] border border-gray-100 dark:border-emerald-900/30 rounded-2xl outline-none focus:border-[#0F5B3C] font-bold text-sm shadow-sm"
           />
         </div>
 
@@ -153,7 +153,7 @@ export default function AIKnowledgeBase() {
             filtered.map(item => (
               <div key={item.id} className="group bg-white dark:bg-[#122A1C] p-6 rounded-3xl border border-gray-100 dark:border-emerald-900/30 hover:shadow-xl transition-all relative">
                 <div className="flex justify-between items-start mb-4">
-                  <span className="px-3 py-1 bg-emerald-50 dark:bg-emerald-900/40 text-[#1B4332] dark:text-emerald-400 rounded-lg text-[9px] font-black uppercase tracking-widest border border-emerald-100 dark:border-emerald-800/30">
+                  <span className="px-3 py-1 bg-emerald-50 dark:bg-emerald-900/40 text-[#0F5B3C] dark:text-emerald-400 rounded-lg text-[9px] font-black uppercase tracking-widest border border-emerald-100 dark:border-emerald-800/30">
                     {item.categoria}
                   </span>
                   <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100 opacity-100">
@@ -187,7 +187,7 @@ export default function AIKnowledgeBase() {
           <form onSubmit={handleSave} className="bg-white dark:bg-[#122A1C] w-full max-w-xl rounded-[2.5rem] shadow-2xl border border-emerald-100 dark:border-emerald-900/40 overflow-hidden anim-scale-in">
             <div className="p-8 border-b border-gray-50 dark:border-emerald-900/30 flex items-center justify-between">
               <div>
-                <h3 className="font-black text-xl text-[#1B4332] dark:text-emerald-400 uppercase tracking-tight">
+                <h3 className="font-black text-xl text-[#0F5B3C] dark:text-emerald-400 uppercase tracking-tight">
                   {editando ? 'Editar Conocimiento' : 'Nuevo Entrenamiento'}
                 </h3>
                 <p className="text-xs text-gray-400 font-bold mt-1">Define cómo debe responder el asistente.</p>
@@ -203,7 +203,7 @@ export default function AIKnowledgeBase() {
                   value={form.pregunta}
                   onChange={e => setForm(p => ({ ...p, pregunta: e.target.value }))}
                   placeholder="Ej: ¿Hay algún lugar para comer cerca?"
-                  className="w-full p-4 bg-gray-50 dark:bg-[#0F2018] border border-gray-100 dark:border-emerald-900/50 rounded-2xl outline-none focus:border-[#1B4332] text-sm font-bold dark:text-gray-100"
+                  className="w-full p-4 bg-gray-50 dark:bg-[#0F2018] border border-gray-100 dark:border-emerald-900/50 rounded-2xl outline-none focus:border-[#0F5B3C] text-sm font-bold dark:text-gray-100"
                 />
               </div>
 
@@ -214,7 +214,7 @@ export default function AIKnowledgeBase() {
                   value={form.respuesta}
                   onChange={e => setForm(p => ({ ...p, respuesta: e.target.value }))}
                   placeholder="Ej: ¡Claro! Puedes visitar la cafetería central o los puestos de snacks frente al Auditorio 2. 🥪"
-                  className="w-full p-4 bg-gray-50 dark:bg-[#0F2018] border border-gray-100 dark:border-emerald-900/50 rounded-2xl outline-none focus:border-[#1B4332] text-sm font-medium dark:text-gray-200 h-32 resize-none"
+                  className="w-full p-4 bg-gray-50 dark:bg-[#0F2018] border border-gray-100 dark:border-emerald-900/50 rounded-2xl outline-none focus:border-[#0F5B3C] text-sm font-medium dark:text-gray-200 h-32 resize-none"
                 />
               </div>
 
@@ -223,7 +223,7 @@ export default function AIKnowledgeBase() {
                 <select 
                   value={form.categoria}
                   onChange={e => setForm(p => ({ ...p, categoria: e.target.value }))}
-                  className="w-full p-4 bg-gray-50 dark:bg-[#0F2018] border border-gray-100 dark:border-emerald-900/50 rounded-2xl outline-none focus:border-[#1B4332] text-xs font-black uppercase tracking-widest dark:text-gray-100"
+                  className="w-full p-4 bg-gray-50 dark:bg-[#0F2018] border border-gray-100 dark:border-emerald-900/50 rounded-2xl outline-none focus:border-[#0F5B3C] text-xs font-black uppercase tracking-widest dark:text-gray-100"
                 >
                   <option value="general">General / Logística</option>
                   <option value="servicios">Servicios (Wifi, Comida)</option>
@@ -242,7 +242,7 @@ export default function AIKnowledgeBase() {
               </button>
               <button 
                 type="submit" disabled={guardando}
-                className="flex-2 py-4 bg-[#1B4332] text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-emerald-800 transition-all shadow-lg flex items-center justify-center gap-2"
+                className="flex-2 py-4 bg-[#0F5B3C] text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-emerald-800 transition-all shadow-lg flex items-center justify-center gap-2"
               >
                 {guardando ? <Loader2 size={16} className="animate-spin" /> : <><Save size={16} /> Guardar Memoria</>}
               </button>
@@ -253,7 +253,7 @@ export default function AIKnowledgeBase() {
 
       {/* Toast */}
       {toast && (
-        <div className="fixed bottom-8 left-4 right-4 sm:left-auto sm:right-8 z-50 bg-[#1B4332] text-white px-8 py-4 rounded-2xl shadow-2xl font-black text-sm flex items-center gap-3 animate-slide-up">
+        <div className="fixed bottom-8 left-4 right-4 sm:left-auto sm:right-8 z-50 bg-[#0F5B3C] text-white px-8 py-4 rounded-2xl shadow-2xl font-black text-sm flex items-center gap-3 animate-slide-up">
           <Check className="w-5 h-5" strokeWidth={4} />
           {toast}
         </div>

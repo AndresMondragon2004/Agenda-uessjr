@@ -1,145 +1,148 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
+import { GraduationCap, ArrowRight, Star } from 'lucide-react'
 import { sesionesService } from '../../services/sesiones.service'
 import ScrollToTop from '../ui/ScrollToTop'
 
 export default function AuthLayout({ children }) {
   const location = useLocation()
-  const isLogin = location.pathname === '/login'
-
-  const [loadingSessions, setLoadingSessions] = useState(true)
   const [sessionCards, setSessionCards] = useState([])
 
   useEffect(() => {
     const loadSessions = async () => {
       try {
-        setLoadingSessions(true)
         const data = await sesionesService.getAll()
-        if (data && data.length >= 3) {
-          setSessionCards([
-            { tipo: data[0].tipo || 'SESIÓN', nombre: data[0].nombre },
-            { tipo: data[1].tipo || 'SESIÓN', nombre: data[1].nombre },
-            { tipo: data[2].tipo || 'SESIÓN', nombre: data[2].nombre },
-          ])
+        if (data && data.length > 0) {
+          // Filtrar activas y tomar 3
+          const top = data.filter(s => s.estado === 'activa').slice(0, 3)
+          setSessionCards(top.length > 0 ? top : data.slice(0, 3))
         }
       } catch (err) {
-        console.error('Error cargando sesiones para AuthLayout', err)
-      } finally {
-        setLoadingSessions(false)
+        console.error(err)
       }
     }
     loadSessions()
   }, [])
 
   return (
-    <div className="h-screen w-full flex bg-white dark:bg-[#0A1A11] font-sans overflow-hidden">
+    <div className="h-screen w-full flex bg-[#FCFCFC] dark:bg-surface-dark-bg font-sans overflow-hidden">
       <ScrollToTop />
-      {/* Left Panel - Branding (Hidden on small screens) */}
-      <div className="hidden lg:flex lg:w-1/2 bg-[#1b3b2b] flex-col justify-between p-8 xl:p-12 relative h-full">
-        
-        {/* Logo */}
-        <div className="z-10 flex-shrink-0">
-          <h1 className="text-white text-xl xl:text-2xl font-bold tracking-tight">
-            UESSJR AGENDA
-          </h1>
+      
+      {/* Left Panel - High-end Editorial Visuals */}
+      <div className="hidden lg:flex lg:w-1/2 bg-ues-green flex-col justify-between p-16 relative h-full overflow-hidden">
+        {/* Abstract Background Decoration */}
+        <div className="absolute top-0 right-0 w-full h-full opacity-10 pointer-events-none">
+           <div className="absolute -top-24 -right-24 w-[500px] h-[500px] rounded-full border-[60px] border-ues-gold/20" />
+           <div className="absolute bottom-48 -left-24 w-80 h-80 rounded-full border-[30px] border-white/20" />
         </div>
 
-        {/* Center Content */}
-        <div className="z-10 flex-1 flex flex-col justify-center max-w-lg py-4">
-          <div className="text-[#e0a96d] text-4xl xl:text-6xl font-serif font-bold mb-2 xl:mb-4 leading-none">
+        <div className="z-10">
+          <Link to="/" className="flex items-center gap-4 group w-fit">
+            <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 group-hover:scale-110 transition-transform duration-500 shadow-2xl">
+              <GraduationCap className="text-apple w-8 h-8" />
+            </div>
+            <div>
+              <span className="text-3xl font-serif font-black text-white leading-none tracking-tighter">UESSJR</span>
+              <p className="text-[10px] font-black text-ues-gold uppercase tracking-[0.4em] mt-1.5 opacity-80">Excelencia Académica</p>
+            </div>
+          </Link>
+        </div>
+
+        <div className="z-10 max-w-xl">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+            className="text-ues-gold text-9xl font-serif font-black mb-6 leading-none italic opacity-30 select-none"
+          >
             ”
-          </div>
-          <h2 className="text-white text-3xl xl:text-4xl 2xl:text-5xl font-light italic leading-tight mb-6 xl:mb-10">
-            Cultura que inspira, conocimiento<br />
-            que<br />
-            transforma.
-          </h2>
+          </motion.div>
+          <motion.h2 
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+            className="text-white text-5xl xl:text-7xl font-serif font-black leading-[0.9] mb-16 tracking-tighter"
+          >
+            Donde el <span className="italic text-ues-gold">saber</span><br/>encuentra su <span className="italic text-apple">impacto</span>.
+          </motion.h2>
 
-          {/* Cards Stack */}
-          <div className="relative h-40 xl:h-48 mt-2 xl:mt-4">
-            {loadingSessions ? (
-              <>
-                <div className="absolute top-0 left-0 w-72 xl:w-80 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl shadow-lg animate-pulse h-[72px] xl:h-[84px]" />
-                <div className="absolute top-8 xl:top-10 left-4 xl:left-6 w-72 xl:w-80 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl shadow-lg animate-pulse h-[72px] xl:h-[84px] z-10" />
-                <div className="absolute top-16 xl:top-20 left-8 xl:left-12 w-72 xl:w-80 bg-white/20 backdrop-blur-md border border-white/30 rounded-xl shadow-lg animate-pulse h-[72px] xl:h-[84px] z-20" />
-              </>
-            ) : (
-              <>
-                {/* Card 1 (Back) */}
-                <div className="absolute top-0 left-0 w-72 xl:w-80 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-3 xl:p-4 shadow-lg transform transition-transform hover:-translate-y-1">
-                  <p className="text-white/60 text-[10px] xl:text-xs font-semibold tracking-wider mb-1 uppercase">{sessionCards[0]?.tipo}</p>
-                  <p className="text-white font-medium text-sm xl:text-base truncate">{sessionCards[0]?.nombre}</p>
-                </div>
-                {/* Card 2 (Middle) */}
-                <div className="absolute top-8 xl:top-10 left-4 xl:left-6 w-72 xl:w-80 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-3 xl:p-4 shadow-lg transform transition-transform hover:-translate-y-1 z-10">
-                  <div className="w-1 h-6 xl:h-8 bg-[#e0a96d] absolute left-0 top-3 rounded-r-full"></div>
-                  <p className="text-white/60 text-[10px] xl:text-xs font-semibold tracking-wider mb-1 uppercase pl-3">{sessionCards[1]?.tipo}</p>
-                  <p className="text-white font-medium text-sm xl:text-base pl-3 truncate">{sessionCards[1]?.nombre}</p>
-                </div>
-                {/* Card 3 (Front) */}
-                <div className="absolute top-16 xl:top-20 left-8 xl:left-12 w-72 xl:w-80 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-3 xl:p-4 shadow-lg transform transition-transform hover:-translate-y-1 z-20">
-                  <p className="text-white/60 text-[10px] xl:text-xs font-semibold tracking-wider mb-1 uppercase">{sessionCards[2]?.tipo}</p>
-                  <p className="text-white font-medium text-sm xl:text-base truncate">{sessionCards[2]?.nombre}</p>
-                </div>
-              </>
-            )}
+          {/* Sessions Preview Deck */}
+          <div className="space-y-6">
+             {sessionCards.map((s, i) => (
+               <motion.div 
+                key={i}
+                initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 + (i * 0.1) }}
+                className="p-6 rounded-[2.5rem] bg-white/5 backdrop-blur-xl border-2 border-white/10 flex items-center justify-between group cursor-default shadow-2xl"
+               >
+                 <div className="flex items-center gap-5">
+                   <div className="w-10 h-10 rounded-xl bg-ues-gold/10 flex items-center justify-center text-ues-gold border border-ues-gold/20 shadow-inner">
+                      <Star size={18} fill="currentColor" />
+                   </div>
+                   <div>
+                     <p className="text-[9px] font-black text-ues-gold uppercase tracking-[0.3em] mb-1 opacity-70">{s.tipo || 'MAGISTRAL'}</p>
+                     <p className="text-white font-serif font-bold text-xl truncate max-w-[300px] tracking-tight">{s.nombre}</p>
+                   </div>
+                 </div>
+                 <div className="w-10 h-10 rounded-full bg-apple/10 flex items-center justify-center text-apple opacity-0 group-hover:opacity-100 transition-all shadow-sm">
+                    <ArrowRight size={18} />
+                 </div>
+               </motion.div>
+             ))}
           </div>
         </div>
 
-        {/* Bottom Info */}
-        <div className="z-10 flex-shrink-0">
-          <p className="text-white font-medium text-sm xl:text-base">13va Jornada Académica y Cultural 2026</p>
-          <p className="text-white/60 text-xs xl:text-sm mt-1">11 — 15 de mayo de 2026 · UES San José del Rincón</p>
+        <div className="z-10 flex items-center justify-between border-t border-white/10 pt-10">
+          <div>
+            <p className="text-white font-serif font-black text-xl tracking-tight leading-none">12va Jornada Académica</p>
+            <p className="text-ues-gold font-black text-[10px] uppercase tracking-[0.4em] mt-3 opacity-60 italic">MAY 2026 · SAN JOSÉ DEL RINCÓN</p>
+          </div>
+          <div className="flex gap-6 grayscale opacity-40 hover:opacity-100 hover:grayscale-0 transition-all duration-700">
+             <img src="https://sic.cultura.gob.mx/imagenes_cache/universidad_4260_g_74199.png" className="h-8 brightness-0 invert" alt="UMB" />
+             <img src="/images/logos/ues-sjr.png" className="h-8 brightness-0 invert" alt="UES" />
+          </div>
         </div>
-        
-        {/* Optional decorative gradient/glow in the background */}
-        <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-[#2a5a43] rounded-full blur-3xl opacity-50"></div>
       </div>
 
-      {/* Right Panel - Form Area */}
-      <div className="w-full lg:w-1/2 flex flex-col relative h-full">
-        {/* Top Navigation */}
-        <nav className="absolute top-0 left-0 right-0 p-8 flex justify-end gap-6 text-sm font-medium text-emerald-800/60 dark:text-emerald-400/50 hidden sm:flex z-10 bg-white/80 dark:bg-[#0A1A11]/90 backdrop-blur-md">
-          <Link to="/" className="hover:text-emerald-900 transition-colors">Inicio</Link>
-          <Link to="/agenda" className="hover:text-emerald-900 transition-colors">Agenda</Link>
-          <Link to="/conferencistas" className="hover:text-emerald-900 transition-colors">Conferencistas</Link>
-          <Link to="/proponer" className="hover:text-emerald-900 transition-colors">Proponer actividad</Link>
-        </nav>
+      {/* Right Panel - Form Interface */}
+      <div className="w-full lg:w-1/2 flex flex-col h-full overflow-y-auto bg-white dark:bg-surface-dark-bg">
+        <div className="max-w-lg mx-auto w-full px-10 py-24 flex flex-col h-full">
+          
+          {/* Tabs Editorial Design */}
+          {!location.pathname.includes('contrasena') && (
+            <div className="flex gap-12 mb-20 border-b border-gray-100 dark:border-white/5">
+              <Link
+                to="/login"
+                className={`pb-8 text-[11px] font-black uppercase tracking-[0.4em] transition-all relative ${
+                  location.pathname === '/login' ? 'text-ues-green dark:text-ues-gold' : 'text-gray-300'
+                }`}
+              >
+                Acceso Académico
+                {location.pathname === '/login' && (
+                  <motion.div layoutId="tab" className="absolute bottom-0 left-0 right-0 h-1 bg-ues-green dark:bg-ues-gold rounded-t-full" />
+                )}
+              </Link>
+              <Link
+                to="/registro"
+                className={`pb-8 text-[11px] font-black uppercase tracking-[0.4em] transition-all relative ${
+                  location.pathname === '/registro' ? 'text-ues-green dark:text-ues-gold' : 'text-gray-300'
+                }`}
+              >
+                Nuevo Registro
+                {location.pathname === '/registro' && (
+                  <motion.div layoutId="tab" className="absolute bottom-0 left-0 right-0 h-1 bg-ues-green dark:bg-ues-gold rounded-t-full" />
+                )}
+              </Link>
+            </div>
+          )}
 
-        {/* Scrollable Form Container */}
-        <div className="flex-1 overflow-y-auto w-full flex flex-col pt-24 px-8 sm:px-16 lg:px-24">
-          <div className="my-auto w-full max-w-md mx-auto pb-12">
-            
-            {/* Tabs */}
-            {!location.pathname.includes('contrasena') && (
-              <div className="flex border-b border-gray-200 dark:border-emerald-900/40 mb-10 w-full">
-                <Link
-                  to="/login"
-                  className={`pb-4 px-2 text-sm font-semibold transition-colors relative ${
-                    location.pathname === '/login' ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
-                  }`}
-                >
-                  Iniciar sesión
-                  {location.pathname === '/login' && (
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900 dark:bg-emerald-400" />
-                  )}
-                </Link>
-                <Link
-                  to="/registro"
-                  className={`pb-4 px-6 text-sm font-semibold transition-colors relative ${
-                    location.pathname === '/registro' ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
-                  }`}
-                >
-                  Registrarse
-                  {location.pathname === '/registro' && (
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900 dark:bg-emerald-400" />
-                  )}
-                </Link>
-              </div>
-            )}
-
+          <div className="flex-1">
             {children}
+          </div>
 
+          <div className="mt-24 pt-10 border-t border-gray-100 dark:border-white/5 flex flex-col sm:flex-row items-center justify-between gap-6">
+            <p className="text-[10px] font-black text-gray-300 uppercase tracking-[0.3em]">© 2026 UESSJR Agenda · Editorial System</p>
+            <div className="flex gap-6">
+               {['Términos', 'Privacidad'].map(t => (
+                 <Link key={t} to={`/${t.toLowerCase().replace('é', 'e')}`} className="text-[10px] font-black text-gray-400 hover:text-ues-green dark:hover:text-ues-gold transition-colors uppercase tracking-widest">{t}</Link>
+               ))}
+            </div>
           </div>
         </div>
       </div>

@@ -155,4 +155,13 @@ export const inscripcionesService = {
     if (error) throw error
     return data
   },
+
+  async getTotalInscripciones() {
+    const { count, error } = await supabase
+      .from('inscripciones')
+      .select('*', { count: 'exact', head: true })
+      .eq('estado', 'confirmada')
+    if (error) throw error
+    return { data: count || 0 }
+  },
 }

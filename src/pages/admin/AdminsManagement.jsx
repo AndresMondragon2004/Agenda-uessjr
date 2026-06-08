@@ -285,7 +285,7 @@ export default function AdminsManagement() {
 
         {loading ? (
           <div className="py-20 text-center">
-            <Loader2 className="w-10 h-10 animate-spin text-[#1B4332] mx-auto mb-4" />
+            <Loader2 className="w-10 h-10 animate-spin text-[#0F5B3C] mx-auto mb-4" />
             <p className="text-gray-400 text-xs font-black uppercase tracking-widest">Cargando equipo técnico...</p>
           </div>
         ) : (
@@ -435,7 +435,7 @@ export default function AdminsManagement() {
               </div>
               <div>
                 <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Correo (solo lectura)</label>
-                <div className="w-full px-4 py-3 rounded-2xl border border-gray-100 dark:border-emerald-900/20 bg-gray-50/50 dark:bg-[#0A1A11] text-sm font-bold text-gray-400 dark:text-gray-500 truncate">
+                <div className="w-full px-4 py-3 rounded-2xl border border-gray-100 dark:border-emerald-900/20 bg-gray-50/50 dark:bg-[#0B1310] text-sm font-bold text-gray-400 dark:text-gray-500 truncate">
                   {editModal.admin?.correo}
                 </div>
               </div>
@@ -452,7 +452,7 @@ export default function AdminsManagement() {
               <button
                 onClick={handleEditarNombre}
                 disabled={editando}
-                className="flex-1 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest bg-[#1B4332] text-white hover:bg-emerald-800 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                className="flex-1 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest bg-[#0F5B3C] text-white hover:bg-emerald-800 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {editando ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
                 {editando ? 'Guardando...' : 'Guardar cambios'}
@@ -529,7 +529,7 @@ export default function AdminsManagement() {
               <button
                 onClick={handleCambiarPassword}
                 disabled={cambiandoPass}
-                className="flex-1 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest bg-[#1B4332] text-white hover:bg-emerald-800 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                className="flex-1 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest bg-[#0F5B3C] text-white hover:bg-emerald-800 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {cambiandoPass ? <Loader2 size={12} className="animate-spin" /> : <KeyRound size={12} />}
                 {cambiandoPass ? 'Actualizando...' : 'Actualizar contraseña'}
@@ -618,7 +618,7 @@ export default function AdminsManagement() {
                     disabled={creando}
                     className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2
                       ${nuevoRol === 'admin'
-                        ? 'bg-white dark:bg-[#1B4332] text-[#1B4332] dark:text-white shadow-sm'
+                        ? 'bg-white dark:bg-[#0F5B3C] text-[#0F5B3C] dark:text-white shadow-sm'
                         : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
                   >
                     <Shield size={12} /> Admin
@@ -629,7 +629,7 @@ export default function AdminsManagement() {
                     disabled={creando}
                     className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2
                       ${nuevoRol === 'superadmin'
-                        ? 'bg-white dark:bg-[#1B4332] text-[#1B4332] dark:text-white shadow-sm'
+                        ? 'bg-white dark:bg-[#0F5B3C] text-[#0F5B3C] dark:text-white shadow-sm'
                         : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
                   >
                     <ShieldCheck size={12} /> Superadmin
@@ -649,7 +649,7 @@ export default function AdminsManagement() {
               <button
                 onClick={handleCrearAdmin}
                 disabled={creando}
-                className="flex-1 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest bg-[#1B4332] text-white hover:bg-emerald-800 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                className="flex-1 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest bg-[#0F5B3C] text-white hover:bg-emerald-800 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {creando ? <Loader2 size={12} className="animate-spin" /> : <Plus size={12} />}
                 {creando ? 'Creando...' : 'Crear administrador'}
@@ -660,7 +660,7 @@ export default function AdminsManagement() {
       )}
 
       {toast && (
-        <div className="fixed bottom-8 left-4 right-4 sm:left-auto sm:right-8 z-50 bg-[#1B4332] text-white px-8 py-4 rounded-2xl shadow-2xl font-black text-sm flex items-center gap-3 animate-slide-up">
+        <div className="fixed bottom-8 left-4 right-4 sm:left-auto sm:right-8 z-50 bg-[#0F5B3C] text-white px-8 py-4 rounded-2xl shadow-2xl font-black text-sm flex items-center gap-3 animate-slide-up">
           <Check className="w-5 h-5" strokeWidth={4} />
           {toast}
         </div>

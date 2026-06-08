@@ -86,7 +86,7 @@ function DiasSection({ jornada, onDiaDeleted }) {
   return (
     <tr>
       <td colSpan={7} className="px-4 pb-4 pt-0">
-        <div className="bg-[#F0F7F4] border-l-4 border-[#1B4332]/40
+        <div className="bg-[#F0F7F4] border-l-4 border-[#0F5B3C]/40
                         rounded-xl px-6 py-5">
           <p className="font-bold text-gray-800 text-sm mb-0.5">
             Días registrados — {jornada.nombre}
@@ -127,7 +127,7 @@ function DiasSection({ jornada, onDiaDeleted }) {
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
-                    <p className="text-2xl font-bold text-[#1B4332]">
+                    <p className="text-2xl font-bold text-[#0F5B3C]">
                       {idx + 1}
                     </p>
                     <p className="text-xs font-bold text-gray-800 mt-0.5">
@@ -161,7 +161,7 @@ function Toggle({ checked, onChange }) {
       type="button"
       onClick={() => onChange(!checked)}
       className={`relative w-11 h-6 rounded-full transition-all duration-300 shrink-0 border-2
-        ${checked ? 'bg-[#1B4332] border-[#1B4332]' : 'bg-gray-200 dark:bg-emerald-950/50 border-gray-200 dark:border-emerald-900/50'}`}
+        ${checked ? 'bg-[#0F5B3C] border-[#0F5B3C]' : 'bg-gray-200 dark:bg-emerald-950/50 border-gray-200 dark:border-emerald-900/50'}`}
     >
       <span className={`absolute top-0.5 left-0.5 bg-white rounded-full
         transition-all duration-300 shadow-sm
@@ -282,7 +282,7 @@ function JornadaModal({ jornadaActiva, jornadaEditando, onClose, onSaved }) {
               name="nombre" value={form.nombre} onChange={handleChange}
               placeholder="Ej. 13va Jornada Académica y Cultural 2026"
               className="w-full px-4 py-2 border border-gray-300 dark:border-emerald-900/40 rounded-lg
-                         focus:border-[#1B4332] outline-none bg-white dark:bg-[#0F2018] text-gray-900 dark:text-gray-200"
+                         focus:border-[#0F5B3C] outline-none bg-white dark:bg-[#0F2018] text-gray-900 dark:text-gray-200"
             />
           </div>
 
@@ -296,7 +296,7 @@ function JornadaModal({ jornadaActiva, jornadaEditando, onClose, onSaved }) {
                 name="edicion" value={form.edicion} onChange={handleChange}
                 placeholder="Ej. 13va"
                 className="w-full px-4 py-2 border border-gray-300 dark:border-emerald-900/40 rounded-lg
-                           focus:border-[#1B4332] outline-none bg-white dark:bg-[#0F2018] text-gray-900 dark:text-gray-200"
+                           focus:border-[#0F5B3C] outline-none bg-white dark:bg-[#0F2018] text-gray-900 dark:text-gray-200"
               />
             </div>
             <div>
@@ -306,7 +306,7 @@ function JornadaModal({ jornadaActiva, jornadaEditando, onClose, onSaved }) {
               <input
                 name="sede" value={form.sede} onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-emerald-900/40 rounded-lg
-                           focus:border-[#1B4332] outline-none bg-white dark:bg-[#0F2018] text-gray-900 dark:text-gray-200"
+                           focus:border-[#0F5B3C] outline-none bg-white dark:bg-[#0F2018] text-gray-900 dark:text-gray-200"
               />
             </div>
           </div>
@@ -321,7 +321,7 @@ function JornadaModal({ jornadaActiva, jornadaEditando, onClose, onSaved }) {
               name="lema" value={form.lema} onChange={handleChange}
               placeholder="Ej. Cultura que inspira, conocimiento que transforma"
               className="w-full px-4 py-2 border border-gray-300 dark:border-emerald-900/40 rounded-lg
-                         focus:border-[#1B4332] outline-none bg-white dark:bg-[#0F2018] text-gray-900 dark:text-gray-200"
+                         focus:border-[#0F5B3C] outline-none bg-white dark:bg-[#0F2018] text-gray-900 dark:text-gray-200"
             />
           </div>
 
@@ -337,7 +337,7 @@ function JornadaModal({ jornadaActiva, jornadaEditando, onClose, onSaved }) {
                   type="date" name="fecha_inicio"
                   value={form.fecha_inicio} onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-emerald-900/40 rounded-lg
-                             focus:border-[#1B4332] outline-none bg-white dark:bg-[#0F2018] text-gray-900 dark:text-gray-200"
+                             focus:border-[#0F5B3C] outline-none bg-white dark:bg-[#0F2018] text-gray-900 dark:text-gray-200"
                 />
               </div>
               <div>
@@ -347,7 +347,7 @@ function JornadaModal({ jornadaActiva, jornadaEditando, onClose, onSaved }) {
                   value={form.fecha_fin} onChange={handleChange}
                   min={form.fecha_inicio}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-emerald-900/40 rounded-lg
-                             focus:border-[#1B4332] outline-none bg-white dark:bg-[#0F2018] text-gray-900 dark:text-gray-200"
+                             focus:border-[#0F5B3C] outline-none bg-white dark:bg-[#0F2018] text-gray-900 dark:text-gray-200"
                 />
               </div>
             </div>
@@ -387,7 +387,7 @@ function JornadaModal({ jornadaActiva, jornadaEditando, onClose, onSaved }) {
                     onClick={() => setForm(prev => ({ ...prev, estado: est }))}
                     className={`py-2 px-3 rounded-lg text-xs font-bold capitalize transition-all
                       ${isActive 
-                        ? 'bg-white dark:bg-[#1B4332] text-[#1B4332] dark:text-white shadow-sm ring-1 ring-black/5 dark:ring-white/10' 
+                        ? 'bg-white dark:bg-[#0F5B3C] text-[#0F5B3C] dark:text-white shadow-sm ring-1 ring-black/5 dark:ring-white/10' 
                         : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
                   >
                     {est}
@@ -436,7 +436,7 @@ function JornadaModal({ jornadaActiva, jornadaEditando, onClose, onSaved }) {
             <button
               type="submit" disabled={saving}
               className="flex-1 px-4 py-2 text-sm font-semibold text-white
-                         bg-[#1B4332] rounded-lg hover:bg-emerald-800
+                         bg-[#0F5B3C] rounded-lg hover:bg-emerald-800
                          transition-colors disabled:opacity-50"
             >
               {saving ? 'Guardando...' : 'Guardar jornada'}
@@ -605,7 +605,7 @@ export default function JornadaManagement() {
         <button
           type="button"
           onClick={handleOpenCreate}
-          className="flex items-center gap-2 px-5 py-2.5 bg-[#1B4332] text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-[#002F1D] hover:-translate-y-0.5 transition-all shadow-lg shadow-emerald-900/10"
+          className="flex items-center gap-2 px-5 py-2.5 bg-[#0F5B3C] text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-[#002F1D] hover:-translate-y-0.5 transition-all shadow-lg shadow-emerald-900/10"
         >
           <Plus className="w-4 h-4" strokeWidth={3} /> Nueva Jornada
         </button>
@@ -618,7 +618,7 @@ export default function JornadaManagement() {
             <div className="w-10 h-10 bg-white dark:bg-emerald-800 rounded-xl flex items-center justify-center text-emerald-600 dark:text-emerald-400 shadow-sm shrink-0">
               <Lock className="w-5 h-5" />
             </div>
-            <p className="text-xs font-bold text-[#1B4332] dark:text-emerald-100 leading-relaxed pr-8">
+            <p className="text-xs font-bold text-[#0F5B3C] dark:text-emerald-100 leading-relaxed pr-8">
               Solo puede haber una jornada activa a la vez. La jornada activa es la que se muestra en la vista pública y controla el acceso a las inscripciones.
             </p>
             <button
@@ -654,11 +654,11 @@ export default function JornadaManagement() {
                   key={tab}
                   onClick={() => setTabActivo(tab)}
                   className={`px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] transition-all border-b-2 whitespace-nowrap
-                    ${isActive ? 'border-[#1B4332] text-[#1B4332]' : 'border-transparent text-gray-500 hover:text-gray-500'}`}
+                    ${isActive ? 'border-[#0F5B3C] text-[#0F5B3C]' : 'border-transparent text-gray-500 hover:text-gray-500'}`}
                 >
                   {tab}
                   {count !== null && (
-                    <span className={`ml-2 px-2 py-0.5 rounded-lg ${isActive ? 'bg-emerald-50 text-[#1B4332]' : 'bg-gray-50 text-gray-400'}`}>
+                    <span className={`ml-2 px-2 py-0.5 rounded-lg ${isActive ? 'bg-emerald-50 text-[#0F5B3C]' : 'bg-gray-50 text-gray-400'}`}>
                       {count}
                     </span>
                   )}
@@ -688,7 +688,7 @@ export default function JornadaManagement() {
                     <tr>
                       <td colSpan={5} className="py-24 text-center">
                         <div className="flex flex-col items-center opacity-30 dark:opacity-50">
-                          <Plus className="w-16 h-16 text-[#1B4332] dark:text-emerald-600 mb-4" />
+                          <Plus className="w-16 h-16 text-[#0F5B3C] dark:text-emerald-600 mb-4" />
                           <p className="font-black text-gray-900 dark:text-gray-100 uppercase tracking-widest text-sm">Sin resultados para esta categoría</p>
                         </div>
                       </td>
@@ -699,11 +699,11 @@ export default function JornadaManagement() {
                         <tr className={`group hover:bg-emerald-50/20 dark:hover:bg-emerald-900/10 transition-all ${expandedId === j.id ? 'bg-emerald-50/30 dark:bg-emerald-900/10' : ''}`}>
                           <td className="px-8 py-6">
                             <div className="flex items-center gap-4">
-                              <div className="w-12 h-12 bg-white dark:bg-[#122A1C] rounded-2xl border border-gray-100 dark:border-emerald-900/40 flex items-center justify-center font-black text-[#1B4332] dark:text-emerald-400 text-sm shadow-sm group-hover:scale-110 transition-transform">
+                              <div className="w-12 h-12 bg-white dark:bg-[#122A1C] rounded-2xl border border-gray-100 dark:border-emerald-900/40 flex items-center justify-center font-black text-[#0F5B3C] dark:text-emerald-400 text-sm shadow-sm group-hover:scale-110 transition-transform">
                                 {j.edicion}
                               </div>
                               <div>
-                                <p className="font-black text-gray-900 dark:text-gray-100 text-sm group-hover:text-[#1B4332] dark:group-hover:text-emerald-400 transition-colors">{j.nombre}</p>
+                                <p className="font-black text-gray-900 dark:text-gray-100 text-sm group-hover:text-[#0F5B3C] dark:group-hover:text-emerald-400 transition-colors">{j.nombre}</p>
                                 {j.lema && <p className="text-[10px] font-bold text-gray-400 italic line-clamp-1">"{j.lema}"</p>}
                               </div>
                             </div>
@@ -724,13 +724,13 @@ export default function JornadaManagement() {
                             <div className="flex items-center gap-2">
                               <button 
                                 onClick={() => toggleExpanded(j.id)}
-                                className={`p-2.5 rounded-xl border transition-all ${expandedId === j.id ? 'bg-[#1B4332] text-white border-[#1B4332]' : 'bg-white dark:bg-[#122A1C] text-gray-400 dark:text-gray-500 border-gray-100 dark:border-emerald-900/40 hover:text-[#1B4332] dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30'}`}
+                                className={`p-2.5 rounded-xl border transition-all ${expandedId === j.id ? 'bg-[#0F5B3C] text-white border-[#0F5B3C]' : 'bg-white dark:bg-[#122A1C] text-gray-400 dark:text-gray-500 border-gray-100 dark:border-emerald-900/40 hover:text-[#0F5B3C] dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30'}`}
                               >
                                 <Eye className="w-5 h-5" />
                               </button>
                               <button 
                                 onClick={() => handleOpenEdit(j)}
-                                className="p-2.5 bg-white dark:bg-[#122A1C] text-gray-400 dark:text-gray-500 border border-gray-100 dark:border-emerald-900/40 rounded-xl hover:text-[#1B4332] dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-all"
+                                className="p-2.5 bg-white dark:bg-[#122A1C] text-gray-400 dark:text-gray-500 border border-gray-100 dark:border-emerald-900/40 rounded-xl hover:text-[#0F5B3C] dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-all"
                               >
                                 <Edit2 className="w-5 h-5" />
                               </button>
@@ -765,7 +765,7 @@ export default function JornadaManagement() {
                                             <X className="w-3.5 h-3.5" strokeWidth={3} />
                                           </button>
                                           <p className="text-[10px] font-black text-gray-300 dark:text-gray-600 mb-1">DÍA {idx + 1}</p>
-                                          <p className="text-sm font-black text-[#1B4332] dark:text-emerald-400 uppercase">{dia.nombre_dia}</p>
+                                          <p className="text-sm font-black text-[#0F5B3C] dark:text-emerald-400 uppercase">{dia.nombre_dia}</p>
                                           <p className="text-[10px] font-bold text-gray-500 dark:text-gray-400">{new Date(dia.fecha + 'T12:00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })}</p>
                                           <div className="mt-2 flex items-center justify-center gap-1">
                                             <Sparkles size={10} className="text-emerald-500" />
@@ -810,7 +810,7 @@ export default function JornadaManagement() {
       )}
 
       {toast && (
-        <div className="fixed bottom-8 left-4 right-4 sm:left-auto sm:right-8 z-50 bg-[#1B4332] text-white px-8 py-4 rounded-2xl shadow-2xl font-black text-sm flex items-center gap-3 animate-slide-up">
+        <div className="fixed bottom-8 left-4 right-4 sm:left-auto sm:right-8 z-50 bg-[#0F5B3C] text-white px-8 py-4 rounded-2xl shadow-2xl font-black text-sm flex items-center gap-3 animate-slide-up">
           <Check className="w-5 h-5" strokeWidth={4} />
           {toast}
         </div>

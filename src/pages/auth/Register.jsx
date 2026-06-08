@@ -128,7 +128,7 @@ export default function Register() {
       <div className="mb-6">
         <Link 
           to="/" 
-          className="inline-flex items-center gap-2 text-xs font-bold text-gray-400 dark:text-gray-500 hover:text-[#1B4332] dark:hover:text-emerald-400 transition-colors uppercase tracking-widest"
+          className="inline-flex items-center gap-2 text-xs font-bold text-gray-400 dark:text-gray-500 hover:text-[#0F5B3C] dark:hover:text-emerald-400 transition-colors uppercase tracking-widest"
         >
           <ArrowLeft size={14} /> Volver al inicio
         </Link>

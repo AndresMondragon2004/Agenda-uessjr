@@ -1,48 +1,55 @@
 /** @type {import('tailwindcss').Config} */
+/* global require */
 export default {
-  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
   darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        primary: {
-          DEFAULT: '#1B4332', // Emerald dark
-          light: '#2D6A4F',
-          dark: '#001F12', // Sidebar background
-          emerald: '#34D399',
-        },
-        accent: {
-          DEFAULT: '#D97706', // Amber
-          light: '#FFFBEB',
-        },
-        bg: {
-          main: '#F2F5F3',
-          card: '#FFFFFF',
+        'ues-green': '#1A4731', // Verde Pino (Autoridad)
+        'ues-gold': '#D4A017',  // Oro (Prestigio)
+        'apple': '#84CC16',     // Verde Manzana (Acentuación selecta)
+        'surface': {
+          'bg': '#FCFCFC',
+          'card': '#FFFFFF',
+          'dark-bg': '#020403', // Obsidian Black para un look editorial de lujo
+          'dark-card': '#0B0F0D',
+          'dark-border': '#161B19',
         }
       },
       fontFamily: {
+        serif: ['Crimson Pro', 'serif'],
         sans: ['Inter', 'sans-serif'],
       },
-      keyframes: {
-        'scale-in': {
-          '0%': { opacity: '0', transform: 'scale(0.95)' },
-          '100%': { opacity: '1', transform: 'scale(1)' },
-        },
-        'fade-in': {
-          '0%': { opacity: '0' },
-          '100%': { opacity: '1' },
-        },
-        'slide-up': {
-          '0%': { opacity: '0', transform: 'translateY(10px)' },
-          '100%': { opacity: '1', transform: 'translateY(0)' },
-        },
+      boxShadow: {
+        'bento': '0 8px 30px rgba(0,0,0,0.04)',
+        'bento-gold': '0 10px 40px rgba(212, 160, 23, 0.1)',
+        'bento-dark': '0 20px 40px rgba(0,0,0,0.3)',
+      },
+      borderRadius: {
+        '4xl': '2rem',
+        '5xl': '3rem',
       },
       animation: {
-        'scale-in': 'scale-in 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-        'fade-in': 'fade-in 0.2s ease-out',
-        'slide-up': 'slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+        'float': 'float 6s ease-in-out infinite',
+        'slide-up': 'slideUp 0.5s ease-out forwards',
       },
+      keyframes: {
+        float: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-20px)' },
+        },
+        slideUp: {
+          '0%': { transform: 'translateY(20px)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
+        }
+      }
     },
   },
-  plugins: [],
+  plugins: [
+    require('tailwind-scrollbar-hide'),
+  ],
 }

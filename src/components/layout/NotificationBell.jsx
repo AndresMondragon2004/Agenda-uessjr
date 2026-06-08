@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Bell, Info, AlertTriangle, CheckCircle, X, ExternalLink } from 'lucide-react'
+import { Bell, Info, AlertTriangle, CheckCircle, X } from 'lucide-react'
 import { notificacionesService } from '../../services/notificaciones.service'
 import { useAuth } from '../../context/AuthContext'
 import { supabase } from '../../services/supabase'
@@ -84,11 +84,11 @@ export default function NotificationBell() {
     <div className="relative">
       <button
         onClick={() => { setIsOpen(!isOpen); if (!isOpen) markAllAsRead() }}
-        className={`p-2 rounded-xl transition-all relative ${isOpen ? 'bg-[#1B4332]/10 text-[#1B4332] dark:text-emerald-400' : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-emerald-900/20'}`}
+        className={`p-2 rounded-xl transition-all relative ${isOpen ? 'bg-[#0F5B3C]/10 text-[#0F5B3C] dark:text-emerald-400' : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-emerald-900/20'}`}
       >
         <Bell size={20} />
         {unreadCount > 0 && (
-          <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white dark:border-[#0A1A11]">
+          <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white dark:border-[#0B1310]">
             {unreadCount}
           </span>
         )}

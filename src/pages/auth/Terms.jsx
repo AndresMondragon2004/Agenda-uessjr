@@ -19,7 +19,7 @@ export default function Terms() {
         
         <section>
           <div className="flex items-center gap-3 mb-3">
-            <div className="p-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg text-[#1B4332] dark:text-emerald-400">
+            <div className="p-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg text-[#0F5B3C] dark:text-emerald-400">
               <ShieldCheck size={18} />
             </div>
             <h2 className="font-black text-gray-900 dark:text-gray-100 uppercase tracking-widest text-[11px]">1. Aceptación de los términos</h2>
@@ -31,7 +31,7 @@ export default function Terms() {
 
         <section>
           <div className="flex items-center gap-3 mb-3">
-            <div className="p-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg text-[#1B4332] dark:text-emerald-400">
+            <div className="p-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg text-[#0F5B3C] dark:text-emerald-400">
               <Lock size={18} />
             </div>
             <h2 className="font-black text-gray-900 dark:text-gray-100 uppercase tracking-widest text-[11px]">2. Uso de la cuenta</h2>
@@ -43,7 +43,7 @@ export default function Terms() {
 
         <section>
           <div className="flex items-center gap-3 mb-3">
-            <div className="p-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg text-[#1B4332] dark:text-emerald-400">
+            <div className="p-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg text-[#0F5B3C] dark:text-emerald-400">
               <Eye size={18} />
             </div>
             <h2 className="font-black text-gray-900 dark:text-gray-100 uppercase tracking-widest text-[11px]">3. Protección de datos</h2>
@@ -55,7 +55,7 @@ export default function Terms() {
 
         <section>
           <div className="flex items-center gap-3 mb-3">
-            <div className="p-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg text-[#1B4332] dark:text-emerald-400">
+            <div className="p-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg text-[#0F5B3C] dark:text-emerald-400">
               <FileText size={18} />
             </div>
             <h2 className="font-black text-gray-900 dark:text-gray-100 uppercase tracking-widest text-[11px]">4. Comportamiento en eventos</h2>
@@ -67,7 +67,7 @@ export default function Terms() {
 
         <section>
           <div className="flex items-center gap-3 mb-3">
-            <div className="p-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg text-[#1B4332] dark:text-emerald-400">
+            <div className="p-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg text-[#0F5B3C] dark:text-emerald-400">
               <Globe size={18} />
             </div>
             <h2 className="font-black text-gray-900 dark:text-gray-100 uppercase tracking-widest text-[11px]">5. Propiedad intelectual</h2>

@@ -185,7 +185,7 @@ export default function CheckInScanner() {
   if (loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin" /></div>
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0A1A11] pb-20">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0B1310] pb-20">
       
       {lastResult && (
         <div className="fixed top-20 inset-x-4 z-[60] anim-fade-up">
@@ -208,7 +208,7 @@ export default function CheckInScanner() {
             <button onClick={() => navigate('/admin/dashboard')} className="p-2 rounded-xl"><ArrowLeft size={20} /></button>
             <h1 className="font-black text-gray-900 dark:text-gray-100">Punto de Control</h1>
           </div>
-          <Users size={20} className="text-[#1B4332]" />
+          <Users size={20} className="text-[#0F5B3C]" />
         </div>
       </div>
 
@@ -227,7 +227,7 @@ export default function CheckInScanner() {
             <option value="">— Elegir sesión —</option>
             {sesiones.map(s => <option key={s.id} value={s.id}>{s.hora_inicio?.slice(0,5)} · {s.nombre}</option>)}
           </select>
-          <button disabled={!sesionId} onClick={() => setScanning(!scanning)} className={`w-full py-4 mt-4 rounded-2xl font-black text-sm uppercase transition-all flex items-center justify-center gap-3 ${scanning ? 'bg-red-50 text-red-600' : 'bg-[#1B4332] text-white'}`}>
+          <button disabled={!sesionId} onClick={() => setScanning(!scanning)} className={`w-full py-4 mt-4 rounded-2xl font-black text-sm uppercase transition-all flex items-center justify-center gap-3 ${scanning ? 'bg-red-50 text-red-600' : 'bg-[#0F5B3C] text-white'}`}>
             {scanning ? <><XCircle size={18} /> Detener</> : <><Camera size={18} /> Iniciar</>}
           </button>
         </div>
@@ -236,7 +236,7 @@ export default function CheckInScanner() {
           {scanning && sesionId && (
             <div className="relative anim-fade-up">
               <div id="reader" className="overflow-hidden rounded-[2.5rem] border-4 border-white dark:border-[#122A1C] shadow-2xl bg-black" />
-              <div className="absolute inset-x-0 -bottom-3 flex justify-center"><span className="bg-[#1B4332] text-white px-4 py-1 rounded-full text-[9px] font-black uppercase">Cámara Activa</span></div>
+              <div className="absolute inset-x-0 -bottom-3 flex justify-center"><span className="bg-[#0F5B3C] text-white px-4 py-1 rounded-full text-[9px] font-black uppercase">Cámara Activa</span></div>
             </div>
           )}
         </div>
@@ -261,7 +261,7 @@ export default function CheckInScanner() {
 
         {scanning && !lastResult && sesionId && (
           <div className="bg-gray-100 dark:bg-[#122A1C] p-6 rounded-[2rem] text-center anim-fade-up">
-            <h2 className="text-sm font-black text-[#1B4332]">{sesiones.find(s => s.id === sesionId)?.nombre}</h2>
+            <h2 className="text-sm font-black text-[#0F5B3C]">{sesiones.find(s => s.id === sesionId)?.nombre}</h2>
             <p className="text-xs text-gray-500 font-bold mt-2">{sesiones.find(s => s.id === sesionId)?.hora_inicio?.slice(0,5)} hrs</p>
           </div>
         )}

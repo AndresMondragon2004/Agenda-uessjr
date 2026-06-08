@@ -19,7 +19,7 @@ function ToggleSwitch({ checked, onChange, label, hint }) {
         type="button"
         onClick={() => onChange(!checked)}
         className={`relative w-11 h-6 rounded-full transition-all duration-300 shrink-0 ml-4 border-2
-          ${checked ? 'bg-[#1B4332] border-[#1B4332]' : 'bg-gray-200 dark:bg-emerald-950/50 border-gray-200 dark:border-emerald-900/50'}`}
+          ${checked ? 'bg-[#0F5B3C] border-[#0F5B3C]' : 'bg-gray-200 dark:bg-emerald-950/50 border-gray-200 dark:border-emerald-900/50'}`}
       >
         <span className={`absolute top-0.5 left-0.5 bg-white rounded-full
           transition-all duration-300 shadow-sm
@@ -381,9 +381,9 @@ export default function SessionForm() {
   // ── Loading ────────────────────────────────────────────────────────────
   if (loadingData) {
     return (
-      <div className="min-h-[calc(100vh-64px)] bg-[#F8FAF9] dark:bg-[#0A1A11] flex items-center justify-center">
+      <div className="min-h-[calc(100vh-64px)] bg-[#F8FAF9] dark:bg-[#0B1310] flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-12 h-12 text-[#1B4332] animate-spin mx-auto mb-4" />
+          <Loader2 className="w-12 h-12 text-[#0F5B3C] animate-spin mx-auto mb-4" />
           <p className="text-gray-500 dark:text-gray-400 font-medium text-sm">Cargando datos de la jornada...</p>
         </div>
       </div>
@@ -400,7 +400,7 @@ export default function SessionForm() {
             <button
               type="button"
               onClick={() => navigate('/admin/sesiones')}
-              className="text-gray-400 dark:text-gray-500 hover:text-[#1B4332] dark:hover:text-emerald-400 transition-colors p-2 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-xl"
+              className="text-gray-400 dark:text-gray-500 hover:text-[#0F5B3C] dark:hover:text-emerald-400 transition-colors p-2 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-xl"
               title="Volver a sesiones"
             >
               <ArrowLeft className="w-5 h-5" />
@@ -410,7 +410,7 @@ export default function SessionForm() {
                 <button
                   type="button"
                   onClick={() => navigate('/admin/dashboard')}
-                  className="hover:text-[#1B4332] dark:hover:text-emerald-400 transition-colors font-medium"
+                  className="hover:text-[#0F5B3C] dark:hover:text-emerald-400 transition-colors font-medium"
                 >
                   Panel de control
                 </button>
@@ -418,7 +418,7 @@ export default function SessionForm() {
                 <button
                   type="button"
                   onClick={() => navigate('/admin/sesiones')}
-                  className="hover:text-[#1B4332] dark:hover:text-emerald-400 transition-colors font-medium"
+                  className="hover:text-[#0F5B3C] dark:hover:text-emerald-400 transition-colors font-medium"
                 >
                   Sesiones
                 </button>
@@ -490,8 +490,8 @@ export default function SessionForm() {
                               className={`px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider
                                 transition-all border-2
                                 ${isActive
-                                  ? 'bg-[#1B4332] text-white border-[#1B4332] shadow-lg shadow-emerald-900/20'
-                                  : 'bg-white dark:bg-[#0F2018] text-gray-500 dark:text-gray-400 border-gray-100 dark:border-emerald-900/30 hover:border-[#1B4332] dark:hover:border-emerald-700 hover:text-[#1B4332]'}`}
+                                  ? 'bg-[#0F5B3C] text-white border-[#0F5B3C] shadow-lg shadow-emerald-900/20'
+                                  : 'bg-white dark:bg-[#0F2018] text-gray-500 dark:text-gray-400 border-gray-100 dark:border-emerald-900/30 hover:border-[#0F5B3C] dark:hover:border-emerald-700 hover:text-[#0F5B3C]'}`}
                             >
                               {label}
                             </button>
@@ -573,7 +573,7 @@ export default function SessionForm() {
                         <div className="md:col-span-2 space-y-2 anim-fade-up">
                           {loadingHorarios ? (
                             <div className="bg-gray-50 dark:bg-[#0F2018] p-4 rounded-2xl border border-gray-100 dark:border-emerald-900/20 flex items-center gap-3">
-                              <Loader2 className="w-4 h-4 animate-spin text-[#1B4332]" />
+                              <Loader2 className="w-4 h-4 animate-spin text-[#0F5B3C]" />
                               <p className="text-gray-400 text-xs font-bold uppercase tracking-widest">Verificando disponibilidad...</p>
                             </div>
                           ) : colision ? (
@@ -845,7 +845,7 @@ export default function SessionForm() {
                             className="block w-full text-sm text-gray-500
                               file:mr-3 file:py-2 file:px-4 file:rounded-lg
                               file:border-0 file:text-sm file:font-semibold
-                              file:bg-[#1B4332] file:text-white
+                              file:bg-[#0F5B3C] file:text-white
                               hover:file:bg-[#2D6A4F] file:cursor-pointer"
                           />
                           <p className="text-xs text-gray-400 mt-1">
@@ -932,7 +932,7 @@ export default function SessionForm() {
                   type="button"
                   onClick={(e) => handleSubmit(e, false)}
                   disabled={loading || success}
-                  style={{ background: 'linear-gradient(135deg, #1B4332, #2D6A4F)' }}
+                  style={{ background: 'linear-gradient(135deg, #0F5B3C, #2D6A4F)' }}
                   className="px-8 py-3 text-sm font-semibold text-white
                              rounded-xl hover:-translate-y-0.5 hover:shadow-md transition-all shadow-lg
                              disabled:opacity-50 disabled:hover:translate-y-0 min-w-[180px] flex items-center justify-center gap-2"
@@ -958,7 +958,7 @@ export default function SessionForm() {
                 </p>
 
                 <div className="border border-gray-200 dark:border-emerald-900/40 rounded-xl overflow-hidden">
-                  <div className="border-l-4 border-[#1B4332] p-4 space-y-3">
+                  <div className="border-l-4 border-[#0F5B3C] p-4 space-y-3">
 
                     {/* Badge + hora */}
                     <div className="flex items-center justify-between flex-wrap gap-2">
@@ -967,7 +967,7 @@ export default function SessionForm() {
                         {TIPOS.find(t => t.value === formData.tipo)?.label || 'Tipo'}
                       </span>
                       {formData.hora_inicio && (
-                        <span className="text-[#1B4332] font-bold text-xs">
+                        <span className="text-[#0F5B3C] font-bold text-xs">
                           {formData.hora_inicio}
                           {formData.hora_fin && ` — ${formData.hora_fin}`} hrs
                         </span>
@@ -988,7 +988,7 @@ export default function SessionForm() {
                           <img src={fotoPreview} alt="ponente"
                                className="w-8 h-8 rounded-full object-cover shrink-0" />
                         ) : (
-                          <div className="w-8 h-8 rounded-full bg-[#1B4332]
+                          <div className="w-8 h-8 rounded-full bg-[#0F5B3C]
                                           flex items-center justify-center shrink-0">
                             <span className="text-white text-xs font-bold">
                               {formData.ponente_nombre.charAt(0).toUpperCase()}

@@ -389,23 +389,23 @@ export default function SessionDetail() {
   }
 
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#0A1A11]">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#0B1310]">
       <div className="flex flex-col items-center gap-4">
-        <div className="w-12 h-12 rounded-full border-4 border-[#1B4332]/20 dark:border-emerald-900/50 border-t-[#1B4332] dark:border-t-emerald-500 animate-spin" />
+        <div className="w-12 h-12 rounded-full border-4 border-[#0F5B3C]/20 dark:border-emerald-900/50 border-t-[#0F5B3C] dark:border-t-emerald-500 animate-spin" />
         <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">Cargando sesión...</p>
       </div>
     </div>
   )
 
   if (error || !sesion) return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#0A1A11] px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#0B1310] px-4">
       <div className="text-center py-16 max-w-sm">
         <div className="w-20 h-20 bg-gray-100 dark:bg-[#122A1C] rounded-full flex items-center justify-center mx-auto mb-4">
           <CalendarDays className="w-10 h-10 text-gray-300 dark:text-emerald-900" />
         </div>
         <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">Sesión no encontrada</h2>
         <p className="text-gray-500 dark:text-gray-400 mb-6">Esta sesión no existe o fue eliminada.</p>
-        <Link to="/agenda" className="px-6 py-2.5 bg-[#1B4332] text-white font-semibold rounded-xl hover:bg-emerald-800 transition-colors">
+        <Link to="/agenda" className="px-6 py-2.5 bg-[#0F5B3C] text-white font-semibold rounded-xl hover:bg-emerald-800 transition-colors">
           Ver agenda
         </Link>
       </div>
@@ -422,7 +422,7 @@ export default function SessionDetail() {
   const lleno = cupo > 0 && totalInscritos >= cupo
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0A1A11] pb-12">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0B1310] pb-12">
 
       {/* Reactions Bar Flotante (Solo si la sesion no ha finalizado) */}
       {!finalizada && (
@@ -437,7 +437,7 @@ export default function SessionDetail() {
       {/* Hero banner — thematic background */}
       <div className="relative pt-32 lg:pt-36 pb-20 overflow-hidden">
         {/* Background Layer */}
-        <div className="absolute inset-0 bg-[#0A1A11]" />
+        <div className="absolute inset-0 bg-[#0B1310]" />
         {(sesion.dias_jornada?.imagen_url || IMAGENES_POR_DIA[sesion.dias_jornada?.nombre_dia]) ? (
           <img 
             src={sesion.dias_jornada?.imagen_url || IMAGENES_POR_DIA[sesion.dias_jornada?.nombre_dia]} 
@@ -445,11 +445,11 @@ export default function SessionDetail() {
             className="absolute inset-0 w-full h-full object-cover opacity-50 transition-opacity duration-700"
           />
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0D2B1D] to-[#1B4332]" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0B1310] to-[#0F5B3C]" />
         )}
         
         {/* Glassmorphism/Readability Overlay: Más claro en el centro para ver la foto */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0A1A11]/60 via-[#0A1A11]/30 to-[#0A1A11]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0B1310]/60 via-[#0B1310]/30 to-[#0B1310]" />
         <div className="absolute inset-0 bg-black/20" /> {/* Filtro extra de contraste */}
 
         <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -516,7 +516,7 @@ export default function SessionDetail() {
                     <img src={sesion.ponente_foto_url} alt={sesion.ponente_nombre}
                          className="w-16 h-16 rounded-full object-cover border-2 border-emerald-100 dark:border-emerald-900/50 shrink-0" />
                   ) : (
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#1B4332] to-emerald-600 flex items-center justify-center shrink-0">
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#0F5B3C] to-emerald-600 flex items-center justify-center shrink-0">
                       <span className="text-white text-2xl font-bold">
                         {sesion.ponente_nombre.charAt(0).toUpperCase()}
                       </span>
@@ -525,7 +525,7 @@ export default function SessionDetail() {
                   <div>
                     <p className="font-bold text-gray-900 dark:text-gray-100 text-lg leading-tight">
                       {sesion.ponente_grado && (
-                        <span className="text-[#1B4332] dark:text-emerald-400">{sesion.ponente_grado} </span>
+                        <span className="text-[#0F5B3C] dark:text-emerald-400">{sesion.ponente_grado} </span>
                       )}
                       {sesion.ponente_nombre}
                     </p>
@@ -548,7 +548,7 @@ export default function SessionDetail() {
             {/* Descripción */}
             {sesion.descripcion && (
               <div className="bg-white dark:bg-[#122A1C] rounded-2xl shadow-sm border border-gray-100 dark:border-emerald-900/40 p-6">
-                <h2 className="font-bold text-gray-900 dark:text-gray-100 text-lg border-l-4 border-[#1B4332] dark:border-emerald-600 pl-3 mb-4">
+                <h2 className="font-bold text-gray-900 dark:text-gray-100 text-lg border-l-4 border-[#0F5B3C] dark:border-emerald-600 pl-3 mb-4">
                   Acerca de esta sesión
                 </h2>
                 <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-justify">{sesion.descripcion}</p>
@@ -575,13 +575,13 @@ export default function SessionDetail() {
 
             {/* Detalles */}
             <div className="bg-white dark:bg-[#122A1C] rounded-2xl shadow-sm border border-gray-100 dark:border-emerald-900/40 p-6">
-              <h2 className="font-bold text-gray-900 dark:text-gray-100 text-base mb-4 border-l-4 border-[#1B4332] dark:border-emerald-600 pl-3">
+              <h2 className="font-bold text-gray-900 dark:text-gray-100 text-base mb-4 border-l-4 border-[#0F5B3C] dark:border-emerald-600 pl-3">
                 Detalles de la sesión
               </h2>
               <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {fechaFormateada && (
                   <div className="flex items-start gap-3">
-                    <CalendarDays size={16} className="text-[#1B4332] dark:text-emerald-500 shrink-0 mt-0.5" />
+                    <CalendarDays size={16} className="text-[#0F5B3C] dark:text-emerald-500 shrink-0 mt-0.5" />
                     <div>
                       <dt className="text-xs text-gray-400 dark:text-gray-500 uppercase font-bold tracking-wide mb-0.5">Día</dt>
                       <dd className="text-sm font-semibold text-gray-800 dark:text-gray-200 capitalize">{fechaFormateada}</dd>
@@ -590,7 +590,7 @@ export default function SessionDetail() {
                 )}
                 {sesion.hora_inicio && (
                   <div className="flex items-start gap-3">
-                    <Clock size={16} className="text-[#1B4332] dark:text-emerald-500 shrink-0 mt-0.5" />
+                    <Clock size={16} className="text-[#0F5B3C] dark:text-emerald-500 shrink-0 mt-0.5" />
                     <div>
                       <dt className="text-xs text-gray-400 dark:text-gray-500 uppercase font-bold tracking-wide mb-0.5">Horario</dt>
                       <dd className="text-sm font-semibold text-gray-800 dark:text-gray-200">
@@ -601,7 +601,7 @@ export default function SessionDetail() {
                 )}
                 {sesion.escenarios?.nombre && (
                   <div className="flex items-start gap-3">
-                    <MapPin size={16} className="text-[#1B4332] dark:text-emerald-500 shrink-0 mt-0.5" />
+                    <MapPin size={16} className="text-[#0F5B3C] dark:text-emerald-500 shrink-0 mt-0.5" />
                     <div>
                       <dt className="text-xs text-gray-400 dark:text-gray-500 uppercase font-bold tracking-wide mb-0.5">Escenario</dt>
                       <dd className="text-sm font-semibold text-gray-800 dark:text-gray-200">{sesion.escenarios.nombre}</dd>
@@ -610,7 +610,7 @@ export default function SessionDetail() {
                 )}
                 {(sesion.programa_academico || []).length > 0 && (
                   <div className="flex items-start gap-3">
-                    <Users size={16} className="text-[#1B4332] dark:text-emerald-500 shrink-0 mt-0.5" />
+                    <Users size={16} className="text-[#0F5B3C] dark:text-emerald-500 shrink-0 mt-0.5" />
                     <div>
                       <dt className="text-xs text-gray-400 dark:text-gray-500 uppercase font-bold tracking-wide mb-0.5">Dirigido a</dt>
                       <dd className="text-sm font-semibold text-gray-800 dark:text-gray-200">
@@ -625,7 +625,7 @@ export default function SessionDetail() {
             {/* Q&A Section */}
             {yaInscrito && (
               <div className="bg-white dark:bg-[#122A1C] rounded-2xl shadow-sm border border-gray-100 dark:border-emerald-900/40 p-6 mt-8">
-                <h2 className="font-bold text-gray-900 dark:text-gray-100 text-lg border-l-4 border-[#1B4332] dark:border-emerald-600 pl-3 mb-4 flex items-center gap-2">
+                <h2 className="font-bold text-gray-900 dark:text-gray-100 text-lg border-l-4 border-[#0F5B3C] dark:border-emerald-600 pl-3 mb-4 flex items-center gap-2">
                   <MessageSquare size={20} /> Preguntas y Respuestas
                 </h2>
                 <div className="mb-6 flex gap-3">
@@ -634,12 +634,12 @@ export default function SessionDetail() {
                     value={nuevaPregunta}
                     onChange={(e) => setNuevaPregunta(e.target.value)}
                     placeholder="Pregunta algo al ponente..."
-                    className="flex-1 px-4 py-3 bg-gray-50 dark:bg-[#0F2018] rounded-xl outline-none focus:border-[#1B4332] text-sm text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-emerald-900/50"
+                    className="flex-1 px-4 py-3 bg-gray-50 dark:bg-[#0F2018] rounded-xl outline-none focus:border-[#0F5B3C] text-sm text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-emerald-900/50"
                   />
                   <button
                     onClick={handleEnviarPregunta}
                     disabled={enviandoPregunta || !nuevaPregunta.trim()}
-                    className="px-4 py-3 bg-[#1B4332] text-white rounded-xl hover:bg-emerald-800 transition-colors disabled:opacity-50 shrink-0 flex items-center gap-2"
+                    className="px-4 py-3 bg-[#0F5B3C] text-white rounded-xl hover:bg-emerald-800 transition-colors disabled:opacity-50 shrink-0 flex items-center gap-2"
                   >
                     <Send size={16} /> <span className="hidden sm:inline">Enviar</span>
                   </button>
@@ -694,7 +694,7 @@ export default function SessionDetail() {
                   <div className="bg-gray-100 dark:bg-emerald-950/50 rounded-full h-2.5 overflow-hidden">
                     <div
                       className={`rounded-full h-2.5 transition-all ${
-                        lleno ? 'bg-red-500' : pct >= 80 ? 'bg-amber-500' : 'bg-[#1B4332]'
+                        lleno ? 'bg-red-500' : pct >= 80 ? 'bg-amber-500' : 'bg-[#0F5B3C]'
                       }`}
                       style={{ width: `${pct}%` }}
                     />
@@ -762,7 +762,7 @@ export default function SessionDetail() {
                   onClick={handleInscribirse}
                   disabled={inscribiendo}
                   className={`w-full py-3.5 text-white font-bold rounded-xl transition-all mb-3 disabled:opacity-50 text-sm ${
-                    lleno ? 'bg-amber-600 hover:bg-amber-700' : 'bg-[#1B4332] hover:bg-emerald-800'
+                    lleno ? 'bg-amber-600 hover:bg-amber-700' : 'bg-[#0F5B3C] hover:bg-emerald-800'
                   }`}
                 >
                   {inscribiendo
@@ -801,7 +801,7 @@ export default function SessionDetail() {
                       return `https://calendar.google.com/calendar/render?${p}`
                     })()}
                     target="_blank" rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 w-full py-2.5 border-2 border-[#1B4332] dark:border-emerald-700 text-[#1B4332] dark:text-emerald-400 font-semibold rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all text-sm"
+                    className="flex items-center justify-center gap-2 w-full py-2.5 border-2 border-[#0F5B3C] dark:border-emerald-700 text-[#0F5B3C] dark:text-emerald-400 font-semibold rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all text-sm"
                   >
                     <CalendarDays size={14} /> Añadir a Google Calendar
                   </a>
@@ -914,7 +914,7 @@ export default function SessionDetail() {
                 </p>
                 <button 
                   onClick={() => setShowRatingModal(true)}
-                  className="w-full py-4 bg-[#1B4332] text-white font-black uppercase text-xs tracking-widest rounded-2xl hover:bg-emerald-800 transition-all shadow-lg shadow-emerald-900/20"
+                  className="w-full py-4 bg-[#0F5B3C] text-white font-black uppercase text-xs tracking-widest rounded-2xl hover:bg-emerald-800 transition-all shadow-lg shadow-emerald-900/20"
                 >
                   {yaValoro ? 'Ver mi calificación' : 'Calificar sesión'}
                 </button>
@@ -945,7 +945,7 @@ export default function SessionDetail() {
                     <Star key={n} size={20} className={n <= valoracion.estrellas ? 'text-amber-400 fill-amber-400' : 'text-gray-200 dark:text-emerald-900/50'} />
                   ))}
                 </div>
-                <p className="text-[#1B4332] dark:text-emerald-400 font-bold">¡Valoración enviada!</p>
+                <p className="text-[#0F5B3C] dark:text-emerald-400 font-bold">¡Valoración enviada!</p>
                 <p className="text-emerald-600 dark:text-emerald-500 text-sm italic mt-2">
                   {valoracion.comentario ? `"${valoracion.comentario}"` : 'Sin comentarios adicionales.'}
                 </p>
@@ -976,7 +976,7 @@ export default function SessionDetail() {
                     value={valoracion.comentario}
                     onChange={e => setValoracion(p => ({ ...p, comentario: e.target.value }))}
                     placeholder="Escribe un comentario opcional sobre la sesión, el ponente o el contenido..."
-                    className="w-full p-5 bg-gray-50 dark:bg-[#0F2018] border border-gray-100 dark:border-emerald-900/50 rounded-[2rem] outline-none focus:border-[#1B4332] text-sm font-medium dark:text-gray-200 resize-none h-32"
+                    className="w-full p-5 bg-gray-50 dark:bg-[#0F2018] border border-gray-100 dark:border-emerald-900/50 rounded-[2rem] outline-none focus:border-[#0F5B3C] text-sm font-medium dark:text-gray-200 resize-none h-32"
                   />
                 </div>
 
@@ -985,7 +985,7 @@ export default function SessionDetail() {
                     await handleValorar();
                   }}
                   disabled={enviandoVal || valoracion.estrellas === 0}
-                  className="px-10 py-4 w-full bg-[#1B4332] text-white font-black uppercase text-xs tracking-widest rounded-2xl hover:bg-emerald-800 transition-all shadow-lg shadow-emerald-900/20 disabled:opacity-50"
+                  className="px-10 py-4 w-full bg-[#0F5B3C] text-white font-black uppercase text-xs tracking-widest rounded-2xl hover:bg-emerald-800 transition-all shadow-lg shadow-emerald-900/20 disabled:opacity-50"
                 >
                   {enviandoVal ? 'Enviando...' : 'Enviar Calificación'}
                 </button>
@@ -997,7 +997,7 @@ export default function SessionDetail() {
 
       {toast && (
         <div className={`fixed bottom-6 left-4 right-4 sm:left-auto sm:right-6 z-50 px-6 py-3.5 rounded-2xl shadow-xl text-sm font-semibold flex items-center gap-2 anim-fade-up ${
-          toast.type === 'error' ? 'bg-red-600 text-white' : 'bg-[#1B4332] text-white'
+          toast.type === 'error' ? 'bg-red-600 text-white' : 'bg-[#0F5B3C] text-white'
         }`}>
           {toast.type === 'error' ? '⚠️' : '✓'} {toast.msg}
         </div>

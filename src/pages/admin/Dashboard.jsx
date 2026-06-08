@@ -18,7 +18,7 @@ function StatCard({ icon: Icon, value, label, sub, subLink, dark = false, urgent
       className={`rounded-2xl p-6 relative overflow-hidden transition-all duration-300
                   hover:shadow-lg hover:-translate-y-0.5 cursor-pointer
                   ${dark
-                    ? 'bg-[#1B4332] text-white'
+                    ? 'bg-[#0F5B3C] text-white'
                     : 'bg-white dark:bg-[#122A1C] text-gray-900 dark:text-gray-100 shadow-sm border border-gray-100 dark:border-emerald-900/40'}`}
     >
       {urgent && (
@@ -37,7 +37,7 @@ function StatCard({ icon: Icon, value, label, sub, subLink, dark = false, urgent
       )}
 
       <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-4
-                      ${dark ? 'bg-white/15 text-white' : 'bg-[#E6F4F0] dark:bg-emerald-900/30 text-[#1B4332] dark:text-emerald-400'}`}>
+                      ${dark ? 'bg-white/15 text-white' : 'bg-[#E6F4F0] dark:bg-emerald-900/30 text-[#0F5B3C] dark:text-emerald-400'}`}>
         <Icon size={20} />
       </div>
 
@@ -60,7 +60,7 @@ function StatCard({ icon: Icon, value, label, sub, subLink, dark = false, urgent
         </p>
         {subLink && (
           <button className={`text-xs font-bold flex items-center gap-1 shrink-0 ml-2
-                            ${dark ? 'text-white/80 hover:text-white' : 'text-[#1B4332] dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300'}`}>
+                            ${dark ? 'text-white/80 hover:text-white' : 'text-[#0F5B3C] dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300'}`}>
             {subLink} <ChevronRight size={12} />
           </button>
         )}
@@ -101,11 +101,11 @@ function WeeklyChart({ sesiones = [] }) {
     <div className="bg-white dark:bg-[#122A1C] rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-emerald-900/40 flex-1">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-1 h-5 bg-[#1B4332] rounded-full" />
+          <div className="w-1 h-5 bg-[#0F5B3C] rounded-full" />
           <h3 className="font-bold text-gray-900 dark:text-gray-100 text-sm">Distribución de sesiones</h3>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-2.5 h-2.5 rounded-sm bg-[#1B4332]" />
+          <div className="w-2.5 h-2.5 rounded-sm bg-[#0F5B3C]" />
           <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
             Por día
           </span>
@@ -152,7 +152,7 @@ function WeeklyChart({ sesiones = [] }) {
                                 group-hover:opacity-90 shadow-md
                                 ${d.isToday
                                   ? 'bg-gradient-to-t from-[#D97706] to-[#F59E0B]'
-                                  : 'bg-gradient-to-t from-[#1B4332] to-[#34D399]'}`}
+                                  : 'bg-gradient-to-t from-[#0F5B3C] to-[#34D399]'}`}
                     style={{
                       height: `${Math.max((d.count / maxCount) * 140, 4)}px`,
                     }}
@@ -184,7 +184,7 @@ function WeeklyChart({ sesiones = [] }) {
       {/* Leyenda */}
       <div className="flex items-center gap-4 mt-2 pt-3 border-t border-gray-50 dark:border-emerald-900/30">
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-sm bg-[#1B4332]" />
+          <div className="w-3 h-3 rounded-sm bg-[#0F5B3C]" />
           <span className="text-[10px] text-gray-400 dark:text-gray-500 font-medium">Sesiones</span>
         </div>
         <div className="flex items-center gap-1.5">
@@ -212,7 +212,7 @@ function ConfirmModal({ message, onConfirm, onCancel, loading }) {
         <div className="space-y-3">
           <button
             type="button" onClick={onConfirm} disabled={loading}
-            className="w-full py-2.5 bg-[#1B4332] text-white font-semibold rounded-lg hover:bg-emerald-800 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full py-2.5 bg-[#0F5B3C] text-white font-semibold rounded-lg hover:bg-emerald-800 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {loading ? <><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />Enviando...</> : <><Send className="w-4 h-4" />Sí, emitir notificación</>}
           </button>
@@ -256,7 +256,7 @@ function QuickActions({ navigate }) {
           >
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-emerald-900/30 flex items-center justify-center
-                              text-gray-400 group-hover:bg-[#1B4332] group-hover:text-white
+                              text-gray-400 group-hover:bg-[#0F5B3C] group-hover:text-white
                               transition-all duration-300 shadow-inner">
                 <act.icon size={18} />
               </div>
@@ -265,7 +265,7 @@ function QuickActions({ navigate }) {
                 {act.label}
               </span>
             </div>
-            <ChevronRight size={16} className="text-gray-300 dark:text-gray-600 group-hover:text-[#1B4332] dark:group-hover:text-emerald-400 transition-colors" />
+            <ChevronRight size={16} className="text-gray-300 dark:text-gray-600 group-hover:text-[#0F5B3C] dark:group-hover:text-emerald-400 transition-colors" />
           </button>
         ))}
       </div>
@@ -321,7 +321,7 @@ function CalendarWidget() {
             key={d}
             className={`text-[11px] font-bold text-center py-1.5 mx-0.5 rounded-lg transition-all
                       ${d === todayDate
-                        ? 'bg-[#1B4332] text-white shadow-sm'
+                        ? 'bg-[#0F5B3C] text-white shadow-sm'
                         : d < todayDate
                         ? 'text-gray-300 dark:text-gray-700'
                         : 'text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-emerald-900/20'}`}
@@ -333,7 +333,7 @@ function CalendarWidget() {
 
       {/* Hoy */}
       <div className="mt-4 pt-3 border-t border-gray-50 dark:border-emerald-900/30 flex items-center gap-2">
-        <div className="w-2 h-2 rounded-full bg-[#1B4332]" />
+        <div className="w-2 h-2 rounded-full bg-[#0F5B3C]" />
         <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400">
           Hoy: {today.toLocaleDateString('es-MX', {
             weekday: 'long', day: 'numeric', month: 'long'
@@ -364,7 +364,7 @@ function PopularSessions({ ranking = [] }) {
             <div key={s.id} className="flex items-center gap-4 group">
               <span className="text-xs font-black text-gray-300 dark:text-emerald-900/50 w-4">#{i+1}</span>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-bold text-gray-800 dark:text-gray-200 truncate group-hover:text-[#1B4332] dark:group-hover:text-emerald-400 transition-colors">
+                <p className="text-xs font-bold text-gray-800 dark:text-gray-200 truncate group-hover:text-[#0F5B3C] dark:group-hover:text-emerald-400 transition-colors">
                   {s.nombre}
                 </p>
                 <div className="w-full bg-gray-100 dark:bg-emerald-900/20 h-2.5 rounded-md mt-2 overflow-hidden shadow-inner">
@@ -536,7 +536,7 @@ export default function Dashboard() {
   })
 
   return (
-    <div className="min-h-screen bg-[#F2F5F3] dark:bg-[#0A1A11]">
+    <div className="min-h-screen bg-[#F2F5F3] dark:bg-[#0B1310]">
 
       {/* Topbar */}
       <header className="bg-white/90 dark:bg-[#122A1C]/90 backdrop-blur-md border-b border-gray-100 dark:border-emerald-900/40
@@ -569,7 +569,7 @@ export default function Dashboard() {
             onClick={() => setShowNotifications(!showNotifications)}
             className={`w-10 h-10 rounded-xl bg-white dark:bg-[#0F2018] border border-gray-100 dark:border-emerald-900/40
                              flex items-center justify-center transition-colors shadow-sm relative
-                             ${showNotifications ? 'text-[#1B4332] dark:text-emerald-400' : 'text-gray-400 dark:text-gray-500'}`}
+                             ${showNotifications ? 'text-[#0F5B3C] dark:text-emerald-400' : 'text-gray-400 dark:text-gray-500'}`}
           >
             <Bell size={18} />
             {(totalPropuestas > 0 || sesionesLlenas.length > 0) && (
@@ -622,7 +622,7 @@ export default function Dashboard() {
                           className="w-full text-left p-4 hover:bg-gray-50 dark:hover:bg-emerald-900/20 transition-colors flex gap-3"
                         >
                           <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-900/40 flex items-center justify-center shrink-0">
-                            <FileText size={14} className="text-[#1B4332] dark:text-emerald-400" />
+                            <FileText size={14} className="text-[#0F5B3C] dark:text-emerald-400" />
                           </div>
                           <div className="min-w-0">
                             <p className="text-xs font-bold text-gray-800 dark:text-gray-200 leading-tight">Nueva propuesta recibida</p>
@@ -638,7 +638,7 @@ export default function Dashboard() {
                 </div>
                 <button 
                   onClick={() => { navigate('/admin/propuestas'); setShowNotifications(false) }}
-                  className="w-full py-3 bg-gray-50 dark:bg-[#0F2018] text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest hover:text-[#1B4332] dark:hover:text-emerald-400 transition-colors"
+                  className="w-full py-3 bg-gray-50 dark:bg-[#0F2018] text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest hover:text-[#0F5B3C] dark:hover:text-emerald-400 transition-colors"
                 >
                   Ver toda la actividad
                 </button>
@@ -648,7 +648,7 @@ export default function Dashboard() {
 
           <button
             onClick={() => navigate('/admin/reportes')}
-            className="flex items-center gap-2.5 px-5 py-2.5 bg-[#1B4332] text-white
+            className="flex items-center gap-2.5 px-5 py-2.5 bg-[#0F5B3C] text-white
                        rounded-xl text-sm font-bold shadow-sm hover:bg-[#143024]
                        transition-all hover:-translate-y-0.5"
           >
@@ -742,7 +742,7 @@ export default function Dashboard() {
               <div className="bg-white dark:bg-[#122A1C] rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-emerald-900/40 flex-1">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
-                    <div className="w-1 h-5 bg-[#1B4332] rounded-full" />
+                    <div className="w-1 h-5 bg-[#0F5B3C] rounded-full" />
                     <h3 className="font-bold text-gray-900 dark:text-gray-100 text-sm">Sesiones de hoy</h3>
                     {sesionesHoy.length > 0 && (
                       <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800
@@ -786,16 +786,16 @@ export default function Dashboard() {
                                    hover:bg-emerald-50/40 dark:hover:bg-emerald-900/20 transition-all group cursor-pointer"
                       >
                         <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-xl bg-[#1B4332]/8 dark:bg-emerald-900/30 border border-[#1B4332]/10 dark:border-emerald-700/30
+                          <div className="w-10 h-10 rounded-xl bg-[#0F5B3C]/8 dark:bg-emerald-900/30 border border-[#0F5B3C]/10 dark:border-emerald-700/30
                                           flex flex-col items-center justify-center shrink-0">
-                            <span className="text-[10px] font-black text-[#1B4332] dark:text-emerald-400 leading-none">
+                            <span className="text-[10px] font-black text-[#0F5B3C] dark:text-emerald-400 leading-none">
                               {s.hora_inicio?.slice(0,5)}
                             </span>
-                            <span className="text-[8px] text-[#1B4332]/50 dark:text-emerald-600 font-medium">hrs</span>
+                            <span className="text-[8px] text-[#0F5B3C]/50 dark:text-emerald-600 font-medium">hrs</span>
                           </div>
                           <div>
                             <p className="text-sm font-bold text-gray-900 dark:text-gray-100 leading-tight
-                                          group-hover:text-[#1B4332] dark:group-hover:text-emerald-400 transition-colors">
+                                          group-hover:text-[#0F5B3C] dark:group-hover:text-emerald-400 transition-colors">
                               {s.nombre}
                             </p>
                             <p className="text-[10px] font-semibold text-gray-400 dark:text-gray-500
@@ -805,7 +805,7 @@ export default function Dashboard() {
                           </div>
                         </div>
                         <ChevronRight size={16}
-                          className="text-gray-200 dark:text-gray-700 group-hover:text-[#1B4332] dark:group-hover:text-emerald-400 transition-colors shrink-0" />
+                          className="text-gray-200 dark:text-gray-700 group-hover:text-[#0F5B3C] dark:group-hover:text-emerald-400 transition-colors shrink-0" />
                       </div>
                     ))}
                   </div>

@@ -74,13 +74,13 @@ export default function AgendaSimple() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F2F5F3] dark:bg-[#0A1A11]">
+    <div className="min-h-screen bg-[#F2F5F3] dark:bg-[#0B1310]">
       {/* Topbar */}
       <div className="bg-white dark:bg-[#122A1C] border-b border-gray-100 dark:border-emerald-900/40 px-4 sm:px-8 py-4 flex items-center justify-between sticky top-14 lg:top-0 z-10">
         <div className="flex items-center gap-4">
           <button
             onClick={() => navigate('/admin/dashboard')}
-            className="p-2 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-xl text-gray-400 dark:text-gray-500 hover:text-[#1B4332] dark:hover:text-emerald-400 transition-all"
+            className="p-2 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-xl text-gray-400 dark:text-gray-500 hover:text-[#0F5B3C] dark:hover:text-emerald-400 transition-all"
           >
             <ChevronLeft size={20} />
           </button>
@@ -90,7 +90,7 @@ export default function AgendaSimple() {
         <button
           onClick={handleDownloadPDF}
           disabled={generating || loading || sesiones.length === 0}
-          className="flex items-center gap-2 px-6 py-2.5 bg-[#1B4332] text-white text-[11px] font-black uppercase tracking-widest rounded-xl hover:bg-[#002F1D] transition-all disabled:opacity-50 shadow-lg shadow-emerald-900/10"
+          className="flex items-center gap-2 px-6 py-2.5 bg-[#0F5B3C] text-white text-[11px] font-black uppercase tracking-widest rounded-xl hover:bg-[#002F1D] transition-all disabled:opacity-50 shadow-lg shadow-emerald-900/10"
         >
           {generating ? (
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -112,7 +112,7 @@ export default function AgendaSimple() {
                 placeholder="Buscar por actividad o ponente..."
                 value={busqueda}
                 onChange={e => setBusqueda(e.target.value)}
-                className="w-full pl-11 pr-4 py-3 rounded-2xl border border-gray-100 dark:border-emerald-900/50 bg-gray-50/50 dark:bg-[#0F2018] focus:bg-white dark:focus:bg-[#0F2018] focus:border-[#1B4332] outline-none transition-all text-sm font-bold dark:text-gray-300"
+                className="w-full pl-11 pr-4 py-3 rounded-2xl border border-gray-100 dark:border-emerald-900/50 bg-gray-50/50 dark:bg-[#0F2018] focus:bg-white dark:focus:bg-[#0F2018] focus:border-[#0F5B3C] outline-none transition-all text-sm font-bold dark:text-gray-300"
               />
             </div>
             
@@ -121,8 +121,8 @@ export default function AgendaSimple() {
                 onClick={() => setDiaFiltro('todos')}
                 className={`px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap
                   ${diaFiltro === 'todos' 
-                    ? 'bg-[#1B4332] text-white' 
-                    : 'bg-gray-50 dark:bg-[#0F2018] text-gray-400 dark:text-gray-500 hover:text-[#1B4332]'}`}
+                    ? 'bg-[#0F5B3C] text-white' 
+                    : 'bg-gray-50 dark:bg-[#0F2018] text-gray-400 dark:text-gray-500 hover:text-[#0F5B3C]'}`}
               >
                 Todos
               </button>
@@ -132,8 +132,8 @@ export default function AgendaSimple() {
                   onClick={() => setDiaFiltro(dia.id)}
                   className={`px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap
                     ${diaFiltro === dia.id 
-                      ? 'bg-[#1B4332] text-white' 
-                      : 'bg-gray-50 dark:bg-[#0F2018] text-gray-400 dark:text-gray-500 hover:text-[#1B4332]'}`}
+                      ? 'bg-[#0F5B3C] text-white' 
+                      : 'bg-gray-50 dark:bg-[#0F2018] text-gray-400 dark:text-gray-500 hover:text-[#0F5B3C]'}`}
                 >
                   {formatShortDay(dia)}
                 </button>
@@ -168,7 +168,7 @@ export default function AgendaSimple() {
                   <tr key={ses.id} className="group hover:bg-emerald-50/30 dark:hover:bg-emerald-900/10 transition-colors">
                     <td className="px-6 py-5">
                       <div className="flex flex-col">
-                        <span className="text-sm font-black text-[#1B4332] dark:text-emerald-400 leading-none">
+                        <span className="text-sm font-black text-[#0F5B3C] dark:text-emerald-400 leading-none">
                           {ses.hora_inicio?.slice(0, 5)}
                         </span>
                         <span className="text-[9px] font-bold text-gray-300 dark:text-gray-600 mt-1 uppercase">
@@ -177,7 +177,7 @@ export default function AgendaSimple() {
                       </div>
                     </td>
                     <td className="px-6 py-5">
-                      <p className="text-sm font-bold text-gray-800 dark:text-gray-200 group-hover:text-[#1B4332] dark:group-hover:text-emerald-400 transition-colors">
+                      <p className="text-sm font-bold text-gray-800 dark:text-gray-200 group-hover:text-[#0F5B3C] dark:group-hover:text-emerald-400 transition-colors">
                         {ses.nombre}
                       </p>
                       <p className="text-[10px] font-medium text-gray-400 dark:text-gray-500 mt-0.5">

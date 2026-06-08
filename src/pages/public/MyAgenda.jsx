@@ -212,12 +212,12 @@ export default function MyAgenda() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0A1A11]">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0B1310]">
 
       {/* Header */}
       <div className="bg-white dark:bg-[#122A1C] border-b border-gray-100 dark:border-emerald-900/40 px-4 sm:px-8 pt-28 pb-10">
         <div className="max-w-5xl mx-auto">
-          <h1 className="text-3xl font-extrabold text-[#1B4332] dark:text-emerald-400">Mi agenda</h1>
+          <h1 className="text-3xl font-extrabold text-[#0F5B3C] dark:text-emerald-400">Mi agenda</h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">
             {estudiante
               ? `${estudiante.nombre} ${estudiante.apellidos} — Sesiones a las que estás inscrito(a).`
@@ -229,7 +229,7 @@ export default function MyAgenda() {
             {!finalizada && (
               <Link
                 to={`/ticket/${estudiante?.id}`}
-                className="flex-1 sm:flex-none px-6 py-3 bg-[#1B4332] text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-emerald-800 transition-all shadow-lg shadow-emerald-950/20 flex items-center justify-center gap-2 transform hover:-translate-y-0.5 active:scale-95"
+                className="flex-1 sm:flex-none px-6 py-3 bg-[#0F5B3C] text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-emerald-800 transition-all shadow-lg shadow-emerald-950/20 flex items-center justify-center gap-2 transform hover:-translate-y-0.5 active:scale-95"
               >
                 <Ticket size={14} /> Ver Mi Ticket (QR)
               </Link>
@@ -245,7 +245,7 @@ export default function MyAgenda() {
               <button
                 onClick={handleDescargarAgendaPersonal}
                 disabled={generating}
-                className="flex-1 sm:flex-none px-6 py-3 bg-white dark:bg-[#0F2018] text-[#1B4332] dark:text-emerald-400 border-2 border-[#1B4332] dark:border-emerald-900/50 text-[10px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-gray-50 dark:hover:bg-emerald-900/20 transition-all shadow-sm flex items-center justify-center gap-2"
+                className="flex-1 sm:flex-none px-6 py-3 bg-white dark:bg-[#0F2018] text-[#0F5B3C] dark:text-emerald-400 border-2 border-[#0F5B3C] dark:border-emerald-900/50 text-[10px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-gray-50 dark:hover:bg-emerald-900/20 transition-all shadow-sm flex items-center justify-center gap-2"
               >
                 {generating ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
                 Descargar Agenda (PDF)
@@ -271,7 +271,7 @@ export default function MyAgenda() {
                   <h3 className="text-sm font-black text-gray-900 dark:text-gray-100 mb-1">Obtén tu código QR en Telegram</h3>
                   <p className="text-xs font-medium text-gray-600 dark:text-gray-400 leading-tight">
                     Vincula tu cuenta con nuestro bot oficial para tener tu boleto de acceso siempre a la mano y recibir notificaciones de tus sesiones. 
-                    <Link to={`/ticket/${estudiante.id}`} className="ml-1 text-[#1B4332] dark:text-emerald-400 font-bold hover:underline">O ver ticket en la web →</Link>
+                    <Link to={`/ticket/${estudiante.id}`} className="ml-1 text-[#0F5B3C] dark:text-emerald-400 font-bold hover:underline">O ver ticket en la web →</Link>
                   </p>
                 </div>
               </div>
@@ -293,7 +293,7 @@ export default function MyAgenda() {
         {loading ? (
           <div className="flex items-center justify-center py-24">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#1B4332] dark:border-emerald-500 mx-auto mb-3" />
+              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#0F5B3C] dark:border-emerald-500 mx-auto mb-3" />
               <p className="text-gray-400 dark:text-gray-500 text-sm">Cargando tu agenda...</p>
             </div>
           </div>
@@ -305,7 +305,7 @@ export default function MyAgenda() {
             </p>
             <Link
               to="/agenda"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-[#1B4332] text-white
+              className="inline-flex items-center gap-2 px-6 py-3 bg-[#0F5B3C] text-white
                          font-semibold rounded-lg hover:bg-emerald-800 transition-colors"
             >
               Explorar agenda
@@ -316,7 +316,7 @@ export default function MyAgenda() {
             {/* ─── PROGRESO DASHBOARD (PRO) ─── */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
               {/* Tarjeta de Porcentaje */}
-              <div className="lg:col-span-2 bg-[#1B4332] rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-xl shadow-emerald-950/20">
+              <div className="lg:col-span-2 bg-[#0F5B3C] rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-xl shadow-emerald-950/20">
                 <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full -translate-y-20 translate-x-20" />
                 <div className="relative z-10">
                   <div className="flex items-center justify-between mb-8">
@@ -349,7 +349,7 @@ export default function MyAgenda() {
               {/* Tarjeta de Diversidad */}
               <div className="bg-white dark:bg-[#122A1C] rounded-[2.5rem] p-8 border border-gray-100 dark:border-emerald-900/30 shadow-sm flex flex-col justify-center text-center">
                 <div className="w-14 h-14 bg-emerald-50 dark:bg-emerald-950/40 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Users className="text-[#1B4332] dark:text-emerald-400" size={24} />
+                  <Users className="text-[#0F5B3C] dark:text-emerald-400" size={24} />
                 </div>
                 <p className="text-3xl font-black text-gray-900 dark:text-white leading-none mb-1">{statsProgreso?.programas}</p>
                 <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Áreas cubiertas</p>
@@ -426,13 +426,13 @@ export default function MyAgenda() {
                           if (!ses) return null
                           return (
                             <div key={insc.id}
-                                 className="bg-white dark:bg-[#122A1C] rounded-2xl shadow-sm border-l-4 border-[#1B4332] dark:border-emerald-600
+                                 className="bg-white dark:bg-[#122A1C] rounded-2xl shadow-sm border-l-4 border-[#0F5B3C] dark:border-emerald-600
                                             p-5 sm:p-6 hover:shadow-md transition-all">
                             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 sm:gap-6">
 
                               {/* Time desktop */}
                               <div className="hidden sm:flex flex-col items-center justify-start shrink-0 w-16 pt-0.5">
-                                <p className="font-bold text-[#1B4332] dark:text-emerald-400 text-base leading-none">
+                                <p className="font-bold text-[#0F5B3C] dark:text-emerald-400 text-base leading-none">
                                   {ses.hora_inicio?.slice(0, 5)}
                                 </p>
                                 <div className="w-px h-4 bg-gray-200 dark:bg-emerald-900/50 my-1" />
@@ -444,7 +444,7 @@ export default function MyAgenda() {
                               {/* Content */}
                               <div className="flex-1 min-w-0">
                                 {/* Mobile time */}
-                                <div className="sm:hidden flex items-center gap-2 text-sm text-[#1B4332] dark:text-emerald-400 font-bold mb-2">
+                                <div className="sm:hidden flex items-center gap-2 text-sm text-[#0F5B3C] dark:text-emerald-400 font-bold mb-2">
                                   <span>{ses.hora_inicio?.slice(0, 5)}</span>
                                   {ses.hora_fin && <span className="text-gray-400"> — {ses.hora_fin.slice(0, 5)}</span>}
                                 </div>
@@ -461,7 +461,7 @@ export default function MyAgenda() {
                                     </span>
                                   )}
                                 </div>
-                                <h3 className="font-bold text-gray-900 dark:text-gray-100 text-base leading-snug mb-2 group-hover:text-[#1B4332] dark:group-hover:text-emerald-400 transition-colors">
+                                <h3 className="font-bold text-gray-900 dark:text-gray-100 text-base leading-snug mb-2 group-hover:text-[#0F5B3C] dark:group-hover:text-emerald-400 transition-colors">
                                   {ses.nombre}
                                 </h3>
 
@@ -491,7 +491,7 @@ export default function MyAgenda() {
                               <div className="shrink-0 flex flex-col gap-2 sm:min-w-[140px] pt-2 sm:pt-0">
                                 <Link
                                   to={`/agenda/${ses.id}`}
-                                  className="w-full flex items-center justify-center px-4 py-2.5 bg-[#1B4332] text-white text-xs font-bold
+                                  className="w-full flex items-center justify-center px-4 py-2.5 bg-[#0F5B3C] text-white text-xs font-bold
                                              rounded-xl hover:bg-emerald-800 transition-all shadow-sm"
                                 >
                                   Ver detalles

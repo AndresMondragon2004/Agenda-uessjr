@@ -1,295 +1,166 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Trophy, Users, Calendar, ChevronRight, Award, Star, MapPin, Clock, ArrowRight, Loader2, Download, CheckCircle2 } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { 
+  Trophy, Award, 
+  Star, ArrowRight, Loader2, 
+  GraduationCap
+} from 'lucide-react'
+import { inscripcionesService } from '../../../services/inscripciones.service'
 import { sesionesService } from '../../../services/sesiones.service'
-import { supabase } from '../../../services/supabase'
 import { useAuth } from '../../../context/AuthContext'
-import { generateConstanciaPDF } from '../../../utils/pdfGenerator'
 
-/* ─── CSS de animaciones (Unificado con ActiveEventView) ─────────────────── */
-const ANIM_CSS = `
-  @keyframes fadeUp    { from { opacity:0; transform:translateY(24px) } to { opacity:1; transform:translateY(0) } }
-  @keyframes scaleIn   { from { opacity:0; transform:scale(.93)       } to { opacity:1; transform:scale(1)     } }
-  @keyframes floatSlow { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-18px)} }
-  @keyframes floatMed  { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
-  @keyframes shimmer   { from{background-position:200% 0} to{background-position:-200% 0} }
-
-  .anim-fade-up   { animation: fadeUp  .6s ease both }
-  .anim-scale-in  { animation: scaleIn .6s ease both }
-  .anim-delay-100 { animation-delay:.10s }
-  .anim-delay-200 { animation-delay:.20s }
-  .anim-delay-300 { animation-delay:.30s }
-  .anim-delay-400 { animation-delay:.40s }
-  .anim-delay-800 { animation-delay:.80s }
-`
-
-/* ─── Intersection Observer Hook ────────────────────────────────────────── */
-function useInView(threshold = 0.12) {
-  const ref = useRef(null)
-  const [vis, setVis] = useState(false)
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) { setVis(true); obs.disconnect() } },
-      { threshold }
-    )
-    obs.observe(el)
-    return () => obs.disconnect()
-  }, [threshold])
-  return [ref, vis]
+const fadeInUp = {
+  initial: { opacity: 0, y: 30 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] }
 }
 
-export default function PostEventView({ jornada }) {
+const staggerContainer = {
+  animate: {
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+}
+
+export default function PostEventView() {
   const { estudiante, isLoggedIn } = useAuth()
-  const [topSesiones, setTopSesiones] = useState([])
   const [stats, setStats] = useState({ totalParticipantes: 0, totalSesiones: 0 })
   const [loading, setLoading] = useState(true)
-  const [asistencias, setAsistencias] = useState([])
-  const [certLoading, setCertLoading] = useState(false)
-  const [generating, setGenerating] = useState(false)
-
-  const [statsRef,  statsVis]  = useInView()
-  const [certRef,   certVis]   = useInView()
-  const [fameRef,   fameVis]   = useInView()
-  const [cierreRef, cierreVis] = useInView()
+  const [showCert, setShowCert] = useState(false)
 
   useEffect(() => {
-    async function cargarResumen() {
+    async function loadStats() {
       try {
-        if (!jornada) return
-        const ses = await sesionesService.getByJornada(jornada.id)
-        const activas = (ses || []).filter(s => s.estado === 'activa')
-        
-        // Calcular total de inscripciones confirmadas (Bypass RLS usando la data ya cargada por el RPC)
-        const totalConfirmados = activas.reduce((acc, s) => acc + (s.total_inscritos || 0), 0)
-
-        setStats({ 
-          totalParticipantes: totalConfirmados, 
-          totalSesiones: activas.length 
+        const [totalInsc, sesiones] = await Promise.all([
+          inscripcionesService.getTotalInscripciones(),
+          sesionesService.getAll()
+        ])
+        setStats({
+          totalParticipantes: totalInsc?.data || 0,
+          totalSesiones: sesiones?.filter(s => s.estado === 'finalizada').length || sesiones?.length || 0
         })
-
-        // Top 3 sesiones
-        const sorted = [...activas].sort((a, b) => (b.total_inscritos || 0) - (a.total_inscritos || 0))
-        setTopSesiones(sorted.slice(0, 3))
-
-        // Cargar asistencias del estudiante si está logueado
-        if (isLoggedIn && estudiante?.id) {
-          setCertLoading(true)
-          const { data: asist } = await supabase
-            .from('asistencias')
-            .select('id')
-            .eq('estudiante_id', estudiante.id)
-          setAsistencias(asist || [])
-          setCertLoading(false)
+        if (isLoggedIn && estudiante) {
+          const misInsc = await inscripcionesService.getByEstudiante(estudiante.id)
+          setShowCert(misInsc && misInsc.length > 0)
         }
       } catch (err) {
-        console.error('Error al cargar resumen post-evento:', err)
+        console.error(err)
       } finally {
         setLoading(false)
       }
     }
-    cargarResumen()
-  }, [jornada, isLoggedIn, estudiante])
+    loadStats()
+  }, [estudiante, isLoggedIn])
 
-  const handleDescargarConstancia = async () => {
-    if (!jornada || !estudiante) return
-    try {
-      setGenerating(true)
-      await generateConstanciaPDF(estudiante, jornada)
-    } catch (err) {
-      console.error(err)
-      alert('Error al generar la constancia')
-    } finally {
-      setGenerating(false)
-    }
-  }
+  if (loading) return (
+    <div className="min-h-screen bg-[#FCFCFC] dark:bg-surface-dark-bg flex items-center justify-center">
+      <Loader2 className="w-12 h-12 animate-spin text-ues-green" />
+    </div>
+  )
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0A1A11]">
-      <style>{ANIM_CSS}</style>
+    <div className="bg-[#FCFCFC] dark:bg-surface-dark-bg selection:bg-ues-gold/30">
       
-      {/* 1. Hero: Agradecimiento */}
-      <section className="relative pt-32 pb-20 bg-[#0D2B1D] overflow-hidden">
-        <div className="absolute inset-0 opacity-20">
-          <img src="/images/campus/aula-magna-1.jpg" className="w-full h-full object-cover" alt="" />
-        </div>
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0D2B1D]/90 to-[#0D2B1D]" />
+      {/* Editorial Hero: Closure - Centered & Scaled Down */}
+      <section className="relative min-h-[90vh] flex items-center justify-center pt-24 pb-20 overflow-hidden border-b border-gray-100 dark:border-white/5">
+        <div className="absolute inset-0 bg-ues-green/[0.01] dark:bg-apple/[0.01]" />
         
-        <div className="relative z-10 max-w-7xl mx-auto px-4 text-center">
-          <div className="w-20 h-20 bg-amber-400/20 border border-amber-400/30 rounded-full flex items-center justify-center mx-auto mb-8 anim-scale-in">
-            <Trophy className="w-10 h-10 text-amber-400" />
-          </div>
-          <h1 className="text-4xl sm:text-6xl font-black text-white mb-6 tracking-tight anim-fade-up">
-            ¡Misión <span className="text-amber-300">cumplida!</span>
-          </h1>
-          <p className="text-white/70 text-xl max-w-2xl mx-auto mb-10 anim-fade-up anim-delay-100">
-            La {jornada?.edicion || '12va'} Jornada Académica y Cultural ha finalizado con éxito rotundo. Gracias por ser parte de esta experiencia transformadora.
-          </p>
-          <div className="flex justify-center gap-4 anim-fade-up anim-delay-200">
-            <Link to="/agenda" className="bg-white/10 hover:bg-white/20 border border-white/20 text-white px-8 py-3 rounded-xl font-bold transition-all backdrop-blur-md flex items-center gap-2">
-              Explorar Archivo Histórico <ArrowRight size={18} />
-            </Link>
-          </div>
-        </div>
-      </section>
+        <div className="relative z-10 max-w-[1600px] mx-auto px-6 lg:px-12 w-full text-center flex flex-col items-center">
+          <motion.div initial="initial" animate="animate" variants={staggerContainer} className="max-w-5xl">
+            
+            <motion.h1 variants={fadeInUp} className="text-6xl sm:text-7xl lg:text-[8rem] font-serif font-black text-gray-900 dark:text-white leading-[0.9] tracking-tighter mb-10">
+              Impacto que<br/><span className="italic text-ues-green dark:text-ues-gold underline decoration-ues-gold/10">Trasciende</span>.
+            </motion.h1>
 
-      {/* 2. Stats Dashboard */}
-      <section className="max-w-7xl mx-auto px-4 -mt-10 relative z-20" ref={statsRef}>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[
-            { label: 'Inscripciones Totales', value: stats.totalParticipantes, icon: Users, color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/20' },
-            { label: 'Sesiones Impartidas', value: stats.totalSesiones, icon: Calendar, color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
-            { label: 'Instituciones Aliadas', value: '12+', icon: Award, color: 'text-amber-500', bg: 'bg-amber-50 dark:bg-amber-900/20' }
-          ].map((stat, i) => (
-            <div 
-              key={i} 
-              className={`bg-white dark:bg-[#122A1C] p-8 rounded-[2rem] shadow-xl border border-gray-100 dark:border-emerald-900/30 flex items-center gap-6 ${statsVis ? 'anim-fade-up' : 'opacity-0'}`} 
-              style={{ animationDelay: `${i * 0.1}s` }}
-            >
-              <div className={`w-16 h-16 rounded-2xl ${stat.bg} flex items-center justify-center shrink-0`}>
-                <stat.icon className={`w-8 h-8 ${stat.color}`} />
-              </div>
-              <div>
-                <p className="text-3xl font-black text-gray-900 dark:text-white leading-none mb-1">{stat.value}</p>
-                <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">{stat.label}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+            {/* Watermark below text - Deep Green & High Visibility */}
+            <motion.div variants={fadeInUp} className="text-[10vw] font-serif font-black text-[#153224] dark:text-apple/[0.1] leading-none mb-10 select-none opacity-40">
+              12va FIN
+            </motion.div>
+            
+            <motion.p variants={fadeInUp} className="text-gray-500 dark:text-gray-400 text-lg sm:text-2xl max-w-3xl font-medium leading-relaxed mb-16 mx-auto">
+              La Jornada Académica ha concluido su fase presencial. Gracias por ser el motor de este despliegue histórico de conocimiento institucional.
+            </motion.p>
 
-      {/* 2.5 Personalized Certificate Section */}
-      {isLoggedIn && estudiante && (
-        <section className="max-w-4xl mx-auto px-4 py-16" ref={certRef}>
-          <div className={`bg-white dark:bg-[#122A1C] rounded-[3rem] p-8 sm:p-12 border border-gray-100 dark:border-emerald-900/30 shadow-2xl relative overflow-hidden ${certVis ? 'anim-fade-up' : 'opacity-0'}`}>
-            <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full -translate-y-32 translate-x-32" />
-
-            <div className="relative z-10 flex flex-col md:flex-row items-center gap-10">
-              <div className="shrink-0">
-                <div className="w-32 h-32 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center relative">
-                  <Award className="w-16 h-16 text-[#1B4332] dark:text-emerald-500" />
-                  {asistencias.length >= 6 && (
-                    <div className="absolute -bottom-2 -right-2 bg-amber-400 text-[#0D2B1D] p-2 rounded-xl shadow-lg transform rotate-12">
-                      <CheckCircle2 size={24} />
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex-1 text-center md:text-left">
-                <h2 className="text-3xl font-black text-gray-900 dark:text-white mb-4 tracking-tight">
-                  {asistencias.length >= 6 ? '¡Tu certificación está lista!' : 'Sobre tu participación'}
-                </h2>
-
-                {certLoading ? (
-                  <div className="flex items-center gap-2 text-gray-400">
-                    <Loader2 size={16} className="animate-spin" />
-                    <span className="text-sm font-bold uppercase tracking-widest">Verificando asistencias...</span>
-                  </div>
-                ) : (
-                  <>
-                    <p className="text-gray-500 dark:text-gray-400 mb-8 leading-relaxed font-medium">
-                      {asistencias.length >= 6 
-                        ? `Felicidades ${estudiante.nombre}, has completado satisfactoriamente la jornada con ${asistencias.length} asistencias verificadas. Ya puedes descargar tu constancia digital.`
-                        : `Hola ${estudiante.nombre}, registramos ${asistencias.length} ${asistencias.length === 1 ? 'asistencia' : 'asistencias'} durante el evento. Recuerda que para obtener la constancia digital se requerían un mínimo de 6 asistencias.`
-                      }
-                    </p>
-
-                    <div className="flex flex-wrap justify-center md:justify-start gap-4">
-                      {asistencias.length >= 6 ? (
-                        <button
-                          onClick={handleDescargarConstancia}
-                          disabled={generating}
-                          className="bg-[#1B4332] hover:bg-emerald-800 text-white px-8 py-4 rounded-2xl font-black uppercase text-xs tracking-[0.2em] transition-all shadow-xl shadow-emerald-950/20 flex items-center gap-3 disabled:opacity-50"
-                        >
-                          {generating ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
-                          Descargar Constancia
-                        </button>
-                      ) : (
-                        <Link to="/agenda" className="bg-gray-100 dark:bg-emerald-900/20 text-gray-600 dark:text-emerald-400 px-8 py-4 rounded-2xl font-black uppercase text-xs tracking-[0.2em] border border-gray-200 dark:border-emerald-800/50 hover:bg-gray-200 transition-all flex items-center gap-3">
-                           Ver Mi Actividad
-                        </Link>
-                      )}
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* 3. Hall of Fame (Top Sesiones) */}
-      <section className="py-24 max-w-7xl mx-auto px-4" ref={fameRef}>
-        <div className={`flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 ${fameVis ? 'anim-fade-up' : 'opacity-0'}`}>
-          <div>
-            <h2 className="text-3xl font-black text-gray-900 dark:text-white mb-2">Lo más <span className="text-[#1B4332] dark:text-emerald-500">destacado</span></h2>
-            <p className="text-gray-500 dark:text-gray-400 font-medium">Las sesiones que marcaron tendencia en esta edición.</p>
-          </div>
-          <div className="hidden md:block h-px flex-1 bg-gray-200 dark:bg-emerald-900/30 mx-8" />
-          <span className="text-[10px] font-black text-amber-500 uppercase tracking-[0.3em] border-2 border-amber-500/30 px-4 py-1.5 rounded-full">Top Favoritas</span>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {loading ? (
-            [1,2,3].map(i => <div key={i} className="h-64 rounded-3xl bg-gray-200 dark:bg-emerald-900/20 animate-pulse" />)
-          ) : topSesiones.map((ses, i) => (
-            <div 
-              key={ses.id} 
-              className={`group relative bg-white dark:bg-[#122A1C] rounded-[2.5rem] p-8 border border-gray-100 dark:border-emerald-900/30 shadow-sm hover:shadow-2xl transition-all hover:-translate-y-2 ${fameVis ? 'anim-fade-up' : 'opacity-0'}`}
-              style={{ animationDelay: `${0.1 + i * 0.1}s` }}
-            >
-              <div className="absolute -top-4 -right-4 w-12 h-12 bg-amber-400 rounded-2xl flex items-center justify-center text-[#0D2B1D] font-black shadow-lg transform rotate-12 group-hover:rotate-0 transition-transform">
-                #{i+1}
-              </div>
-              
-              <div className="flex items-center gap-2 mb-6">
-                <span className="bg-emerald-50 dark:bg-emerald-900/40 text-[#1B4332] dark:text-emerald-400 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
-                  {ses.total_inscritos} Inscritos
-                </span>
-                <div className="flex gap-0.5 text-amber-400">
-                  <Star size={12} fill="currentColor" />
-                  <Star size={12} fill="currentColor" />
-                  <Star size={12} fill="currentColor" />
-                </div>
-              </div>
-
-              <h3 className="text-xl font-black text-gray-900 dark:text-white mb-4 leading-snug min-h-[3.5rem] line-clamp-2">
-                {ses.nombre}
-              </h3>
-
-              <div className="space-y-3 mb-8">
-                <div className="flex items-center gap-3 text-gray-500 dark:text-gray-400 text-sm">
-                  <MapPin size={16} className="text-[#1B4332] dark:text-emerald-500" />
-                  <span>{ses.escenarios?.nombre || 'UES SJR'}</span>
-                </div>
-                <div className="flex items-center gap-3 text-gray-500 dark:text-gray-400 text-sm">
-                  <Clock size={16} className="text-[#1B4332] dark:text-emerald-500" />
-                  <span>{ses.hora_inicio?.slice(0,5)} hrs</span>
-                </div>
-              </div>
-
-              <Link to={`/agenda/${ses.id}`} className="flex items-center justify-between w-full p-4 bg-gray-50 dark:bg-emerald-950/30 rounded-2xl group-hover:bg-[#1B4332] group-hover:text-white transition-all">
-                <span className="font-bold text-sm uppercase tracking-widest">Ver Detalles</span>
-                <ChevronRight size={20} />
+            <motion.div variants={fadeInUp} className="flex flex-wrap justify-center gap-6">
+              <Link to="/agenda" className="group flex items-center gap-4 bg-ues-green text-white px-10 py-5 rounded-full font-bold uppercase text-xs tracking-widest hover:bg-emerald-900 transition-all shadow-2xl">
+                Consultar Memorias <ArrowRight size={18} />
               </Link>
-            </div>
-          ))}
+              {showCert && (
+                <Link to="/mi-agenda" className="group flex items-center gap-4 bg-white dark:bg-white/5 border-2 border-ues-gold/20 px-10 py-5 rounded-full font-bold uppercase text-xs tracking-widest text-gray-900 dark:text-white hover:bg-ues-gold hover:text-white transition-all shadow-xl">
+                  Descargar Constancias <Award size={18} className="text-apple group-hover:text-white" />
+                </Link>
+              )}
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
-      {/* 4. Banner de cierre */}
-      <section className="bg-white dark:bg-[#0E1F15] py-20" ref={cierreRef}>
-        <div className={`max-w-4xl mx-auto px-4 text-center ${cierreVis ? 'anim-fade-up' : 'opacity-0'}`}>
-          <h2 className="text-3xl font-black text-gray-900 dark:text-white mb-6">¡Nos vemos en la siguiente edición!</h2>
-          <p className="text-gray-500 dark:text-gray-400 mb-10 leading-relaxed italic">
-            "La educación es el arma más poderosa que puedes usar para cambiar el mundo."
-          </p>
-          <div className="flex flex-wrap justify-center gap-6 grayscale opacity-50">
-            <img src="https://ydcybysimlvatvadpbaz.supabase.co/storage/v1/object/public/images/umb.png" className="h-10" alt="UMB" />
-            <img src="/images/logos/ues-sjr.png" className="h-10 dark:invert" alt="UES SJR" />
+      {/* Impact Stats Bento - Much smaller */}
+      <section className="py-24 px-6 lg:px-12 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          
+          <motion.div 
+            whileInView="animate" initial="initial" viewport={{ once: true }} variants={fadeInUp}
+            className="bg-white dark:bg-surface-dark-card p-10 rounded-[3rem] border-2 border-ues-gold/10 shadow-bento dark:shadow-bento-dark flex flex-col justify-center items-center text-center relative overflow-hidden group"
+          >
+            <div className="absolute -right-8 -top-8 opacity-5 group-hover:scale-110 transition-transform duration-700 pointer-events-none">
+              <Trophy size={150} className="text-ues-green dark:text-apple" />
+            </div>
+            <div className="relative z-10">
+              <div className="w-12 h-12 rounded-xl bg-ues-green flex items-center justify-center text-ues-gold mb-6 shadow-lg shadow-ues-green/20 mx-auto">
+                <Star size={24} fill="currentColor" className="text-apple" />
+              </div>
+              <h2 className="text-3xl font-serif font-black text-gray-900 dark:text-white mb-2 tracking-tighter">
+                <span className="italic text-ues-green dark:text-ues-gold">Excelencia</span> Académica
+              </h2>
+              <p className="text-gray-400 text-sm font-medium mb-6">Resultados institucionales récord.</p>
+              
+              <div className="flex flex-col items-center">
+                <span className="text-6xl font-serif font-black text-gray-900 dark:text-white tabular-nums italic">{stats.totalParticipantes}</span>
+                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-500 mt-2">Inscripciones Totales</span>
+              </div>
+            </div>
+          </motion.div>
+
+          <motion.div 
+            whileInView="animate" initial="initial" viewport={{ once: true }} variants={fadeInUp}
+            className="bg-white dark:bg-surface-dark-card p-10 rounded-[3rem] border-2 border-ues-gold/10 shadow-bento dark:shadow-bento-dark flex flex-col justify-center items-center text-center group"
+          >
+            <div className="relative z-10">
+              <div className="w-12 h-12 rounded-xl bg-ues-gold/10 flex items-center justify-center text-ues-gold mb-6 mx-auto border border-ues-gold/20">
+                <GraduationCap size={24} />
+              </div>
+              <h2 className="text-3xl font-serif font-black text-gray-900 dark:text-white mb-2 tracking-tighter">
+                <span className="italic text-ues-green dark:text-ues-gold">Sesiones</span> Exitosas
+              </h2>
+              <p className="text-gray-400 text-sm font-medium mb-6">Impacto multidisciplinario.</p>
+              
+              <div className="flex flex-col items-center">
+                <span className="text-6xl font-serif font-black text-gray-900 dark:text-white tabular-nums italic">{stats.totalSesiones}</span>
+                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-500 mt-2">Eventos Realizados</span>
+              </div>
+            </div>
+          </motion.div>
+
+        </div>
+      </section>
+
+      {/* Institutional Final Branding - Fixed Original Colors & Centering */}
+      <section className="py-24 border-t border-gray-100 dark:border-white/5 bg-white dark:bg-surface-dark-bg">
+        <div className="max-w-4xl mx-auto px-6 text-center flex flex-col items-center gap-12">
+          <div>
+            <span className="text-[14px] font-black text-ues-gold uppercase tracking-[0.6em] block mb-4">12va edición</span>
+            <p className="text-gray-400 text-xl font-medium italic leading-none tracking-tight">"Cultura que inspira, conocimiento que transforma"</p>
           </div>
+          
+          <div className="flex flex-wrap justify-center gap-16 opacity-100 dark:grayscale dark:brightness-0 dark:invert dark:opacity-40 transition-all items-center hover:opacity-100">
+            <img src="https://sic.cultura.gob.mx/imagenes_cache/universidad_4260_g_74199.png" className="h-14 object-contain" alt="UMB" />
+            <img src="/images/logos/ues-sjr.png" className="h-14 object-contain" alt="UES SJR" />
+          </div>
+          
+          <p className="text-gray-900 dark:text-white font-serif font-black text-2xl tracking-tighter uppercase opacity-80">UESSJR · 2026</p>
         </div>
       </section>
 

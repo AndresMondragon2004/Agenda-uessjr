@@ -40,7 +40,7 @@ function ViewEstudianteModal({ estudiante, onClose, onEdit, onDelete, loadingDet
         {/* Header */}
         <div className="p-6 sm:p-8 border-b border-gray-100 dark:border-emerald-900/40 flex items-center justify-between bg-gray-50/50 dark:bg-[#0F2018]/50">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#1B4332] to-[#2D6A4F] text-white flex items-center justify-center shadow-lg shadow-emerald-900/20 font-black text-xl">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#0F5B3C] to-[#2D6A4F] text-white flex items-center justify-center shadow-lg shadow-emerald-900/20 font-black text-xl">
               {getInitials(estudiante.nombre, estudiante.apellidos)}
             </div>
             <div>
@@ -55,7 +55,7 @@ function ViewEstudianteModal({ estudiante, onClose, onEdit, onDelete, loadingDet
 
         {loadingDetalle ? (
           <div className="p-20 text-center">
-            <Loader2 className="w-10 h-10 animate-spin text-[#1B4332] mx-auto mb-4" />
+            <Loader2 className="w-10 h-10 animate-spin text-[#0F5B3C] mx-auto mb-4" />
             <p className="text-gray-400 text-xs font-black uppercase tracking-widest">Cargando historial...</p>
           </div>
         ) : (
@@ -77,7 +77,7 @@ function ViewEstudianteModal({ estudiante, onClose, onEdit, onDelete, loadingDet
                 <div className="bg-gray-50 dark:bg-[#0F2018] rounded-3xl p-6 border border-gray-100 dark:border-emerald-900/30 space-y-5">
                   <div className="flex flex-col">
                     <span className="text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">Correo Electrónico</span>
-                    <a href={`mailto:${estudiante.correo}`} className="text-sm font-bold text-[#1B4332] dark:text-emerald-400 hover:underline">
+                    <a href={`mailto:${estudiante.correo}`} className="text-sm font-bold text-[#0F5B3C] dark:text-emerald-400 hover:underline">
                       {estudiante.correo}
                     </a>
                   </div>
@@ -98,7 +98,7 @@ function ViewEstudianteModal({ estudiante, onClose, onEdit, onDelete, loadingDet
                   <h4 className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] flex items-center gap-2">
                     <CalendarDays size={14} className="text-emerald-500" /> Agenda Personal
                   </h4>
-                  <span className="px-2.5 py-0.5 bg-[#1B4332] text-white text-[9px] font-black rounded-full uppercase">
+                  <span className="px-2.5 py-0.5 bg-[#0F5B3C] text-white text-[9px] font-black rounded-full uppercase">
                     {estudiante.inscripciones?.length || 0} sesiones
                   </span>
                 </div>
@@ -121,10 +121,10 @@ function ViewEstudianteModal({ estudiante, onClose, onEdit, onDelete, loadingDet
                               e.stopPropagation();
                               navigate(`/admin/sesiones/${ses.id}`);
                             }}
-                            className="p-4 bg-[#FAF9F6] dark:bg-[#122A1C] rounded-2xl border border-gray-100 dark:border-emerald-900/30 shadow-sm hover:border-[#1B4332]/50 hover:bg-emerald-50/30 dark:hover:bg-emerald-900/10 transition-all flex items-center justify-between gap-4 cursor-pointer group/item"
+                            className="p-4 bg-[#FAF9F6] dark:bg-[#122A1C] rounded-2xl border border-gray-100 dark:border-emerald-900/30 shadow-sm hover:border-[#0F5B3C]/50 hover:bg-emerald-50/30 dark:hover:bg-emerald-900/10 transition-all flex items-center justify-between gap-4 cursor-pointer group/item"
                           >
                             <div className="flex-1 min-w-0">
-                              <p className="text-xs font-black text-gray-800 dark:text-gray-200 leading-snug truncate group-hover/item:text-[#1B4332] dark:group-hover/item:text-emerald-400 transition-colors">{ses.nombre}</p>
+                              <p className="text-xs font-black text-gray-800 dark:text-gray-200 leading-snug truncate group-hover/item:text-[#0F5B3C] dark:group-hover/item:text-emerald-400 transition-colors">{ses.nombre}</p>
                               <div className="flex items-center gap-3 text-[9px] font-bold text-gray-400 mt-1 uppercase">
                                 <span className="flex items-center gap-1"><Calendar size={10} /> {ses.dias_jornada?.nombre_dia}</span>
                                 <span className="flex items-center gap-1"><Clock size={10} /> {ses.hora_inicio?.slice(0, 5)}</span>
@@ -210,33 +210,33 @@ function EditModal({ estudiante, onClose, onSaved }) {
             <div>
               <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Nombre *</label>
               <input type="text" name="nombre" value={form.nombre} onChange={handleChange}
-                className="w-full py-2 border-0 border-b border-gray-200 dark:border-emerald-900/40 text-sm bg-transparent dark:text-gray-200 outline-none focus:border-b-[#1B4332] transition-colors" />
+                className="w-full py-2 border-0 border-b border-gray-200 dark:border-emerald-900/40 text-sm bg-transparent dark:text-gray-200 outline-none focus:border-b-[#0F5B3C] transition-colors" />
             </div>
             <div>
               <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Apellidos *</label>
               <input type="text" name="apellidos" value={form.apellidos} onChange={handleChange}
-                className="w-full py-2 border-0 border-b border-gray-200 dark:border-emerald-900/40 text-sm bg-transparent dark:text-gray-200 outline-none focus:border-b-[#1B4332] transition-colors" />
+                className="w-full py-2 border-0 border-b border-gray-200 dark:border-emerald-900/40 text-sm bg-transparent dark:text-gray-200 outline-none focus:border-b-[#0F5B3C] transition-colors" />
             </div>
           </div>
           <div>
             <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Telegram ID / Teléfono</label>
             <input type="text" name="telefono" value={form.telefono} onChange={handleChange}
-              className="w-full py-2 border-0 border-b border-gray-200 dark:border-emerald-900/40 text-sm bg-transparent dark:text-gray-200 outline-none focus:border-b-[#1B4332] transition-colors" />
+              className="w-full py-2 border-0 border-b border-gray-200 dark:border-emerald-900/40 text-sm bg-transparent dark:text-gray-200 outline-none focus:border-b-[#0F5B3C] transition-colors" />
           </div>
           <div>
             <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Matrícula</label>
             <input type="text" name="matricula" value={form.matricula} onChange={handleChange}
-              className="w-full py-2 border-0 border-b border-gray-200 text-sm bg-transparent outline-none focus:border-b-[#1B4332] transition-colors" />
+              className="w-full py-2 border-0 border-b border-gray-200 text-sm bg-transparent outline-none focus:border-b-[#0F5B3C] transition-colors" />
           </div>
           <div>
             <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Correo electrónico</label>
             <input type="email" name="correo" value={form.correo} onChange={handleChange}
-              className="w-full py-2 border-0 border-b border-gray-200 text-sm bg-transparent outline-none focus:border-b-[#1B4332] transition-colors" />
+              className="w-full py-2 border-0 border-b border-gray-200 text-sm bg-transparent outline-none focus:border-b-[#0F5B3C] transition-colors" />
           </div>
           <div>
             <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Programa académico</label>
             <select name="programa_academico" value={form.programa_academico} onChange={handleChange}
-              className="w-full py-2 border-0 border-b border-gray-200 dark:border-emerald-900/40 text-sm bg-transparent dark:text-gray-200 outline-none focus:border-b-[#1B4332] transition-colors">
+              className="w-full py-2 border-0 border-b border-gray-200 dark:border-emerald-900/40 text-sm bg-transparent dark:text-gray-200 outline-none focus:border-b-[#0F5B3C] transition-colors">
               <option value="">Sin especificar</option>
               {PROGRAMAS_OPTIONS.map(p => (
                 <option key={p.value} value={p.value}>{p.label}</option>
@@ -249,7 +249,7 @@ function EditModal({ estudiante, onClose, onSaved }) {
               Cancelar
             </button>
             <button type="submit" disabled={saving}
-              className="flex-1 py-2.5 bg-gradient-to-r from-[#1B4332] to-[#2D6A4F] text-white font-semibold rounded-xl hover:from-[#133124] hover:to-[#1B4332] active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-emerald-900/20">
+              className="flex-1 py-2.5 bg-gradient-to-r from-[#0F5B3C] to-[#2D6A4F] text-white font-semibold rounded-xl hover:from-[#133124] hover:to-[#0F5B3C] active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-emerald-900/20">
               {saving ? <><Loader2 className="w-4 h-4 animate-spin" /> Guardando...</> : <><Save className="w-4 h-4" /> Guardar</>}
             </button>
           </div>
@@ -299,35 +299,35 @@ function AddEstudianteModal({ onClose, onSaved }) {
             <div>
               <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Nombre(s)</label>
               <input required value={formData.nombre} onChange={e => setFormData({ ...formData, nombre: e.target.value })}
-                     className="w-full px-4 py-2 bg-gray-50 dark:bg-emerald-950/30 border border-gray-100 dark:border-emerald-900/40 rounded-xl text-sm font-bold text-gray-800 dark:text-gray-200 focus:outline-none focus:border-[#1B4332] dark:focus:border-emerald-500" />
+                     className="w-full px-4 py-2 bg-gray-50 dark:bg-emerald-950/30 border border-gray-100 dark:border-emerald-900/40 rounded-xl text-sm font-bold text-gray-800 dark:text-gray-200 focus:outline-none focus:border-[#0F5B3C] dark:focus:border-emerald-500" />
             </div>
             <div>
               <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Apellidos</label>
               <input required value={formData.apellidos} onChange={e => setFormData({ ...formData, apellidos: e.target.value })}
-                     className="w-full px-4 py-2 bg-gray-50 dark:bg-emerald-950/30 border border-gray-100 dark:border-emerald-900/40 rounded-xl text-sm font-bold text-gray-800 dark:text-gray-200 focus:outline-none focus:border-[#1B4332] dark:focus:border-emerald-500" />
+                     className="w-full px-4 py-2 bg-gray-50 dark:bg-emerald-950/30 border border-gray-100 dark:border-emerald-900/40 rounded-xl text-sm font-bold text-gray-800 dark:text-gray-200 focus:outline-none focus:border-[#0F5B3C] dark:focus:border-emerald-500" />
             </div>
           </div>
           <div>
             <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Correo Electrónico</label>
             <input required type="email" value={formData.correo} onChange={e => setFormData({ ...formData, correo: e.target.value })}
-                   className="w-full px-4 py-2 bg-gray-50 dark:bg-emerald-950/30 border border-gray-100 dark:border-emerald-900/40 rounded-xl text-sm font-bold text-gray-800 dark:text-gray-200 focus:outline-none focus:border-[#1B4332] dark:focus:border-emerald-500" />
+                   className="w-full px-4 py-2 bg-gray-50 dark:bg-emerald-950/30 border border-gray-100 dark:border-emerald-900/40 rounded-xl text-sm font-bold text-gray-800 dark:text-gray-200 focus:outline-none focus:border-[#0F5B3C] dark:focus:border-emerald-500" />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Matrícula</label>
               <input value={formData.matricula} onChange={e => setFormData({ ...formData, matricula: e.target.value })}
-                     className="w-full px-4 py-2 bg-gray-50 dark:bg-emerald-950/30 border border-gray-100 dark:border-emerald-900/40 rounded-xl text-sm font-bold text-gray-800 dark:text-gray-200 focus:outline-none focus:border-[#1B4332] dark:focus:border-emerald-500" />
+                     className="w-full px-4 py-2 bg-gray-50 dark:bg-emerald-950/30 border border-gray-100 dark:border-emerald-900/40 rounded-xl text-sm font-bold text-gray-800 dark:text-gray-200 focus:outline-none focus:border-[#0F5B3C] dark:focus:border-emerald-500" />
             </div>
             <div>
               <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Teléfono (Telegram)</label>
               <input value={formData.telefono} onChange={e => setFormData({ ...formData, telefono: e.target.value })}
-                     className="w-full px-4 py-2 bg-gray-50 dark:bg-emerald-950/30 border border-gray-100 dark:border-emerald-900/40 rounded-xl text-sm font-bold text-gray-800 dark:text-gray-200 focus:outline-none focus:border-[#1B4332] dark:focus:border-emerald-500" />
+                     className="w-full px-4 py-2 bg-gray-50 dark:bg-emerald-950/30 border border-gray-100 dark:border-emerald-900/40 rounded-xl text-sm font-bold text-gray-800 dark:text-gray-200 focus:outline-none focus:border-[#0F5B3C] dark:focus:border-emerald-500" />
             </div>
           </div>
           <div>
             <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Programa</label>
             <select value={formData.programa_academico} onChange={e => setFormData({ ...formData, programa_academico: e.target.value })}
-                    className="w-full px-4 py-2 bg-gray-50 dark:bg-emerald-950/30 border border-gray-100 dark:border-emerald-900/40 rounded-xl text-sm font-bold text-gray-800 dark:text-gray-200 focus:outline-none focus:border-[#1B4332] dark:focus:border-emerald-500">
+                    className="w-full px-4 py-2 bg-gray-50 dark:bg-emerald-950/30 border border-gray-100 dark:border-emerald-900/40 rounded-xl text-sm font-bold text-gray-800 dark:text-gray-200 focus:outline-none focus:border-[#0F5B3C] dark:focus:border-emerald-500">
               {PROGRAMAS_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
               <option value="externo">Externo</option>
             </select>
@@ -336,7 +336,7 @@ function AddEstudianteModal({ onClose, onSaved }) {
 
         <div className="flex justify-end gap-3 mt-4 p-6 bg-gray-50 dark:bg-emerald-900/20 border-t border-gray-100 dark:border-emerald-900/40">
           <button type="button" onClick={onClose} className="px-5 py-2.5 text-gray-500 font-bold hover:bg-gray-100 dark:hover:bg-emerald-900/40 rounded-xl transition-all uppercase tracking-widest text-xs">Cancelar</button>
-          <button type="submit" disabled={saving} className="px-8 py-2.5 bg-[#1B4332] text-white font-black hover:bg-emerald-800 rounded-xl shadow-lg shadow-emerald-900/20 transition-all flex items-center gap-2 uppercase tracking-widest text-xs">
+          <button type="submit" disabled={saving} className="px-8 py-2.5 bg-[#0F5B3C] text-white font-black hover:bg-emerald-800 rounded-xl shadow-lg shadow-emerald-900/20 transition-all flex items-center gap-2 uppercase tracking-widest text-xs">
             {saving ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={16} />}
             Guardar Estudiante
           </button>
@@ -516,10 +516,10 @@ export default function StudentsManagement() {
       <div className="bg-[#FAF9F6] dark:bg-[#122A1C] border-b border-gray-100 dark:border-emerald-900/40 px-4 sm:px-8 py-4 flex items-center justify-between sticky top-14 lg:top-0 z-10">
         <h1 className="font-black text-xl text-gray-900 dark:text-gray-100 tracking-tight">Estudiantes registrados</h1>
         <div className="flex items-center gap-2">
-          <div className="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/30 text-[#1B4332] dark:text-emerald-400 rounded-xl text-[10px] font-black uppercase tracking-widest border border-emerald-100 dark:border-emerald-900/50">
+          <div className="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/30 text-[#0F5B3C] dark:text-emerald-400 rounded-xl text-[10px] font-black uppercase tracking-widest border border-emerald-100 dark:border-emerald-900/50">
             {estudiantesFiltrados.length} / {estudiantes.length}
           </div>
-          <button onClick={() => setShowAddModal(true)} className="flex items-center gap-2 px-3 py-1.5 bg-[#1B4332] text-white rounded-xl text-[10px] font-black uppercase tracking-widest border border-[#1B4332] hover:bg-[#0F2018] active:scale-95 transition-all shadow-md">
+          <button onClick={() => setShowAddModal(true)} className="flex items-center gap-2 px-3 py-1.5 bg-[#0F5B3C] text-white rounded-xl text-[10px] font-black uppercase tracking-widest border border-[#0F5B3C] hover:bg-[#0F2018] active:scale-95 transition-all shadow-md">
             + Nuevo Estudiante
           </button>
           <button
@@ -572,7 +572,7 @@ export default function StudentsManagement() {
               placeholder="Buscar por nombre, matrícula o correo..."
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
-              className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 dark:border-emerald-900/50 dark:bg-[#0F2018] dark:text-gray-300 dark:placeholder-gray-600 focus:border-[#1B4332] focus:ring-4 focus:ring-[#1B4332]/10 dark:focus:ring-emerald-500/10 outline-none transition-all duration-300 text-sm font-bold"
+              className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 dark:border-emerald-900/50 dark:bg-[#0F2018] dark:text-gray-300 dark:placeholder-gray-600 focus:border-[#0F5B3C] focus:ring-4 focus:ring-[#0F5B3C]/10 dark:focus:ring-emerald-500/10 outline-none transition-all duration-300 text-sm font-bold"
             />
           </div>
           <div className="relative shrink-0">
@@ -580,7 +580,7 @@ export default function StudentsManagement() {
             <select
               value={programaFiltro}
               onChange={(e) => setProgramaFiltro(e.target.value)}
-              className="pl-11 pr-10 py-3 rounded-xl border border-gray-200 dark:border-emerald-900/50 focus:border-[#1B4332] outline-none transition-all text-sm font-black bg-[#FAF9F6] dark:bg-[#0F2018] dark:text-gray-300 appearance-none cursor-pointer"
+              className="pl-11 pr-10 py-3 rounded-xl border border-gray-200 dark:border-emerald-900/50 focus:border-[#0F5B3C] outline-none transition-all text-sm font-black bg-[#FAF9F6] dark:bg-[#0F2018] dark:text-gray-300 appearance-none cursor-pointer"
             >
               <option value="todos">Todos los programas</option>
               {Object.entries(PROGRAMA_LABELS).map(([val, label]) => (
@@ -626,11 +626,11 @@ export default function StudentsManagement() {
                       >
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#1B4332] to-[#2D6A4F] text-white flex items-center justify-center font-black text-xs shadow-md shadow-emerald-900/20 shrink-0">
+                            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#0F5B3C] to-[#2D6A4F] text-white flex items-center justify-center font-black text-xs shadow-md shadow-emerald-900/20 shrink-0">
                               {getInitials(est.nombre, est.apellidos)}
                             </div>
                             <div>
-                              <p className="text-sm font-black text-gray-900 dark:text-gray-100 group-hover:text-[#1B4332] dark:group-hover:text-emerald-400 transition-colors">
+                              <p className="text-sm font-black text-gray-900 dark:text-gray-100 group-hover:text-[#0F5B3C] dark:group-hover:text-emerald-400 transition-colors">
                                 {est.nombre} {est.apellidos}
                               </p>
                               <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500">{est.matricula || 'Sin matrícula'}</p>
@@ -650,7 +650,7 @@ export default function StudentsManagement() {
                           <div className="flex items-center justify-end gap-2">
                             <button 
                               onClick={(e) => { e.stopPropagation(); handleSelectEstudiante(est) }}
-                              className="p-2 rounded-xl text-[#1B4332] dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors border border-emerald-100 dark:border-emerald-900/30"
+                              className="p-2 rounded-xl text-[#0F5B3C] dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors border border-emerald-100 dark:border-emerald-900/30"
                               title="Ver perfil"
                             >
                               <ChevronRight size={16} />
@@ -739,7 +739,7 @@ export default function StudentsManagement() {
       )}
 
       {toast && (
-        <div className="fixed bottom-8 left-4 right-4 sm:left-auto sm:right-8 z-50 bg-[#1B4332] text-white px-8 py-4 rounded-2xl shadow-2xl font-black text-sm flex items-center gap-3 animate-slide-up">
+        <div className="fixed bottom-8 left-4 right-4 sm:left-auto sm:right-8 z-50 bg-[#0F5B3C] text-white px-8 py-4 rounded-2xl shadow-2xl font-black text-sm flex items-center gap-3 animate-slide-up">
           <Check className="w-5 h-5" strokeWidth={4} />
           {toast}
         </div>
