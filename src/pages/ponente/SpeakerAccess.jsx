@@ -31,7 +31,7 @@ export default function SpeakerAccess() {
       <div className="min-h-screen bg-gray-50 dark:bg-[#0A1A11] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <div className="flex justify-center">
-            <div className="w-16 h-16 rounded-2xl bg-[#1B4332] flex items-center justify-center shadow-lg">
+            <div className="w-16 h-16 rounded-2xl bg-[#22573E] flex items-center justify-center shadow-lg">
               <GraduationCap className="w-8 h-8 text-amber-400" />
             </div>
           </div>
@@ -61,7 +61,7 @@ export default function SpeakerAccess() {
                     required
                     value={token}
                     onChange={(e) => setToken(e.target.value)}
-                    className="block w-full pl-10 pr-3 py-3 border border-gray-200 dark:border-emerald-900/50 rounded-xl focus:ring-[#1B4332] focus:border-[#1B4332] outline-none sm:text-sm bg-gray-50 dark:bg-emerald-950/20 text-gray-900 dark:text-white placeholder-gray-400 transition-all font-mono"
+                    className="block w-full pl-10 pr-3 py-3 border border-gray-200 dark:border-emerald-900/50 rounded-xl focus:ring-[#22573E] focus:border-[#22573E] outline-none sm:text-sm bg-gray-50 dark:bg-emerald-950/20 text-gray-900 dark:text-white placeholder-gray-400 transition-all font-mono"
                     placeholder="Ej. a1b2c3d4-..."
                   />
                 </div>
@@ -71,7 +71,7 @@ export default function SpeakerAccess() {
                 <button
                   type="submit"
                   disabled={loading || !token.trim()}
-                  className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-[#1B4332] hover:bg-emerald-800 focus:outline-none transition-colors disabled:opacity-50"
+                  className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-[#22573E] hover:bg-emerald-800 focus:outline-none transition-colors disabled:opacity-50"
                 >
                   {loading ? (
                     <Loader2 className="w-5 h-5 animate-spin" />
@@ -84,7 +84,7 @@ export default function SpeakerAccess() {
               </div>
               
               <div className="pt-4 text-center">
-                <Link to="/" className="inline-flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-[#1B4332] dark:text-gray-400 dark:hover:text-emerald-400 transition-colors">
+                <Link to="/" className="inline-flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-[#22573E] dark:text-gray-400 dark:hover:text-emerald-400 transition-colors">
                   <ArrowLeft size={14} /> Volver a la vista pública
                 </Link>
               </div>

@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { actividadService } from './actividad.service'
 
 export const estudiantesService = {
 
@@ -29,7 +30,14 @@ export const estudiantesService = {
     return data
   },
 
-  async update(id, datos) {
+  async update(id, datos, adminName = 'Sistema') {
+    // Obtener datos anteriores
+    const { data: oldData } = await supabase
+      .from('estudiantes')
+      .select('*')
+      .eq('id', id)
+      .single()
+
     const { data, error } = await supabase
       .from('estudiantes')
       .update(datos)
@@ -37,24 +45,56 @@ export const estudiantesService = {
       .select()
       .single()
     if (error) throw error
+
+    await actividadService.logActividad(
+      'estudiante',
+      'modificar',
+      `${adminName} modificó al estudiante: ${data.nombre} ${data.apellidos}`,
+      { antes: oldData, despues: data },
+      adminName
+    )
+
     return data
   },
 
-  async create(datos) {
+  async create(datos, adminName = 'Sistema') {
     const { data, error } = await supabase
       .from('estudiantes')
       .insert([datos])
       .select()
       .single()
     if (error) throw error
+
+    await actividadService.logActividad(
+      'estudiante',
+      'crear',
+      `${adminName} registró manualmente al estudiante: ${data.nombre} ${data.apellidos}`,
+      { nuevo: data },
+      adminName
+    )
+
     return data
   },
 
-  async delete(id) {
+  async delete(id, adminName = 'Sistema') {
+    const { data: oldData } = await supabase
+      .from('estudiantes')
+      .select('nombre, apellidos')
+      .eq('id', id)
+      .single()
+
     const { error } = await supabase
       .from('estudiantes')
       .delete()
       .eq('id', id)
     if (error) throw error
+
+    await actividadService.logActividad(
+      'estudiante',
+      'eliminar',
+      `${adminName} eliminó al estudiante: ${oldData?.nombre} ${oldData?.apellidos}`,
+      { eliminado: oldData },
+      adminName
+    )
   }
 }

@@ -113,7 +113,6 @@ export default function PreEventView({ jornada }) {
 
   return (
     <div className="min-h-screen bg-[#0D2B1D] selection:bg-amber-400 selection:text-[#0D2B1D]">
-      <style>{ANIM_CSS}</style>
       
       {/* 1. Hero Section: Countdown focus */}
       <section className="relative pt-32 pb-20 overflow-hidden">
@@ -128,23 +127,23 @@ export default function PreEventView({ jornada }) {
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 text-center">
-          <div className="inline-flex items-center gap-2 bg-amber-400 text-[#0D2B1D] px-4 py-1.5 rounded-full font-black text-[10px] uppercase tracking-widest mb-8 anim-fade-up">
+          <div className="inline-flex items-center gap-2 bg-amber-400 text-[#0D2B1D] px-4 py-1.5 rounded-full font-black text-[10px] uppercase tracking-widest mb-8 anim-reveal anim-stagger-1">
             <Rocket size={14} /> Próximamente
           </div>
           
-          <h1 className="text-4xl sm:text-6xl lg:text-8xl font-black text-white tracking-tight mb-6 anim-fade-up anim-delay-100">
+          <h1 className="text-4xl sm:text-6xl lg:text-8xl font-black text-white tracking-tight mb-6 anim-reveal anim-stagger-2">
             Estamos <span className="text-amber-300">preparando</span> algo histórico
           </h1>
           
-          <p className="text-white/70 text-lg sm:text-xl max-w-2xl mx-auto mb-16 anim-fade-up anim-delay-200 leading-relaxed">
+          <p className="text-white/70 text-lg sm:text-xl max-w-2xl mx-auto mb-16 anim-reveal anim-stagger-3 leading-relaxed">
             La 12va Jornada Académica y Cultural de la UES San José del Rincón está por comenzar. Únete a la mayor celebración del conocimiento.
           </p>
 
-          <div className="anim-scale-in anim-delay-300">
+          <div className="anim-reveal anim-stagger-4">
             <LargeCountdown targetDate={jornada?.fecha_inicio ? `${jornada.fecha_inicio}T09:00:00` : '2026-05-11T09:00:00'} />
           </div>
 
-          <div className="mt-16 flex flex-col sm:flex-row items-center justify-center gap-4 anim-fade-up anim-delay-400">
+          <div className="mt-16 flex flex-col sm:flex-row items-center justify-center gap-4 anim-reveal anim-stagger-5">
             <Link to="/agenda" className="w-full sm:w-auto bg-white text-[#0D2B1D] px-10 py-5 rounded-2xl font-black uppercase text-sm hover:bg-amber-300 transition-all shadow-xl hover:-translate-y-1">
               Ver Programa Preliminar
             </Link>
@@ -161,7 +160,7 @@ export default function PreEventView({ jornada }) {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-center">
             <div className={`lg:col-span-1 ${viviremosVis ? 'anim-fade-up' : 'opacity-0'}`}>
               <h2 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white leading-tight mb-6">
-                Lo que <span className="text-[#1B4332] dark:text-emerald-500">viviremos</span> en esta edición
+                Lo que <span className="text-[#22573E] dark:text-emerald-500">viviremos</span> en esta edición
               </h2>
               <div className="space-y-6">
                 {[
@@ -170,7 +169,7 @@ export default function PreEventView({ jornada }) {
                   { icon: Star, text: 'Presentaciones culturales de primer nivel' }
                 ].map((item, i) => (
                   <div key={i} className="flex items-center gap-4 text-gray-600 dark:text-gray-400 font-bold">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950 flex items-center justify-center text-[#1B4332] dark:text-emerald-400">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950 flex items-center justify-center text-[#22573E] dark:text-emerald-400">
                       <item.icon size={20} />
                     </div>
                     {item.text}

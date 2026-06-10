@@ -132,8 +132,8 @@ function SessionCard({ ses, idx, inView }) {
   const accent  = ACCENTS[idx % ACCENTS.length]
   return (
     <div
-      className={`group bg-white dark:bg-[#122A1C] rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2 flex flex-col border border-gray-100 dark:border-emerald-900/40 anim-fade-up ${inView ? '' : 'opacity-0'}`}
-      style={{ animationDelay: `${0.1 + idx * 0.12}s` }}
+      className={`group bg-white dark:bg-[#122A1C] rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2 flex flex-col border border-gray-100 dark:border-emerald-900/40 ${inView ? 'anim-reveal' : 'opacity-0'}`}
+      style={{ animationDelay: `${idx * 0.12}s` }}
     >
       <div className="h-1.5 w-full" style={{ background: `linear-gradient(90deg,${accent},${accent}88)` }} />
       <div className="p-6 flex-grow flex flex-col">
@@ -157,7 +157,7 @@ function SessionCard({ ses, idx, inView }) {
         <span className="text-gray-300 dark:text-gray-600/80 font-black text-5xl leading-none select-none -mt-1 mb-2">
           0{idx + 1}
         </span>
-        <h3 className="text-base font-bold text-gray-900 dark:text-gray-100 mb-4 leading-snug line-clamp-3 flex-grow group-hover:text-[#1B4332] dark:group-hover:text-emerald-400 transition-colors">
+        <h3 className="text-base font-bold text-gray-900 dark:text-gray-100 mb-4 leading-snug line-clamp-3 flex-grow group-hover:text-[#22573E] dark:group-hover:text-emerald-400 transition-colors">
           {ses.nombre}
         </h3>
         {ses.ponente_nombre && (
@@ -353,7 +353,6 @@ export default function ActiveEventView({ jornada }) {
 
   return (
     <div className="w-full">
-      <style>{ANIM_CSS}</style>
 
       {/* ══════════════════════════════════════════
           HERO
@@ -389,7 +388,7 @@ export default function ActiveEventView({ jornada }) {
             {/* Columna izquierda */}
             <div className="flex flex-col gap-6">
 
-              <div className="flex items-center gap-3 self-start anim-fade-up">
+              <div className="flex items-center gap-3 self-start anim-reveal anim-stagger-1">
                 <span className="relative flex h-2.5 w-2.5 shrink-0">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                   <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400" />
@@ -403,7 +402,7 @@ export default function ActiveEventView({ jornada }) {
                 </span>
               </div>
 
-              <div className="anim-fade-up anim-delay-100">
+              <div className="anim-reveal anim-stagger-2">
                 <h1 className="font-black leading-[1.05] tracking-tight">
                   <span className="block text-white text-4xl sm:text-5xl lg:text-7xl drop-shadow-lg">
                     {jornada ? jornada.edicion : '12va'} jornada
@@ -414,11 +413,11 @@ export default function ActiveEventView({ jornada }) {
                 </h1>
               </div>
 
-              <p className="text-white/75 text-lg leading-relaxed max-w-lg border-l-4 border-amber-400/50 pl-4 anim-fade-up anim-delay-200">
+              <p className="text-white/75 text-lg leading-relaxed max-w-lg border-l-4 border-amber-400/50 pl-4 anim-reveal anim-stagger-3">
                 {jornada?.lema || 'Cultura que inspira, conocimiento que transforma. Únete al evento académico más importante del año.'}
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-3 anim-fade-up anim-delay-300 mt-2">
+              <div className="flex flex-col sm:flex-row gap-3 anim-reveal anim-stagger-4 mt-2">
                 <Link
                   to="/agenda"
                   className="inline-flex items-center justify-center gap-2 bg-[#D97706] hover:bg-amber-500 text-white font-black text-sm px-8 py-4 rounded-2xl transition-all shadow-lg shadow-amber-900/30 hover:-translate-y-0.5 uppercase tracking-wide"
@@ -433,7 +432,7 @@ export default function ActiveEventView({ jornada }) {
                 </Link>
               </div>
 
-              <div className="flex items-center gap-3 text-white/50 text-sm font-medium anim-fade-up anim-delay-400 mt-2">
+              <div className="flex items-center gap-3 text-white/50 text-sm font-medium anim-reveal anim-stagger-5 mt-2">
                 <div className="h-px w-8 bg-white/30" />
                 <CalendarDays size={15} className="text-amber-400 shrink-0" />
                 <span>
@@ -449,12 +448,12 @@ export default function ActiveEventView({ jornada }) {
               />
 
               {/* Logos Institucionales en Hero */}
-              <div className="flex items-center gap-6 pt-8 anim-fade-up anim-delay-800 border-t border-white/10 mt-4">
+              <div className="flex items-center gap-6 pt-8 anim-reveal anim-stagger-6 border-t border-white/10 mt-4">
                 <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] [writing-mode:vertical-lr] rotate-180">
                   Respaldado por
                 </p>
                 <div className="flex items-center gap-6">
-                  <img src="https://sic.cultura.gob.mx/imagenes_cache/universidad_4260_g_74199.png" alt="UMB" className="h-10 sm:h-12 object-contain opacity-60 hover:opacity-100 transition-opacity drop-shadow-lg" />
+                  <img src="https://sic.cultura.gob.mx/imagenes_cache/universidad_4260_g_74199.png" alt="UMB" className="h-10 sm:h-12 object-contain brightness-0 invert opacity-60 hover:opacity-100 transition-opacity drop-shadow-lg" />
                   <img src="/images/logos/ues-sjr.png" alt="UES SJR" className="h-10 sm:h-12 object-contain brightness-0 invert opacity-60 hover:opacity-100 transition-opacity drop-shadow-lg" />
                 </div>
               </div>
@@ -500,7 +499,7 @@ export default function ActiveEventView({ jornada }) {
 
             {/* Columna derecha — card próxima sesión */}
             {proximaSesion && (
-              <div className="hidden lg:flex justify-end anim-scale-in anim-delay-400">
+              <div className="hidden lg:flex justify-end anim-slide-right anim-stagger-2">
                 <div className="relative rounded-3xl p-8 max-w-sm w-full shadow-2xl shadow-black/30 group hover:-translate-y-1 transition-transform duration-300 border border-white/20"
                      style={{ background: 'rgba(13,43,29,0.55)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
 
@@ -593,18 +592,18 @@ export default function ActiveEventView({ jornada }) {
       ══════════════════════════════════════════ */}
       <section className="bg-[#F0F7F4] dark:bg-[#0A1A11] py-14" ref={statsRef}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className={`text-center mb-10 ${statsVis ? 'anim-fade-up' : 'opacity-0'}`}>
-            <span className="text-[#1B4332]/60 dark:text-emerald-700 font-bold text-xs uppercase tracking-[0.2em]">
+          <div className={`text-center mb-10 ${statsVis ? 'anim-reveal' : 'opacity-0'}`}>
+            <span className="text-[#22573E]/60 dark:text-emerald-700 font-bold text-xs uppercase tracking-[0.2em]">
               UES San José del Rincón
             </span>
-            <h2 className="text-2xl md:text-3xl font-extrabold text-[#1B4332] dark:text-emerald-400 mt-1">
+            <h2 className="text-2xl md:text-3xl font-extrabold text-[#22573E] dark:text-emerald-400 mt-1">
               Una jornada, múltiples experiencias
             </h2>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {statsVis && (
               <>
-                <StatCard icon={BookOpen}     value={stats.sesiones      > 0 ? `${stats.sesiones}+`      : '—'} label="Sesiones académicas"  color="#1B4332" delay={0.05} />
+                <StatCard icon={BookOpen}     value={stats.sesiones      > 0 ? `${stats.sesiones}+`      : '—'} label="Sesiones académicas"  color="#22573E" delay={0.05} />
                 <StatCard icon={Mic2}         value={stats.conferencistas > 0 ? `${stats.conferencistas}+` : '—'} label="Conferencistas"        color="#D97706" delay={0.15} />
                 <StatCard icon={CalendarDays} value={stats.dias           > 0 ? `${stats.dias}`            : '—'} label="Días de actividades"   color="#2563EB" delay={0.25} />
                 <StatCard icon={Users}        value="4"                                                           label="Programas académicos"  color="#7C3AED" delay={0.35} />
@@ -621,20 +620,20 @@ export default function ActiveEventView({ jornada }) {
       ══════════════════════════════════════════ */}
       <section className="bg-white dark:bg-[#0E1F15] py-24" ref={ejesRef}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className={`flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-14 ${ejesVis ? 'anim-fade-up' : 'opacity-0'}`}>
+          <div className={`flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-14 ${ejesVis ? 'anim-reveal' : 'opacity-0'}`}>
             <div>
-              <span className="inline-flex items-center gap-2 text-[#1B4332]/60 dark:text-emerald-600 font-bold text-xs uppercase tracking-[0.15em] mb-3">
-                <span className="w-6 h-px bg-[#1B4332]/40 dark:bg-emerald-800" />
+              <span className="inline-flex items-center gap-2 text-[#22573E]/60 dark:text-emerald-600 font-bold text-xs uppercase tracking-[0.15em] mb-3">
+                <span className="w-6 h-px bg-[#22573E]/40 dark:bg-emerald-800" />
                 Ejes temáticos
               </span>
               <h2 className="text-4xl font-extrabold text-gray-900 dark:text-gray-100 leading-tight">
-                Filtra por tu <span className="text-[#1B4332] dark:text-emerald-400">área académica</span>
+                Filtra por tu <span className="text-[#22573E] dark:text-emerald-400">área académica</span>
               </h2>
               <p className="text-gray-500 dark:text-gray-400 mt-2 text-base">
                 Haz clic en tu carrera para ver las sesiones que te interesan.
               </p>
             </div>
-            <Link to="/agenda" className="text-[#1B4332] dark:text-emerald-400 font-semibold text-sm hover:underline flex items-center gap-1 shrink-0">
+            <Link to="/agenda" className="text-[#22573E] dark:text-emerald-400 font-semibold text-sm hover:underline flex items-center gap-1 shrink-0">
               Ver agenda completa <ArrowRight size={14} />
             </Link>
           </div>
@@ -643,8 +642,8 @@ export default function ActiveEventView({ jornada }) {
               <button
                 key={programa}
                 onClick={() => navigate(`/agenda?programa=${programa}`)}
-                className={`group relative text-left bg-gradient-to-br ${bg} ${bgDark} p-6 rounded-2xl border-2 border-transparent hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer ${ejesVis ? 'anim-fade-up' : 'opacity-0'}`}
-                style={{ animationDelay: `${0.1 + i * 0.08}s` }}
+                className={`group relative text-left bg-gradient-to-br ${bg} ${bgDark} p-6 rounded-2xl border-2 border-transparent hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer ${ejesVis ? 'anim-reveal' : 'opacity-0'}`}
+                style={{ animationDelay: `${i * 0.12}s` }}
                 onMouseEnter={e => { e.currentTarget.style.borderColor = `${acento}30` }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor = 'transparent' }}
               >
@@ -672,13 +671,13 @@ export default function ActiveEventView({ jornada }) {
       ══════════════════════════════════════════ */}
       <section className="bg-[#F8FAFB] dark:bg-[#0A1A11] py-24" ref={sesRef}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className={`flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-14 ${sesVis ? 'anim-fade-up' : 'opacity-0'}`}>
+          <div className={`flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-14 ${sesVis ? 'anim-reveal' : 'opacity-0'}`}>
             <div>
-              <span className="text-[#1B4332]/50 dark:text-emerald-800 font-bold text-xs uppercase tracking-[0.15em] mb-2 block">
+              <span className="text-[#22573E]/50 dark:text-emerald-800 font-bold text-xs uppercase tracking-[0.15em] mb-2 block">
                 Programa {jornada ? new Date(jornada.fecha_inicio + 'T12:00:00').getFullYear() : '2026'}
               </span>
               <h2 className="text-4xl font-extrabold text-gray-900 dark:text-gray-100 leading-tight">
-                Sesiones <span className="text-[#1B4332] dark:text-emerald-400">destacadas</span>
+                Sesiones <span className="text-[#22573E] dark:text-emerald-400">destacadas</span>
               </h2>
               <p className="text-gray-500 dark:text-gray-400 mt-2">No te pierdas los eventos más esperados de la jornada.</p>
             </div>
@@ -721,7 +720,7 @@ export default function ActiveEventView({ jornada }) {
           <div className="absolute bottom-4 right-8 w-56 h-56 border border-amber-700/10 rounded-full" />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-emerald-900/20 rounded-full blur-3xl" />
         </div>
-        <div className={`relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center ${ctaVis ? 'anim-fade-up' : 'opacity-0'}`}>
+        <div className={`relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center ${ctaVis ? 'anim-reveal' : 'opacity-0'}`}>
           <div className="w-14 h-14 bg-amber-400/20 border border-amber-400/30 rounded-2xl flex items-center justify-center mx-auto mb-6">
             <MapPin className="w-7 h-7 text-amber-400" />
           </div>
@@ -742,7 +741,7 @@ export default function ActiveEventView({ jornada }) {
       ══════════════════════════════════════════ */}
       <section className="bg-[#F0F7F4] dark:bg-[#0A1A11] py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-gradient-to-br from-[#1B4332] to-[#0D2B1D] rounded-3xl p-8 sm:p-12 md:p-14 relative overflow-hidden">
+          <div className="bg-gradient-to-br from-[#22573E] to-[#0D2B1D] rounded-3xl p-8 sm:p-12 md:p-14 relative overflow-hidden">
             <div className="absolute right-0 top-0 bottom-0 w-64 pointer-events-none overflow-hidden rounded-r-3xl hidden lg:block">
               <div className="absolute right-8 top-8 w-32 h-32 border-2 border-white/5 rounded-full" />
               <div className="absolute right-4 top-4 w-48 h-48 border border-white/5 rounded-full" />

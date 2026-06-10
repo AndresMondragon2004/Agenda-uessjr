@@ -18,7 +18,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#1B4332] border border-emerald-700/40 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-[#22573E] border border-emerald-700/40 flex items-center justify-center">
                 <GraduationCap className="w-5 h-5 text-amber-400" />
               </div>
               <div>
@@ -79,7 +79,7 @@ export default function Footer() {
                 Instituciones
               </p>
               <div className="flex items-center gap-6 grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-500">
-                <img src="https://sic.cultura.gob.mx/imagenes_cache/universidad_4260_g_74199.png" alt="UMB" className="h-10 object-contain" onError={e => { e.target.style.display='none' }} />
+                <img src="https://sic.cultura.gob.mx/imagenes_cache/universidad_4260_g_74199.png" alt="UMB" className="h-10 object-contain brightness-0 invert" onError={e => { e.target.style.display='none' }} />
                 <img src="/images/logos/ues-sjr.png" alt="UES SJR" className="h-10 object-contain brightness-0 invert" onError={e => { e.target.style.display='none' }} />
               </div>
             </div>

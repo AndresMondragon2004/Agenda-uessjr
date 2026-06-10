@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, useMemo } from 'react'
 import { supabase } from '../services/supabase'
 import { gasService } from '../services/gas.service'
 import { telegramService } from '../services/telegram.service'
+import { actividadService } from '../services/actividad.service'
 
 const AuthContext = createContext(null)
 
@@ -144,6 +145,15 @@ export function AuthProvider({ children }) {
           programa_academico: datosEstudiante.programa_academico,
         }])
       if (dbError) throw dbError
+
+      // Log Actividad Reciente
+      await actividadService.logActividad(
+        'estudiante',
+        'registro',
+        `Nuevo registro de estudiante: ${datosEstudiante.nombre} ${datosEstudiante.apellidos}`,
+        { matricula: datosEstudiante.matricula, programa: datosEstudiante.programa_academico },
+        `${datosEstudiante.nombre} ${datosEstudiante.apellidos}`
+      )
 
       // 3. Notificaciones de bienvenida (Solo correo por ahora)
       const estudianteData = {

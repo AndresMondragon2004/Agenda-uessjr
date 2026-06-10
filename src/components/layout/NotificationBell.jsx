@@ -84,7 +84,7 @@ export default function NotificationBell() {
     <div className="relative">
       <button
         onClick={() => { setIsOpen(!isOpen); if (!isOpen) markAllAsRead() }}
-        className={`p-2 rounded-xl transition-all relative ${isOpen ? 'bg-[#1B4332]/10 text-[#1B4332] dark:text-emerald-400' : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-emerald-900/20'}`}
+        className={`p-2 rounded-xl transition-all relative ${isOpen ? 'bg-[#22573E]/10 text-[#22573E] dark:text-emerald-400' : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-emerald-900/20'}`}
       >
         <Bell size={20} />
         {unreadCount > 0 && (

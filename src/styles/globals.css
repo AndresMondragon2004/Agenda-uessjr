@@ -9,6 +9,8 @@ html {
 
 body {
   font-family: 'Plus Jakarta Sans', sans-serif;
+  background-color: #FAF9F6; /* Ivory base for light mode */
+  color: #1a1a1a;
 }
 
 /* Disable transitions for elements where it might look weird or cause lag */
@@ -91,6 +93,56 @@ body {
 .anim-delay-600 { animation-delay: 0.6s; }
 .anim-delay-700 { animation-delay: 0.7s; }
 .anim-delay-800 { animation-delay: 0.8s; }
+
+/* ─── Premium Animation Suite ────────────────────────────────────────── */
+@keyframes softReveal {
+  from { 
+    opacity: 0; 
+    filter: blur(8px);
+    transform: translateY(24px) scale(0.96); 
+  }
+  to { 
+    opacity: 1; 
+    filter: blur(0);
+    transform: translateY(0) scale(1); 
+  }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.anim-reveal { 
+  animation: softReveal 0.9s cubic-bezier(0.22, 1, 0.36, 1) both; 
+}
+
+.anim-slide-right { animation: slideInRight 0.8s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.anim-slide-left { animation: slideInLeft 0.8s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+.anim-stagger-1 { animation-delay: 0.1s; }
+.anim-stagger-2 { animation-delay: 0.2s; }
+.anim-stagger-3 { animation-delay: 0.3s; }
+.anim-stagger-4 { animation-delay: 0.4s; }
+.anim-stagger-5 { animation-delay: 0.5s; }
+.anim-stagger-6 { animation-delay: 0.6s; }
+.anim-stagger-7 { animation-delay: 0.7s; }
+.anim-stagger-8 { animation-delay: 0.8s; }
+.anim-stagger-9 { animation-delay: 0.9s; }
+.anim-stagger-10 { animation-delay: 1s; }
+
+.hover-premium {
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.hover-premium:hover {
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.05), 0 8px 10px -6px rgb(0 0 0 / 0.05);
+}
 
 /* Shimmer skeleton */
 .shimmer-bg {

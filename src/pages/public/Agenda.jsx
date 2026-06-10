@@ -176,11 +176,11 @@ export default function Agenda() {
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
               <p className="text-sm text-gray-400 dark:text-gray-500 mb-1 flex items-center gap-1">
-                <Link to="/" className="hover:text-[#1B4332] dark:text-gray-500 dark:hover:text-emerald-400 transition-colors">Inicio</Link>
+                <Link to="/" className="hover:text-[#22573E] dark:text-gray-500 dark:hover:text-emerald-400 transition-colors">Inicio</Link>
                 <span>/</span>
                 <span className="text-gray-600 dark:text-gray-400">Agenda</span>
               </p>
-              <h1 className="text-3xl sm:text-4xl font-extrabold text-[#1B4332] dark:text-emerald-400 tracking-tight">
+              <h1 className="text-3xl sm:text-4xl font-extrabold text-[#22573E] dark:text-emerald-400 tracking-tight">
                 Agenda de la jornada
               </h1>
               <p className="text-gray-500 dark:text-gray-400 mt-2 max-w-xl">
@@ -190,7 +190,7 @@ export default function Agenda() {
                 <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
                   <span className="font-semibold text-gray-700 dark:text-gray-300">{totalFiltradas}</span> sesiones
                   {progFiltro !== 'todos' && (
-                    <span> · Filtrando por <span className="font-semibold text-[#1B4332] dark:text-emerald-400">{PROGRAMA_LABELS[progFiltro]}</span></span>
+                    <span> · Filtrando por <span className="font-semibold text-[#22573E] dark:text-emerald-400">{PROGRAMA_LABELS[progFiltro]}</span></span>
                   )}
                 </p>
               )}
@@ -198,7 +198,7 @@ export default function Agenda() {
             <button 
               onClick={handleDownloadPDF}
               disabled={generating || loading || sesiones.length === 0}
-              className="flex items-center gap-2 px-5 py-2.5 border-2 border-[#1B4332] dark:border-emerald-700 text-[#1B4332] dark:text-emerald-400 font-semibold rounded-xl hover:bg-[#1B4332] dark:hover:bg-emerald-800 hover:text-white transition-all text-sm min-h-[44px] shrink-0 disabled:opacity-50"
+              className="flex items-center gap-2 px-5 py-2.5 border-2 border-[#22573E] dark:border-emerald-700 text-[#22573E] dark:text-emerald-400 font-semibold rounded-xl hover:bg-[#22573E] dark:hover:bg-emerald-800 hover:text-white transition-all text-sm min-h-[44px] shrink-0 disabled:opacity-50"
             >
               {generating ? (
                 <>
@@ -231,7 +231,7 @@ export default function Agenda() {
                   onClick={() => updateProgFiltro('todos')}
                   className={`px-4 py-1.5 rounded-xl text-[11px] font-bold whitespace-nowrap transition-all shrink-0 ${
                     progFiltro === 'todos'
-                      ? 'bg-[#1B4332] text-white shadow-md'
+                      ? 'bg-[#22573E] text-white shadow-md'
                       : 'bg-gray-100 dark:bg-emerald-950/30 text-gray-500 dark:text-gray-400 hover:bg-gray-200'
                   }`}
                 >
@@ -266,8 +266,8 @@ export default function Agenda() {
                     onClick={() => setDiaFiltro('todos')}
                     className={`px-4 py-2 rounded-xl text-[11px] font-bold whitespace-nowrap transition-all border-2 ${
                       diaFiltro === 'todos'
-                        ? 'bg-[#1B4332] text-white border-[#1B4332] shadow-md'
-                        : 'bg-white dark:bg-[#0F2018] text-gray-500 dark:text-gray-400 border-gray-100 dark:border-emerald-900/30 hover:border-[#1B4332] dark:hover:border-emerald-700'
+                        ? 'bg-[#22573E] text-white border-[#22573E] shadow-md'
+                        : 'bg-white dark:bg-[#0F2018] text-gray-500 dark:text-gray-400 border-gray-100 dark:border-emerald-900/30 hover:border-[#22573E] dark:hover:border-emerald-700'
                     }`}
                   >
                     Todos
@@ -277,8 +277,8 @@ export default function Agenda() {
                       onClick={() => setDiaFiltro(dia.id)}
                       className={`px-4 py-2 rounded-xl text-[11px] font-bold whitespace-nowrap transition-all border-2 ${
                         diaFiltro === dia.id
-                          ? 'bg-[#1B4332] text-white border-[#1B4332] shadow-md'
-                          : 'bg-white dark:bg-[#0F2018] text-gray-500 dark:text-gray-400 border-gray-100 dark:border-emerald-900/30 hover:border-[#1B4332] dark:hover:border-emerald-700'
+                          ? 'bg-[#22573E] text-white border-[#22573E] shadow-md'
+                          : 'bg-white dark:bg-[#0F2018] text-gray-500 dark:text-gray-400 border-gray-100 dark:border-emerald-900/30 hover:border-[#22573E] dark:hover:border-emerald-700'
                       }`}
                     >
                       {formatShortDay(dia)}
@@ -293,7 +293,7 @@ export default function Agenda() {
                 <select
                   value={tipoFiltro}
                   onChange={e => setTipoFiltro(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-100 dark:border-emerald-900/50 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-300 focus:border-[#1B4332] outline-none bg-gray-50/50 dark:bg-emerald-950/20"
+                  className="w-full px-4 py-2 border border-gray-100 dark:border-emerald-900/50 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-300 focus:border-[#22573E] outline-none bg-gray-50/50 dark:bg-emerald-950/20"
                 >
                   <option value="todos">Todos los tipos</option>
                   {Object.entries(TIPO_LABELS).map(([v, l]) => (
@@ -312,7 +312,7 @@ export default function Agenda() {
                     value={busqueda}
                     onChange={e => setBusqueda(e.target.value)}
                     placeholder="Título, ponente o institución..."
-                    className="w-full pl-9 pr-4 py-2 border border-gray-100 dark:border-emerald-900/50 rounded-xl text-xs font-bold focus:border-[#1B4332] outline-none bg-gray-50/50 dark:bg-emerald-950/20 dark:text-gray-300"
+                    className="w-full pl-9 pr-4 py-2 border border-gray-100 dark:border-emerald-900/50 rounded-xl text-xs font-bold focus:border-[#22573E] outline-none bg-gray-50/50 dark:bg-emerald-950/20 dark:text-gray-300"
                   />
                   {(diaFiltro !== 'todos' || tipoFiltro !== 'todos' || progFiltro !== 'todos' || busqueda) && (
                     <button
@@ -349,7 +349,7 @@ export default function Agenda() {
             {sesiones.length > 0 && (
               <button
                 onClick={() => { setDiaFiltro('todos'); setTipoFiltro('todos'); updateProgFiltro('todos'); setBusqueda('') }}
-                className="mt-4 px-5 py-2 bg-[#1B4332] text-white font-semibold rounded-xl text-sm hover:bg-emerald-800 transition-colors"
+                className="mt-4 px-5 py-2 bg-[#22573E] text-white font-semibold rounded-xl text-sm hover:bg-emerald-800 transition-colors"
               >
                 Ver todas las sesiones
               </button>
@@ -363,7 +363,7 @@ export default function Agenda() {
                 {/* Day header */}
                 <div className="flex items-center gap-4 mb-5">
                   <div className="h-px flex-1 bg-gray-200 dark:bg-emerald-900/40" />
-                  <div className="flex items-center gap-2 bg-[#1B4332] text-white px-4 py-1.5 rounded-full">
+                  <div className="flex items-center gap-2 bg-[#22573E] text-white px-4 py-1.5 rounded-full">
                     <span className="text-xs font-bold capitalize">{formatDiaHeader(dia)}</span>
                   </div>
                   <div className="h-px flex-1 bg-gray-200 dark:bg-emerald-900/40" />
@@ -374,12 +374,12 @@ export default function Agenda() {
                   {sesDia.map(ses => (
                     <div key={ses.id}
                          className="group bg-white dark:bg-[#122A1C] rounded-2xl shadow-sm hover:shadow-md transition-all border border-gray-100 dark:border-emerald-900/40 border-l-4 p-5 sm:p-6"
-                         style={{ borderLeftColor: '#1B4332' }}>
+                         style={{ borderLeftColor: '#22573E' }}>
                       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-6">
 
                         {/* Time desktop */}
                         <div className="hidden sm:flex flex-col items-center justify-start shrink-0 w-16 pt-0.5">
-                          <p className="font-bold text-[#1B4332] dark:text-emerald-400 text-base leading-none">
+                          <p className="font-bold text-[#22573E] dark:text-emerald-400 text-base leading-none">
                             {ses.hora_inicio?.slice(0, 5)}
                           </p>
                           <div className="w-px h-4 bg-gray-200 dark:bg-emerald-900/50 my-1" />
@@ -391,7 +391,7 @@ export default function Agenda() {
                         {/* Content */}
                         <div className="flex-1 min-w-0">
                           {/* Mobile time */}
-                          <div className="sm:hidden flex items-center gap-2 text-sm text-[#1B4332] dark:text-emerald-400 font-bold mb-2">
+                          <div className="sm:hidden flex items-center gap-2 text-sm text-[#22573E] dark:text-emerald-400 font-bold mb-2">
                             <Clock size={13} />
                             {ses.hora_inicio?.slice(0, 5)}
                             {ses.hora_fin && ` — ${ses.hora_fin.slice(0, 5)}`}
@@ -421,14 +421,14 @@ export default function Agenda() {
                             )}
                           </div>
 
-                          <h3 className="font-bold text-gray-900 dark:text-gray-100 text-base leading-snug mb-2 group-hover:text-[#1B4332] dark:group-hover:text-emerald-400 transition-colors">
+                          <h3 className="font-bold text-gray-900 dark:text-gray-100 text-base leading-snug mb-2 group-hover:text-[#22573E] dark:group-hover:text-emerald-400 transition-colors">
                             {ses.nombre}
                           </h3>
 
                           {ses.ponente_nombre && (
                             <div className="flex items-center gap-2">
-                              <div className="w-6 h-6 rounded-full bg-[#1B4332]/10 dark:bg-emerald-900/50 flex items-center justify-center shrink-0">
-                                <span className="text-[#1B4332] dark:text-emerald-400 text-[10px] font-bold">
+                              <div className="w-6 h-6 rounded-full bg-[#22573E]/10 dark:bg-emerald-900/50 flex items-center justify-center shrink-0">
+                                <span className="text-[#22573E] dark:text-emerald-400 text-[10px] font-bold">
                                   {ses.ponente_nombre.charAt(0).toUpperCase()}
                                 </span>
                               </div>
@@ -448,13 +448,13 @@ export default function Agenda() {
                           <div className="flex gap-2">
                             <Link
                               to={`/agenda/${ses.id}`}
-                              className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 bg-[#1B4332] text-white text-xs font-bold rounded-xl hover:bg-emerald-800 transition-colors min-h-[42px] shadow-sm"
+                              className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 bg-[#22573E] text-white text-xs font-bold rounded-xl hover:bg-emerald-800 transition-colors min-h-[42px] shadow-sm"
                             >
                               Detalles <ChevronRight size={13} />
                             </Link>
                             <button
                               onClick={(e) => { e.preventDefault(); handleShare(ses.id) }}
-                              className="px-3 py-2.5 bg-gray-100 dark:bg-emerald-900/30 text-gray-500 dark:text-gray-400 hover:text-[#1B4332] dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/50 rounded-xl transition-all min-h-[42px]"
+                              className="px-3 py-2.5 bg-gray-100 dark:bg-emerald-900/30 text-gray-500 dark:text-gray-400 hover:text-[#22573E] dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/50 rounded-xl transition-all min-h-[42px]"
                               aria-label="Copiar enlace"
                               title="Copiar enlace"
                             >

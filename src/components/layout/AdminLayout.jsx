@@ -123,7 +123,7 @@ function Sidebar({ navigate, location, open, onClose, user, onLogoutClick, onTog
                   onClick={() => { navigate(item.path); onClose() }}
                   className={`w-full text-left px-3 py-2 rounded-xl text-sm transition-all flex items-center gap-3 group relative
                     ${isActive
-                      ? 'bg-[#1B4332] text-white font-bold'
+                      ? 'bg-[#22573E] text-white font-bold'
                       : 'text-white/50 hover:text-white/90 hover:bg-white/5'}`}
                 >
                   <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-[#34D399]' : 'text-white/20 group-hover:text-white/40'}`} />
@@ -248,7 +248,7 @@ export default function AdminLayout() {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#F2F5F3] dark:bg-[#0A1A11]">
+    <div className="flex min-h-screen bg-[#F5F4F0] dark:bg-[#0A1A11]">
       <ScrollToTop />
       {/* Mobile topbar */}
       <div className="fixed top-0 left-0 right-0 h-14 bg-[#001F12] z-40 flex items-center justify-between px-4 lg:hidden border-b border-white/5">
@@ -306,7 +306,7 @@ export default function AdminLayout() {
       <button
         onClick={() => setShowCommandPalette(true)}
         aria-label="Abrir buscador"
-        className="fixed bottom-6 right-6 z-30 lg:hidden w-14 h-14 bg-[#1B4332] text-white rounded-full shadow-xl flex items-center justify-center hover:bg-emerald-700 active:scale-90 transition-all"
+        className="fixed bottom-6 right-6 z-30 lg:hidden w-14 h-14 bg-[#22573E] text-white rounded-full shadow-xl flex items-center justify-center hover:bg-emerald-700 active:scale-90 transition-all"
       >
         <Search size={22} />
       </button>

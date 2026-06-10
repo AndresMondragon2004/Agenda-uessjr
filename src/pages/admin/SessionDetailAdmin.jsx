@@ -197,7 +197,7 @@ export default function SessionDetailAdmin() {
         <button
           type="button"
           onClick={() => navigate('/admin/sesiones')}
-          className="text-gray-500 dark:text-gray-400 hover:text-[#1B4332] dark:hover:text-emerald-400 font-semibold text-sm flex items-center gap-1.5 transition-colors"
+          className="text-gray-500 dark:text-gray-400 hover:text-[#22573E] dark:hover:text-emerald-400 font-semibold text-sm flex items-center gap-1.5 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" /> <span className="hidden sm:inline">Volver a sesiones</span>
         </button>
@@ -205,7 +205,7 @@ export default function SessionDetailAdmin() {
           <button
             type="button"
             onClick={() => navigate('/admin/sesiones/editar/' + id)}
-            style={{ background: 'linear-gradient(135deg, #1B4332, #2D6A4F)' }}
+            style={{ background: 'linear-gradient(135deg, #22573E, #2D6A4F)' }}
             className="px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold text-white rounded-xl hover:-translate-y-0.5 hover:shadow-md transition-all shadow-sm flex items-center gap-1.5"
           >
             <Edit2 className="w-4 h-4" /> <span className="hidden sm:inline">Editar sesión</span>
@@ -224,7 +224,7 @@ export default function SessionDetailAdmin() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4 bg-emerald-50 dark:bg-emerald-900/20 px-6 py-4 rounded-3xl border border-emerald-100 dark:border-emerald-900/40 flex-1">
-            <div className="w-10 h-10 rounded-2xl bg-[#1B4332] text-white flex items-center justify-center shadow-lg">
+            <div className="w-10 h-10 rounded-2xl bg-[#22573E] text-white flex items-center justify-center shadow-lg">
               <UserCheck size={20} />
             </div>
             <div>
@@ -236,7 +236,7 @@ export default function SessionDetailAdmin() {
           <button
             onClick={handleExportAttendance}
             disabled={exporting || totalInscritos === 0}
-            className="px-6 py-4 bg-white dark:bg-[#122A1C] border border-gray-100 dark:border-emerald-900/40 text-[#1B4332] dark:text-emerald-400 font-black text-[11px] uppercase tracking-widest rounded-3xl hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
+            className="px-6 py-4 bg-white dark:bg-[#122A1C] border border-gray-100 dark:border-emerald-900/40 text-[#22573E] dark:text-emerald-400 font-black text-[11px] uppercase tracking-widest rounded-3xl hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
           >
             {exporting ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -256,7 +256,7 @@ export default function SessionDetailAdmin() {
         {loading ? (
           <div className="flex items-center justify-center py-24">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1B4332] mx-auto mb-4" />
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#22573E] mx-auto mb-4" />
               <p className="text-gray-400 text-sm">Cargando detalles de la sesión...</p>
             </div>
           </div>
@@ -265,7 +265,7 @@ export default function SessionDetailAdmin() {
             <h2 className="text-xl font-bold text-gray-900 mb-2">Sesión no encontrada</h2>
             <p className="text-gray-400 mb-6">Esta sesión no existe o fue eliminada del sistema.</p>
             <button type="button" onClick={() => navigate('/admin/sesiones')}
-                    className="px-6 py-2.5 bg-[#1B4332] text-white font-semibold rounded-xl">
+                    className="px-6 py-2.5 bg-[#22573E] text-white font-semibold rounded-xl">
               Volver al listado
             </button>
           </div>
@@ -275,7 +275,7 @@ export default function SessionDetailAdmin() {
             <div className="lg:col-span-2 space-y-6">
               <div className="bg-white dark:bg-[#122A1C] rounded-2xl shadow-sm border border-gray-100 dark:border-emerald-900/40 overflow-hidden">
                 {/* Header visual */}
-                <div className="h-32 sm:h-40 bg-gradient-to-r from-[#1B4332] to-[#2D6A4F] relative p-8">
+                <div className="h-32 sm:h-40 bg-gradient-to-r from-[#22573E] to-[#2D6A4F] relative p-8">
                   <div className="absolute -bottom-6 left-8 flex items-center gap-3">
                     <span className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase shadow-sm border
                       ${TIPO_COLORS[sesion.tipo] || 'bg-white text-gray-700'}`}>
@@ -361,7 +361,7 @@ export default function SessionDetailAdmin() {
                            className="w-24 h-24 rounded-2xl object-cover shrink-0 border-4 border-gray-50 dark:border-emerald-900/40 shadow-sm" />
                     ) : (
                       <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/40 dark:to-emerald-900/60 flex items-center justify-center shrink-0 border-4 border-white dark:border-emerald-900/40 shadow-sm">
-                        <span className="text-[#1B4332] dark:text-emerald-400 text-3xl font-black">
+                        <span className="text-[#22573E] dark:text-emerald-400 text-3xl font-black">
                           {sesion.ponente_nombre.charAt(0).toUpperCase()}
                         </span>
                       </div>
@@ -416,7 +416,7 @@ export default function SessionDetailAdmin() {
                       <circle cx="64" cy="64" r="58" stroke="currentColor" strokeWidth="8" fill="transparent"
                               strokeDasharray={2 * Math.PI * 58}
                               strokeDashoffset={2 * Math.PI * 58 * (1 - pctOcupacion / 100)}
-                              className={`${pctOcupacion >= 100 ? 'text-red-500' : pctOcupacion >= 80 ? 'text-amber-500' : 'text-[#1B4332]'} transition-all duration-1000`} />
+                              className={`${pctOcupacion >= 100 ? 'text-red-500' : pctOcupacion >= 80 ? 'text-amber-500' : 'text-[#22573E]'} transition-all duration-1000`} />
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
                       <span className="text-3xl font-black text-gray-900 dark:text-white">{totalInscritos}</span>
@@ -499,7 +499,7 @@ export default function SessionDetailAdmin() {
                           navigator.clipboard.writeText(`${window.location.origin}/ponente/${sesion.acceso_ponente_token}`)
                           showToast('Enlace de ponente copiado al portapapeles')
                         }}
-                        className="px-3 py-2 bg-[#1B4332] hover:bg-emerald-800 text-white rounded-xl transition-colors shrink-0"
+                        className="px-3 py-2 bg-[#22573E] hover:bg-emerald-800 text-white rounded-xl transition-colors shrink-0"
                         title="Copiar enlace directo"
                       >
                         <Copy size={16} />

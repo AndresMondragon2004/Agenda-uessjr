@@ -36,7 +36,7 @@ function ToggleSwitch({ checked, onChange, label, hint }) {
         type="button"
         onClick={() => onChange(!checked)}
         className={`relative w-11 h-6 rounded-full transition-all duration-300 shrink-0 ml-4 border-2
-          ${checked ? 'bg-[#1B4332] border-[#1B4332]' : 'bg-gray-200 dark:bg-emerald-950/50 border-gray-200 dark:border-emerald-900/50'}`}
+          ${checked ? 'bg-[#22573E] border-[#22573E]' : 'bg-gray-200 dark:bg-emerald-950/50 border-gray-200 dark:border-emerald-900/50'}`}
       >
         <span className={`absolute top-0.5 left-0.5 bg-white rounded-full
           transition-all duration-300 shadow-sm
@@ -311,7 +311,7 @@ export default function ScenariosManagement() {
         <button
           type="button"
           onClick={handleOpenCreate}
-          className="flex items-center gap-2 px-5 py-2.5 bg-[#1B4332] text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-[#002F1D] hover:-translate-y-0.5 transition-all shadow-lg shadow-emerald-900/10"
+          className="flex items-center gap-2 px-5 py-2.5 bg-[#22573E] text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-[#002F1D] hover:-translate-y-0.5 transition-all shadow-lg shadow-emerald-900/10"
         >
           <Plus className="w-4 h-4" strokeWidth={3} /> Nuevo Escenario
         </button>
@@ -325,7 +325,7 @@ export default function ScenariosManagement() {
               <div className="w-10 h-10 bg-white dark:bg-emerald-800 rounded-xl flex items-center justify-center text-emerald-600 dark:text-emerald-400 shadow-sm">
                 <MapPin className="w-5 h-5" />
               </div>
-              <p className="text-xs font-bold text-[#1B4332] dark:text-emerald-100 leading-relaxed">
+              <p className="text-xs font-bold text-[#22573E] dark:text-emerald-100 leading-relaxed">
                 Los escenarios se asignan al registrar cada sesión. El cupo máximo del escenario determina el límite de inscripciones automáticas.
               </p>
             </div>
@@ -370,10 +370,10 @@ export default function ScenariosManagement() {
                           ${TIPO_STYLES[esc.tipo] || 'bg-gray-50 text-gray-400 border-gray-100'}`}>
                           {esc.tipo}
                         </span>
-                        <h3 className="text-xl font-black text-gray-900 dark:text-gray-100 group-hover:text-[#1B4332] dark:group-hover:text-emerald-400 transition-colors">{esc.nombre}</h3>
+                        <h3 className="text-xl font-black text-gray-900 dark:text-gray-100 group-hover:text-[#22573E] dark:group-hover:text-emerald-400 transition-colors">{esc.nombre}</h3>
                       </div>
                       <span className={`px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest shadow-sm
-                        ${esc.disponible ? 'bg-[#1B4332] text-white' : 'bg-red-50 text-red-600 border border-red-100'}`}>
+                        ${esc.disponible ? 'bg-[#22573E] text-white' : 'bg-red-50 text-red-600 border border-red-100'}`}>
                         {esc.disponible ? 'Disponible' : 'Cerrado'}
                       </span>
                     </div>
@@ -385,7 +385,7 @@ export default function ScenariosManagement() {
                     <div className="bg-gray-50/80 dark:bg-[#0F2018]/80 rounded-2xl p-4 mb-8 flex items-center justify-between gap-4">
                       <div>
                         <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">Aforo por sesión</p>
-                        <p className="text-3xl font-black text-[#1B4332] dark:text-emerald-400 leading-none">{esc.capacidad_maxima}</p>
+                        <p className="text-3xl font-black text-[#22573E] dark:text-emerald-400 leading-none">{esc.capacidad_maxima}</p>
                         <p className="text-[9px] font-bold text-gray-400 dark:text-gray-600 uppercase tracking-widest mt-1">personas</p>
                       </div>
                       <div className="h-12 w-px bg-gray-200 dark:bg-emerald-900/40 shrink-0" />
@@ -412,7 +412,7 @@ export default function ScenariosManagement() {
                       <div className="flex gap-2">
                         <button 
                           onClick={() => handleOpenEdit(esc)}
-                          className="p-2.5 text-gray-400 dark:text-gray-500 border border-gray-100 dark:border-emerald-900/40 rounded-xl hover:text-[#1B4332] dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:border-emerald-100 dark:hover:border-emerald-800/50 transition-all"
+                          className="p-2.5 text-gray-400 dark:text-gray-500 border border-gray-100 dark:border-emerald-900/40 rounded-xl hover:text-[#22573E] dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:border-emerald-100 dark:hover:border-emerald-800/50 transition-all"
                         >
                           <Edit2 className="w-4 h-4" />
                         </button>
@@ -433,10 +433,10 @@ export default function ScenariosManagement() {
                 onClick={handleOpenCreate}
                 className="bg-gray-50/50 dark:bg-[#122A1C]/50 border-4 border-dashed border-gray-100 dark:border-emerald-900/40 rounded-[32px] p-8 flex flex-col items-center justify-center gap-4 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:border-emerald-100 dark:hover:border-emerald-800/50 hover:scale-[0.98] transition-all min-h-[350px] group"
               >
-                <div className="w-16 h-16 bg-white dark:bg-[#122A1C] rounded-3xl flex items-center justify-center text-gray-200 dark:text-gray-700 group-hover:text-[#1B4332] dark:group-hover:text-emerald-400 group-hover:shadow-xl transition-all">
+                <div className="w-16 h-16 bg-white dark:bg-[#122A1C] rounded-3xl flex items-center justify-center text-gray-200 dark:text-gray-700 group-hover:text-[#22573E] dark:group-hover:text-emerald-400 group-hover:shadow-xl transition-all">
                   <Plus className="w-8 h-8" strokeWidth={3} />
                 </div>
-                <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest group-hover:text-[#1B4332]">Añadir nuevo escenario</p>
+                <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest group-hover:text-[#22573E]">Añadir nuevo escenario</p>
               </button>
             </div>
 
@@ -468,7 +468,7 @@ export default function ScenariosManagement() {
       )}
 
       {toast && (
-        <div className="fixed bottom-8 left-4 right-4 sm:left-auto sm:right-8 z-50 bg-[#1B4332] text-white px-8 py-4 rounded-2xl shadow-2xl font-black text-sm flex items-center gap-3 animate-slide-up">
+        <div className="fixed bottom-8 left-4 right-4 sm:left-auto sm:right-8 z-50 bg-[#22573E] text-white px-8 py-4 rounded-2xl shadow-2xl font-black text-sm flex items-center gap-3 animate-slide-up">
           <Check className="w-5 h-5" strokeWidth={4} />
           {toast}
         </div>

@@ -6,7 +6,7 @@ export default {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#1B4332', // Emerald dark
+          DEFAULT: '#22573E', // Softer Eucalyptus green (formerly #1B4332)
           light: '#2D6A4F',
           dark: '#001F12', // Sidebar background
           emerald: '#34D399',
@@ -16,8 +16,21 @@ export default {
           light: '#FFFBEB',
         },
         bg: {
-          main: '#F2F5F3',
+          main: '#F4F6F4', // Soft sage/gray tone (formerly #F2F5F3)
           card: '#FFFFFF',
+        },
+        gray: {
+          50: '#F4F6F4',   // Softer sage background
+          100: '#E9EFEA',  // Very soft border
+          200: '#D6DFD9',  // Medium border
+          300: '#B8C6BD',  // Muted line
+          400: '#95A69B',  // Muted text light
+          500: '#738478',  // Regular secondary text
+          600: '#5A695F',  // Accent text
+          700: '#434E47',  // High contrast text
+          800: '#2E3531',  // Near black dark text
+          900: '#1C201E',  // Pure black text in sage theme
+          950: '#0D0F0E',
         }
       },
       fontFamily: {

@@ -1,5 +1,6 @@
 import { supabase } from './supabase'
 import { telegramService } from './telegram.service'
+import { actividadService } from './actividad.service'
 
 export const sesionesService = {
 
@@ -54,7 +55,7 @@ export const sesionesService = {
     return data
   },
 
-  async create(sesion) {
+  async create(sesion, adminName = 'Sistema') {
     const payload = { ...sesion }
     delete payload.dias_jornada
     delete payload.escenarios
@@ -66,10 +67,19 @@ export const sesionesService = {
       .select()
       .single()
     if (error) throw error
+
+    await actividadService.logActividad(
+      'sesion',
+      'crear',
+      `${adminName} creó la sesión: ${data.nombre}`,
+      { nuevo: data },
+      adminName
+    )
+
     return data
   },
 
-  async update(id, sesion) {
+  async update(id, sesion, adminName = 'Sistema') {
     const sesionAnterior = await this.getById(id).catch(() => null);
 
     const payload = { ...sesion }
@@ -85,6 +95,14 @@ export const sesionesService = {
       .select()
       .single()
     if (error) throw error
+
+    await actividadService.logActividad(
+      'sesion',
+      'modificar',
+      `${adminName} modificó la sesión: ${data.nombre}`,
+      { antes: sesionAnterior, despues: data },
+      adminName
+    )
 
     if (sesionAnterior) {
       this.getById(id).then(sesionNueva => {
@@ -129,12 +147,26 @@ export const sesionesService = {
     }
   },
 
-  async delete(id) {
+  async delete(id, adminName = 'Sistema') {
+    const { data: oldData } = await supabase
+      .from('sesiones')
+      .select('nombre')
+      .eq('id', id)
+      .single()
+
     const { error } = await supabase
       .from('sesiones')
       .delete()
       .eq('id', id)
     if (error) throw error
+
+    await actividadService.logActividad(
+      'sesion',
+      'eliminar',
+      `${adminName} eliminó la sesión: ${oldData?.nombre || id}`,
+      { eliminado: oldData },
+      adminName
+    )
   },
 
   async updateEstado(id, estado) {

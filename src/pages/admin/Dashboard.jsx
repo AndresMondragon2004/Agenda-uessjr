@@ -3,22 +3,24 @@ import { useNavigate } from 'react-router-dom'
 import {
   CalendarDays, Clock, Users, Inbox,
   ChevronRight, Plus, UserPlus, FileSearch,
-  BarChart2, Bell, FileText, ChevronLeft, Camera, Send, Megaphone, X, Check
+  BarChart2, Bell, FileText, ChevronLeft, Camera, Send, Megaphone, X, Check,
+  Activity, History
 } from 'lucide-react'
 import { jornadaService } from '../../services/jornada.service'
 import { sesionesService } from '../../services/sesiones.service'
 import { notificacionesService } from '../../services/notificaciones.service'
+import { actividadService } from '../../services/actividad.service'
 import { supabase } from '../../services/supabase'
 
 // ─── Stat Card ────────────────────────────────────────────────────────────────
-function StatCard({ icon: Icon, value, label, sub, subLink, dark = false, urgent = false, onClick }) {
+function StatCard({ icon: Icon, value, label, sub, subLink, dark = false, urgent = false, onClick, className = '' }) {
   return (
     <div
       onClick={onClick}
-      className={`rounded-2xl p-6 relative overflow-hidden transition-all duration-300
-                  hover:shadow-lg hover:-translate-y-0.5 cursor-pointer
+      className={`rounded-2xl p-6 relative overflow-hidden anim-reveal hover-premium cursor-pointer
+                  ${className}
                   ${dark
-                    ? 'bg-[#1B4332] text-white'
+                    ? 'bg-[#22573E] text-white'
                     : 'bg-white dark:bg-[#122A1C] text-gray-900 dark:text-gray-100 shadow-sm border border-gray-100 dark:border-emerald-900/40'}`}
     >
       {urgent && (
@@ -37,7 +39,7 @@ function StatCard({ icon: Icon, value, label, sub, subLink, dark = false, urgent
       )}
 
       <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-4
-                      ${dark ? 'bg-white/15 text-white' : 'bg-[#E6F4F0] dark:bg-emerald-900/30 text-[#1B4332] dark:text-emerald-400'}`}>
+                      ${dark ? 'bg-white/15 text-white' : 'bg-[#E6F4F0] dark:bg-emerald-900/30 text-[#22573E] dark:text-emerald-400'}`}>
         <Icon size={20} />
       </div>
 
@@ -60,7 +62,7 @@ function StatCard({ icon: Icon, value, label, sub, subLink, dark = false, urgent
         </p>
         {subLink && (
           <button className={`text-xs font-bold flex items-center gap-1 shrink-0 ml-2
-                            ${dark ? 'text-white/80 hover:text-white' : 'text-[#1B4332] dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300'}`}>
+                            ${dark ? 'text-white/80 hover:text-white' : 'text-[#22573E] dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300'}`}>
             {subLink} <ChevronRight size={12} />
           </button>
         )}
@@ -101,11 +103,11 @@ function WeeklyChart({ sesiones = [] }) {
     <div className="bg-white dark:bg-[#122A1C] rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-emerald-900/40 flex-1">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-1 h-5 bg-[#1B4332] rounded-full" />
+          <div className="w-1 h-5 bg-[#22573E] rounded-full" />
           <h3 className="font-bold text-gray-900 dark:text-gray-100 text-sm">Distribución de sesiones</h3>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-2.5 h-2.5 rounded-sm bg-[#1B4332]" />
+          <div className="w-2.5 h-2.5 rounded-sm bg-[#22573E]" />
           <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
             Por día
           </span>
@@ -152,7 +154,7 @@ function WeeklyChart({ sesiones = [] }) {
                                 group-hover:opacity-90 shadow-md
                                 ${d.isToday
                                   ? 'bg-gradient-to-t from-[#D97706] to-[#F59E0B]'
-                                  : 'bg-gradient-to-t from-[#1B4332] to-[#34D399]'}`}
+                                  : 'bg-gradient-to-t from-[#22573E] to-[#34D399]'}`}
                     style={{
                       height: `${Math.max((d.count / maxCount) * 140, 4)}px`,
                     }}
@@ -184,7 +186,7 @@ function WeeklyChart({ sesiones = [] }) {
       {/* Leyenda */}
       <div className="flex items-center gap-4 mt-2 pt-3 border-t border-gray-50 dark:border-emerald-900/30">
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-sm bg-[#1B4332]" />
+          <div className="w-3 h-3 rounded-sm bg-[#22573E]" />
           <span className="text-[10px] text-gray-400 dark:text-gray-500 font-medium">Sesiones</span>
         </div>
         <div className="flex items-center gap-1.5">
@@ -212,7 +214,7 @@ function ConfirmModal({ message, onConfirm, onCancel, loading }) {
         <div className="space-y-3">
           <button
             type="button" onClick={onConfirm} disabled={loading}
-            className="w-full py-2.5 bg-[#1B4332] text-white font-semibold rounded-lg hover:bg-emerald-800 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full py-2.5 bg-[#22573E] text-white font-semibold rounded-lg hover:bg-emerald-800 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {loading ? <><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />Enviando...</> : <><Send className="w-4 h-4" />Sí, emitir notificación</>}
           </button>
@@ -239,33 +241,31 @@ function QuickActions({ navigate }) {
     { label: 'Ver reportes',         icon: BarChart2,   path: '/admin/reportes'       },
   ]
   return (
-    <div className="bg-white dark:bg-[#122A1C] rounded-[2.5rem] p-8 shadow-sm border border-gray-100 dark:border-emerald-900/40 w-full">
+    <div className="bg-white dark:bg-[#122A1C] rounded-[2.5rem] p-8 shadow-sm border border-gray-100 dark:border-emerald-900/40 w-full h-full">
       <div className="flex items-center gap-3 mb-8">
         <div className="w-1.5 h-6 bg-[#D97706] rounded-full shadow-sm" />
         <h3 className="font-black text-gray-900 dark:text-gray-100 text-sm uppercase tracking-widest">Acciones rápidas</h3>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
         {actions.map((act, i) => (
           <button
             key={i}
             onClick={() => navigate(act.path)}
-            className="w-full flex items-center justify-between p-4 rounded-2xl
-                       bg-gray-50/50 dark:bg-[#0F2018] border border-gray-100 dark:border-emerald-900/30
-                       hover:border-emerald-500/30 hover:bg-white dark:hover:bg-emerald-900/20
-                       transition-all duration-300 group shadow-sm"
+            className="flex items-center gap-3 p-3 rounded-2xl
+                       bg-gray-50/30 dark:bg-[#0F2018] border border-gray-100/50 dark:border-emerald-900/20
+                       hover:border-emerald-500/30 hover:bg-white dark:hover:bg-emerald-900/40
+                       transition-all duration-300 group h-full min-w-0"
           >
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-emerald-900/30 flex items-center justify-center
-                              text-gray-400 group-hover:bg-[#1B4332] group-hover:text-white
-                              transition-all duration-300 shadow-inner">
-                <act.icon size={18} />
-              </div>
-              <span className="text-xs font-black text-gray-700 dark:text-gray-300
-                               group-hover:text-gray-900 dark:group-hover:text-gray-100 transition-colors uppercase tracking-wider">
-                {act.label}
-              </span>
+            <div className="w-10 h-10 rounded-2xl bg-white dark:bg-emerald-950/50 flex items-center justify-center
+                            text-gray-400 group-hover:bg-[#22573E] group-hover:text-white
+                            transition-all duration-300 shrink-0 shadow-sm border border-gray-50 dark:border-emerald-900/10">
+              <act.icon size={18} />
             </div>
-            <ChevronRight size={16} className="text-gray-300 dark:text-gray-600 group-hover:text-[#1B4332] dark:group-hover:text-emerald-400 transition-colors" />
+            <span className="text-[9px] font-black text-gray-600 dark:text-gray-400
+                             group-hover:text-[#22573E] dark:group-hover:text-emerald-400 
+                             transition-colors uppercase tracking-wider leading-tight text-left break-words">
+              {act.label}
+            </span>
           </button>
         ))}
       </div>
@@ -321,7 +321,7 @@ function CalendarWidget() {
             key={d}
             className={`text-[11px] font-bold text-center py-1.5 mx-0.5 rounded-lg transition-all
                       ${d === todayDate
-                        ? 'bg-[#1B4332] text-white shadow-sm'
+                        ? 'bg-[#22573E] text-white shadow-sm'
                         : d < todayDate
                         ? 'text-gray-300 dark:text-gray-700'
                         : 'text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-emerald-900/20'}`}
@@ -333,7 +333,7 @@ function CalendarWidget() {
 
       {/* Hoy */}
       <div className="mt-4 pt-3 border-t border-gray-50 dark:border-emerald-900/30 flex items-center gap-2">
-        <div className="w-2 h-2 rounded-full bg-[#1B4332]" />
+        <div className="w-2 h-2 rounded-full bg-[#22573E]" />
         <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400">
           Hoy: {today.toLocaleDateString('es-MX', {
             weekday: 'long', day: 'numeric', month: 'long'
@@ -347,40 +347,52 @@ function CalendarWidget() {
 // ─── Popular Sessions Ranking ───────────────────────────────────────────────
 function PopularSessions({ ranking = [] }) {
   return (
-    <div className="bg-white dark:bg-[#122A1C] rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-emerald-900/40 flex-1">
-      <div className="flex items-center justify-between mb-6">
+    <div className="bg-white dark:bg-[#122A1C] rounded-[2.5rem] p-8 shadow-sm border border-gray-100 dark:border-emerald-900/40 flex-1 relative overflow-hidden">
+      <div className="flex items-center justify-between mb-8 relative z-10">
         <div className="flex items-center gap-3">
-          <div className="w-1 h-5 bg-[#D97706] rounded-full" />
-          <h3 className="font-bold text-gray-900 dark:text-gray-100 text-sm">Sesiones más populares</h3>
+          <div className="w-1.5 h-6 bg-[#D97706] rounded-full shadow-sm" />
+          <h3 className="font-black text-gray-900 dark:text-gray-100 text-sm uppercase tracking-widest">Top Sesiones</h3>
         </div>
-        <BarChart2 size={16} className="text-gray-300 dark:text-gray-600" />
+        <div className="flex items-center gap-2 px-3 py-1 bg-orange-50 dark:bg-orange-900/20 rounded-full border border-orange-100 dark:border-orange-900/30">
+          <BarChart2 size={12} className="text-[#D97706]" />
+          <span className="text-[10px] font-bold text-[#D97706] uppercase tracking-wider">Demanda</span>
+        </div>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-5 relative z-10">
         {ranking.length === 0 ? (
-          <p className="text-xs text-gray-400 dark:text-gray-600 py-10 text-center">Sin datos de inscripciones aún</p>
+          <div className="py-12 text-center">
+            <p className="text-xs font-bold text-gray-400 dark:text-gray-600">Sin datos de inscripciones aún</p>
+          </div>
         ) : (
-          ranking.map((s, i) => (
-            <div key={s.id} className="flex items-center gap-4 group">
-              <span className="text-xs font-black text-gray-300 dark:text-emerald-900/50 w-4">#{i+1}</span>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-bold text-gray-800 dark:text-gray-200 truncate group-hover:text-[#1B4332] dark:group-hover:text-emerald-400 transition-colors">
-                  {s.nombre}
-                </p>
-                <div className="w-full bg-gray-100 dark:bg-emerald-900/20 h-2.5 rounded-md mt-2 overflow-hidden shadow-inner">
+          ranking.map((s, i) => {
+            const pct = Math.min((s.inscritos / (s.escenarios?.capacidad_maxima || 100)) * 100, 100)
+            return (
+              <div key={s.id} className="group">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="text-[10px] font-black text-gray-300 dark:text-emerald-900/50 w-4 shrink-0">0{i+1}</span>
+                    <p className="text-xs font-black text-gray-800 dark:text-gray-200 truncate group-hover:text-[#D97706] transition-colors leading-tight">
+                      {s.nombre}
+                    </p>
+                  </div>
+                  <span className="text-[10px] font-black text-gray-400 dark:text-gray-500 shrink-0 ml-4">
+                    {s.inscritos}
+                  </span>
+                </div>
+                <div className="relative h-2 w-full bg-gray-50 dark:bg-emerald-950/40 rounded-full overflow-hidden shadow-inner border border-gray-100 dark:border-emerald-900/20">
                   <div 
-                    className="h-full bg-gradient-to-r from-[#D97706] to-[#F59E0B] rounded-md transition-all duration-1000 shadow-sm"
-                    style={{ width: `${Math.min((s.inscritos / (s.escenarios?.capacidad_maxima || 100)) * 100, 100)}%` }}
+                    className="absolute inset-y-0 left-0 bg-gradient-to-r from-[#D97706] to-[#F59E0B] rounded-full transition-all duration-1000 ease-out shadow-sm"
+                    style={{ width: `${pct}%` }}
                   />
+                  {/* Reflejo animado para el top 1 */}
+                  {i === 0 && (
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 translate-x-[-100%] animate-[shimmer_3s_infinite]" />
+                  )}
                 </div>
               </div>
-              <div className="text-right shrink-0">
-                <span className="text-[10px] font-black text-[#D97706] bg-orange-50 dark:bg-orange-900/20 px-2 py-0.5 rounded-lg">
-                  {s.inscritos} alumnos
-                </span>
-              </div>
-            </div>
-          ))
+            )
+          })
         )}
       </div>
     </div>
@@ -408,38 +420,147 @@ function ProgramChart({ data = {} }) {
   const total = entries.reduce((acc, curr) => acc + curr[1], 0) || 1
 
   return (
-    <div className="bg-white dark:bg-[#122A1C] rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-emerald-900/40 w-full lg:w-80">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-1 h-5 bg-[#2563EB] rounded-full" />
-        <h3 className="font-bold text-gray-900 dark:text-gray-100 text-sm">Participación por carrera</h3>
+    <div className="bg-white dark:bg-[#122A1C] rounded-[2.5rem] p-8 shadow-sm border border-gray-100 dark:border-emerald-900/40 w-full lg:w-80 relative overflow-hidden">
+      <div className="flex items-center gap-3 mb-8 relative z-10">
+        <div className="w-1.5 h-6 bg-[#2563EB] rounded-full shadow-sm" />
+        <h3 className="font-black text-gray-900 dark:text-gray-100 text-sm uppercase tracking-widest">Carreras</h3>
       </div>
       
-      <div className="space-y-5">
+      <div className="space-y-6 relative z-10">
         {entries.map(([key, val]) => (
-          <div key={key} className="space-y-1.5">
-            <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest">
-              <span className="text-gray-500 dark:text-gray-400">{LABELS[key] || key}</span>
-              <span className="text-gray-900 dark:text-white">{val}</span>
+          <div key={key} className="group">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest group-hover:text-gray-900 dark:group-hover:text-gray-100 transition-colors">
+                {LABELS[key] || key}
+              </span>
+              <span className="text-xs font-black text-gray-900 dark:text-white">
+                {Math.round((val / total) * 100)}%
+              </span>
             </div>
-            <div className="h-3 w-full bg-gray-50 dark:bg-emerald-950/40 rounded-md overflow-hidden shadow-inner">
+            <div className="h-2 w-full bg-gray-50 dark:bg-emerald-950/40 rounded-full overflow-hidden shadow-inner border border-gray-100 dark:border-emerald-900/20">
               <div 
-                className="h-full rounded-md transition-all duration-1000 shadow-sm relative overflow-hidden"
+                className="h-full rounded-full transition-all duration-1000 ease-out shadow-sm relative overflow-hidden"
                 style={{ 
                   width: `${(val / total) * 100}%`, 
-                  backgroundColor: COLORS[key] || '#ccc',
-                  backgroundImage: `linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.15) 100%)`
+                  backgroundColor: COLORS[key] || '#ccc'
                 }}
-              />
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+              </div>
             </div>
           </div>
         ))}
       </div>
       
-      <div className="mt-6 pt-4 border-t border-gray-50 dark:border-emerald-900/30">
-        <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 text-center uppercase tracking-widest">
-          Total alumnos: {total}
+      <div className="mt-8 pt-6 border-t border-gray-50 dark:border-emerald-900/30 text-center relative z-10">
+        <p className="text-[10px] font-black text-gray-400 dark:text-gray-600 uppercase tracking-widest leading-none">
+          {total} Alumnos activos
         </p>
       </div>
+    </div>
+  )
+}
+
+// ─── Recent Activity ───────────────────────────────────────────────────────
+function RecentActivity() {
+  const [actividades, setActividades] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function cargar() {
+      try {
+        const data = await actividadService.getRecientes(6)
+        setActividades(data)
+      } catch (err) {
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    cargar()
+  }, [])
+
+  const getIcon = (tipo) => {
+    switch (tipo) {
+      case 'jornada': return CalendarDays
+      case 'estudiante': return UserPlus
+      case 'sesion': return Clock
+      case 'propuesta': return FileSearch
+      default: return Activity
+    }
+  }
+
+  const getColor = (tipo) => {
+    switch (tipo) {
+      case 'jornada': return 'text-blue-500 bg-blue-50 dark:bg-blue-900/20'
+      case 'estudiante': return 'text-emerald-500 bg-emerald-50 dark:bg-emerald-900/20'
+      case 'sesion': return 'text-amber-500 bg-amber-50 dark:bg-amber-900/20'
+      case 'propuesta': return 'text-purple-500 bg-purple-50 dark:bg-purple-900/20'
+      default: return 'text-gray-500 bg-gray-50 dark:bg-gray-900/20'
+    }
+  }
+
+  return (
+    <div className="bg-white dark:bg-[#122A1C] rounded-[2.5rem] p-8 shadow-sm border border-gray-100 dark:border-emerald-900/40 w-full lg:w-[480px] shrink-0">
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-3">
+          <div className="w-1.5 h-6 bg-[#22573E] rounded-full shadow-sm" />
+          <h3 className="font-black text-gray-900 dark:text-gray-100 text-sm uppercase tracking-widest">Actividad Reciente</h3>
+        </div>
+        <div className="flex items-center gap-2 px-3 py-1 bg-gray-50 dark:bg-emerald-900/20 rounded-full border border-gray-100 dark:border-emerald-900/30">
+          <History size={12} className="text-gray-400" />
+          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Historial</span>
+        </div>
+      </div>
+
+      <div className="space-y-6">
+        {loading ? (
+          [1, 2, 3].map(i => (
+            <div key={i} className="flex gap-4 animate-pulse">
+              <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-emerald-900/20 shrink-0" />
+              <div className="flex-1 space-y-2">
+                <div className="h-3 bg-gray-100 dark:bg-emerald-900/20 rounded w-3/4" />
+                <div className="h-2 bg-gray-100 dark:bg-emerald-900/20 rounded w-1/2" />
+              </div>
+            </div>
+          ))
+        ) : actividades.length === 0 ? (
+          <div className="py-10 text-center">
+            <p className="text-xs font-bold text-gray-400 dark:text-gray-600">No hay actividad registrada aún</p>
+          </div>
+        ) : (
+          actividades.map((act) => {
+            const Icon = getIcon(act.entidad_tipo)
+            const colorClass = getColor(act.entidad_tipo)
+            const fecha = new Date(act.created_at)
+            
+            return (
+              <div key={act.id} className="flex gap-4 group">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110 ${colorClass}`}>
+                  <Icon size={18} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-bold text-gray-800 dark:text-gray-200 leading-tight">
+                    {act.descripcion}
+                  </p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-[10px] font-black text-[#22573E] dark:text-emerald-400 uppercase tracking-wider">
+                      {act.usuario_nombre}
+                    </span>
+                    <span className="text-[10px] text-gray-400 dark:text-gray-600 font-medium">
+                      • {fecha.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })} hrs, {fecha.toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )
+          })
+        )}
+      </div>
+      
+      <button className="w-full mt-8 py-3 bg-gray-50/50 dark:bg-[#0F2018] border border-gray-100 dark:border-emerald-900/30 rounded-2xl text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em] hover:text-[#22573E] dark:hover:text-emerald-400 transition-all">
+        Ver registro completo
+      </button>
     </div>
   )
 }
@@ -536,7 +657,7 @@ export default function Dashboard() {
   })
 
   return (
-    <div className="min-h-screen bg-[#F2F5F3] dark:bg-[#0A1A11]">
+    <div className="min-h-screen bg-[#F5F4F0] dark:bg-[#0A1A11]">
 
       {/* Topbar */}
       <header className="bg-white/90 dark:bg-[#122A1C]/90 backdrop-blur-md border-b border-gray-100 dark:border-emerald-900/40
@@ -555,12 +676,12 @@ export default function Dashboard() {
             <img 
               src="https://sic.cultura.gob.mx/imagenes_cache/universidad_4260_g_74199.png" 
               alt="Logo UMB" 
-              className="h-10 object-contain drop-shadow-sm" 
+              className="h-10 object-contain drop-shadow-sm dark:brightness-0 dark:invert" 
             />
             <img 
               src="/images/logos/ues-sjr.png" 
               alt="Logo UES SJR" 
-              className="h-10 object-contain brightness-0 dark:invert opacity-80 sm:opacity-100 drop-shadow-sm" 
+              className="h-10 object-contain dark:brightness-0 dark:invert opacity-80 sm:opacity-100 drop-shadow-sm" 
             />
           </div>
         </div>
@@ -569,7 +690,7 @@ export default function Dashboard() {
             onClick={() => setShowNotifications(!showNotifications)}
             className={`w-10 h-10 rounded-xl bg-white dark:bg-[#0F2018] border border-gray-100 dark:border-emerald-900/40
                              flex items-center justify-center transition-colors shadow-sm relative
-                             ${showNotifications ? 'text-[#1B4332] dark:text-emerald-400' : 'text-gray-400 dark:text-gray-500'}`}
+                             ${showNotifications ? 'text-[#22573E] dark:text-emerald-400' : 'text-gray-400 dark:text-gray-500'}`}
           >
             <Bell size={18} />
             {(totalPropuestas > 0 || sesionesLlenas.length > 0) && (
@@ -622,7 +743,7 @@ export default function Dashboard() {
                           className="w-full text-left p-4 hover:bg-gray-50 dark:hover:bg-emerald-900/20 transition-colors flex gap-3"
                         >
                           <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-900/40 flex items-center justify-center shrink-0">
-                            <FileText size={14} className="text-[#1B4332] dark:text-emerald-400" />
+                            <FileText size={14} className="text-[#22573E] dark:text-emerald-400" />
                           </div>
                           <div className="min-w-0">
                             <p className="text-xs font-bold text-gray-800 dark:text-gray-200 leading-tight">Nueva propuesta recibida</p>
@@ -638,7 +759,7 @@ export default function Dashboard() {
                 </div>
                 <button 
                   onClick={() => { navigate('/admin/propuestas'); setShowNotifications(false) }}
-                  className="w-full py-3 bg-gray-50 dark:bg-[#0F2018] text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest hover:text-[#1B4332] dark:hover:text-emerald-400 transition-colors"
+                  className="w-full py-3 bg-gray-50 dark:bg-[#0F2018] text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest hover:text-[#22573E] dark:hover:text-emerald-400 transition-colors"
                 >
                   Ver toda la actividad
                 </button>
@@ -648,7 +769,7 @@ export default function Dashboard() {
 
           <button
             onClick={() => navigate('/admin/reportes')}
-            className="flex items-center gap-2.5 px-5 py-2.5 bg-[#1B4332] text-white
+            className="flex items-center gap-2.5 px-5 py-2.5 bg-[#22573E] text-white
                        rounded-xl text-sm font-bold shadow-sm hover:bg-[#143024]
                        transition-all hover:-translate-y-0.5"
           >
@@ -686,6 +807,7 @@ export default function Dashboard() {
                 subLink="Ver todas"
                 dark={true}
                 onClick={() => navigate('/admin/sesiones')}
+                className="anim-stagger-1"
               />
               <StatCard
                 icon={Clock}
@@ -702,6 +824,7 @@ export default function Dashboard() {
                   return 'Sesiones finalizadas'
                 })()}
                 onClick={() => navigate('/admin/sesiones')}
+                className="anim-stagger-2"
               />
               <StatCard
                 icon={Users}
@@ -709,6 +832,7 @@ export default function Dashboard() {
                 label="Estudiantes registrados"
                 sub="En el sistema"
                 onClick={() => navigate('/admin/estudiantes')}
+                className="anim-stagger-3"
               />
               <StatCard
                 icon={Inbox}
@@ -718,22 +842,28 @@ export default function Dashboard() {
                 subLink={totalPropuestas > 0 ? 'Revisar' : undefined}
                 urgent={totalPropuestas > 0}
                 onClick={() => navigate('/admin/propuestas')}
+                className="anim-stagger-4"
               />
             </div>
 
             {/* Gráfica Semanal (Métricas de Carga) */}
-            <div className="flex flex-col lg:flex-row gap-6">
+            <div className="flex flex-col lg:flex-row gap-6 anim-reveal anim-stagger-5">
               <WeeklyChart sesiones={todasSesiones} />
             </div>
 
             {/* Populares + Carreras */}
-            <div className="flex flex-col lg:flex-row gap-6">
+            <div className="flex flex-col lg:flex-row gap-6 anim-reveal anim-stagger-6">
               <PopularSessions ranking={popularRanking} />
               <ProgramChart data={progStats} />
             </div>
 
-            {/* Acciones rápidas (Comunicación Real-time) */}
-            <QuickActions navigate={navigate} />
+            {/* Actividad Reciente + Acciones rápidas */}
+            <div className="flex flex-col lg:flex-row gap-6 anim-reveal anim-stagger-7">
+              <RecentActivity />
+              <div className="flex-1">
+                <QuickActions navigate={navigate} />
+              </div>
+            </div>
 
             {/* Sesiones de hoy + Calendario */}
             <div className="flex flex-col lg:flex-row gap-6">
@@ -742,7 +872,7 @@ export default function Dashboard() {
               <div className="bg-white dark:bg-[#122A1C] rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-emerald-900/40 flex-1">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
-                    <div className="w-1 h-5 bg-[#1B4332] rounded-full" />
+                    <div className="w-1 h-5 bg-[#22573E] rounded-full" />
                     <h3 className="font-bold text-gray-900 dark:text-gray-100 text-sm">Sesiones de hoy</h3>
                     {sesionesHoy.length > 0 && (
                       <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800
@@ -786,16 +916,16 @@ export default function Dashboard() {
                                    hover:bg-emerald-50/40 dark:hover:bg-emerald-900/20 transition-all group cursor-pointer"
                       >
                         <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-xl bg-[#1B4332]/8 dark:bg-emerald-900/30 border border-[#1B4332]/10 dark:border-emerald-700/30
+                          <div className="w-10 h-10 rounded-xl bg-[#22573E]/8 dark:bg-emerald-900/30 border border-[#22573E]/10 dark:border-emerald-700/30
                                           flex flex-col items-center justify-center shrink-0">
-                            <span className="text-[10px] font-black text-[#1B4332] dark:text-emerald-400 leading-none">
+                            <span className="text-[10px] font-black text-[#22573E] dark:text-emerald-400 leading-none">
                               {s.hora_inicio?.slice(0,5)}
                             </span>
-                            <span className="text-[8px] text-[#1B4332]/50 dark:text-emerald-600 font-medium">hrs</span>
+                            <span className="text-[8px] text-[#22573E]/50 dark:text-emerald-600 font-medium">hrs</span>
                           </div>
                           <div>
                             <p className="text-sm font-bold text-gray-900 dark:text-gray-100 leading-tight
-                                          group-hover:text-[#1B4332] dark:group-hover:text-emerald-400 transition-colors">
+                                          group-hover:text-[#22573E] dark:group-hover:text-emerald-400 transition-colors">
                               {s.nombre}
                             </p>
                             <p className="text-[10px] font-semibold text-gray-400 dark:text-gray-500
@@ -805,7 +935,7 @@ export default function Dashboard() {
                           </div>
                         </div>
                         <ChevronRight size={16}
-                          className="text-gray-200 dark:text-gray-700 group-hover:text-[#1B4332] dark:group-hover:text-emerald-400 transition-colors shrink-0" />
+                          className="text-gray-200 dark:text-gray-700 group-hover:text-[#22573E] dark:group-hover:text-emerald-400 transition-colors shrink-0" />
                       </div>
                     ))}
                   </div>

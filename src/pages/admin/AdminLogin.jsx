@@ -80,7 +80,7 @@ export default function AdminLogin() {
                 value={correo}
                 onChange={e => setCorreo(e.target.value)}
                 placeholder="admin@uessjr.edu.mx"
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-[#1B4332] outline-none text-base min-h-[44px]"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-[#22573E] outline-none text-base min-h-[44px]"
               />
             </div>
             <div>
@@ -91,7 +91,7 @@ export default function AdminLogin() {
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-[#1B4332] outline-none pr-12 text-base min-h-[44px]"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-[#22573E] outline-none pr-12 text-base min-h-[44px]"
                 />
                 <button
                   type="button"
@@ -106,14 +106,14 @@ export default function AdminLogin() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-[#1B4332] text-white font-bold rounded-lg hover:bg-emerald-800 transition-colors disabled:opacity-50"
+              className="w-full py-3 bg-[#22573E] text-white font-bold rounded-lg hover:bg-emerald-800 transition-colors disabled:opacity-50"
             >
               {loading ? 'Ingresando...' : 'Iniciar sesión como administrador'}
             </button>
           </form>
 
           <div className="mt-6 pt-4 border-t border-gray-100 text-center">
-            <Link to="/login" className="text-sm text-gray-400 hover:text-[#1B4332] transition-colors">
+            <Link to="/login" className="text-sm text-gray-400 hover:text-[#22573E] transition-colors">
               ¿Eres estudiante? Ir al acceso estudiantil
             </Link>
           </div>
