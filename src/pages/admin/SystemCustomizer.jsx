@@ -4,7 +4,7 @@ import {
   Palette, Rocket, MessageSquare, Mail, 
   ArrowLeft, Eye, Smartphone, Monitor, 
   Check, Save, X, Upload, Globe, Ticket,
-  Laptop
+  Laptop, Sun, Moon
 } from 'lucide-react';
 import { useSettings, SettingsContext } from '../../context/SettingsContext';
 import { useAuth } from '../../context/AuthContext';
@@ -24,16 +24,19 @@ import Footer from '../../components/layout/Footer';
  */
 const SystemCustomizer = () => {
   const navigate = useNavigate();
-  const { settings, updateSettings, isLoadingSettings } = useSettings();
+  const { settings, saveDraft, publishSettings, isLoadingSettings } = useSettings();
   const { isSuperAdmin } = useAuth();
   
   const [activeTab, setActiveTab] = useState('branding');
-  const [viewMode, setViewMode] = useState('landing'); // 'landing', 'login', 'ticket'
+  const [viewMode, setViewMode] = useState('landing'); // 'landing', 'login', 'ticket', 'email'
   const [deviceMode, setDeviceMode] = useState('desktop'); // 'desktop', 'mobile'
+  const [previewDarkMode, setPreviewDarkMode] = useState(false);
   const [draftSettings, setDraftSettings] = useState(null);
   const [activeJornada, setActiveJornada] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState({ type: '', content: '' });
+  
+  const previewContainerRef = useRef(null);
 
   // Cargar jornada activa para datos reales en preview
   useEffect(() => {
@@ -49,11 +52,35 @@ const SystemCustomizer = () => {
   }, []);
 
   // Sincronizar borrador inicial
+  // Si hay draft_settings en la DB, los usamos. Si no, usamos settings.
   useEffect(() => {
     if (settings && !draftSettings) {
-      setDraftSettings(settings);
+      setDraftSettings(settings.draft_settings || settings);
     }
   }, [settings, draftSettings]);
+
+  // Interceptar clics en el preview para evitar navegación real
+  useEffect(() => {
+    const handlePreviewClick = (e) => {
+      const target = e.target.closest('a, button');
+      if (target && previewContainerRef.current?.contains(target)) {
+        e.preventDefault();
+        e.stopPropagation();
+        setMessage({ type: 'info', content: 'Modo Edición: Navegación desactivada en el preview.' });
+        setTimeout(() => setMessage({ type: '', content: '' }), 2000);
+      }
+    };
+
+    const container = previewContainerRef.current;
+    if (container) {
+      container.addEventListener('click', handlePreviewClick, true);
+    }
+    return () => {
+      if (container) {
+        container.removeEventListener('click', handlePreviewClick, true);
+      }
+    };
+  }, [viewMode]);
 
   const handleInputChange = (section, field, value) => {
     setDraftSettings(prev => ({
@@ -95,9 +122,23 @@ const SystemCustomizer = () => {
     }
   };
 
-  const handleSave = async () => {
+  const handleSaveDraft = async () => {
     setIsSaving(true);
-    const result = await updateSettings(draftSettings);
+    const result = await saveDraft(draftSettings);
+    if (result.success) {
+      setMessage({ type: 'success', content: 'Borrador guardado correctamente.' });
+    } else {
+      setMessage({ type: 'error', content: 'Error al guardar borrador: ' + result.error });
+    }
+    setIsSaving(false);
+    setTimeout(() => setMessage({ type: '', content: '' }), 3000);
+  };
+
+  const handlePublish = async () => {
+    if (!window.confirm('¿Estás seguro de que quieres publicar estos cambios? Se aplicarán a todos los usuarios inmediatamente.')) return;
+    
+    setIsSaving(true);
+    const result = await publishSettings(draftSettings);
     if (result.success) {
       setMessage({ type: 'success', content: 'Configuración publicada correctamente.' });
     } else {
@@ -127,7 +168,10 @@ const SystemCustomizer = () => {
     { id: 'landing', label: 'Landing Page', icon: Monitor },
     { id: 'login', label: 'Login', icon: Laptop },
     { id: 'ticket', label: 'Ticket QR', icon: Ticket },
+    { id: 'email', label: 'Email', icon: Mail },
   ];
+
+  const isDirty = JSON.stringify(settings?.draft_settings || settings) !== JSON.stringify(draftSettings);
 
   return (
     <div className="h-screen w-screen flex overflow-hidden bg-[#1a1a1a] text-gray-200 font-sans select-none">
@@ -143,14 +187,23 @@ const SystemCustomizer = () => {
           >
             <ArrowLeft size={20} />
           </button>
-          <h2 className="font-bold text-sm tracking-tight uppercase text-gray-400">Personalizador</h2>
-          <button 
-            onClick={handleSave}
-            disabled={isSaving}
-            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-xs font-black rounded-lg transition-all shadow-lg shadow-emerald-900/20"
-          >
-            {isSaving ? 'Guardando...' : <><Save size={14} /> Publicar</>}
-          </button>
+          
+          <div className="flex gap-2">
+            <button 
+              onClick={handleSaveDraft}
+              disabled={isSaving || !isDirty}
+              className="flex items-center gap-2 px-3 py-2 bg-gray-700 hover:bg-gray-600 disabled:opacity-30 text-white text-[10px] font-bold rounded-lg transition-all"
+            >
+              {isSaving ? '...' : 'Borrador'}
+            </button>
+            <button 
+              onClick={handlePublish}
+              disabled={isSaving}
+              className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-[10px] font-black rounded-lg transition-all shadow-lg shadow-emerald-900/20"
+            >
+              {isSaving ? 'Cargando...' : <><Rocket size={14} /> Publicar</>}
+            </button>
+          </div>
         </div>
 
         {/* Navegación de Pestañas */}
@@ -176,16 +229,25 @@ const SystemCustomizer = () => {
           
           {message.content && (
             <div className={`p-3 rounded-lg text-xs font-bold animate-fade-in ${
-              message.type === 'success' ? 'bg-emerald-900/40 text-emerald-400 border border-emerald-500/20' : 'bg-red-900/40 text-red-400 border border-red-500/20'
+              message.type === 'success' ? 'bg-emerald-900/40 text-emerald-400 border border-emerald-500/20' : 
+              message.type === 'info' ? 'bg-blue-900/40 text-blue-400 border border-blue-500/20' :
+              'bg-red-900/40 text-red-400 border border-red-500/20'
             }`}>
               {message.content}
+            </div>
+          )}
+
+          {isDirty && !message.content && (
+            <div className="p-3 bg-amber-900/20 border border-amber-500/20 rounded-lg text-[10px] text-amber-500 font-bold uppercase tracking-widest flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+              Tienes cambios sin publicar
             </div>
           )}
 
           {activeTab === 'branding' && (
             <div className="space-y-8 animate-in slide-in-from-left-2 duration-200">
               <section className="space-y-4">
-                <h3 className="text-xs font-black text-emerald-500 uppercase tracking-[0.2em]">Colores Base</h3>
+                <h3 className="text-xs font-black text-emerald-500 uppercase tracking-[0.2em]">Paleta de Colores</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <ColorInput 
                     label="Primario" 
@@ -197,25 +259,77 @@ const SystemCustomizer = () => {
                     value={draftSettings.branding.secondary_color} 
                     onChange={(v) => handleInputChange('branding', 'secondary_color', v)} 
                   />
+                  <ColorInput 
+                    label="Fondo (Claro)" 
+                    value={draftSettings.branding.bg_color_light} 
+                    onChange={(v) => handleInputChange('branding', 'bg_color_light', v)} 
+                  />
+                  <ColorInput 
+                    label="Fondo (Oscuro)" 
+                    value={draftSettings.branding.bg_color_dark} 
+                    onChange={(v) => handleInputChange('branding', 'bg_color_dark', v)} 
+                  />
+                </div>
+              </section>
+
+              <section className="space-y-4">
+                <h3 className="text-xs font-black text-emerald-500 uppercase tracking-[0.2em]">Formas (Border Radius)</h3>
+                <div className="flex gap-2">
+                  {[
+                    { label: 'Cuadrado', value: '0rem' },
+                    { label: 'Redondeado', value: '0.5rem' },
+                    { label: 'Píldora', value: '9999px' }
+                  ].map(shape => (
+                    <button
+                      key={shape.value}
+                      onClick={() => handleInputChange('branding', 'border_radius', shape.value)}
+                      className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold border transition-all ${
+                        draftSettings.branding.border_radius === shape.value
+                          ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400'
+                          : 'border-white/10 bg-[#1a1a1a] text-gray-500 hover:border-white/20'
+                      }`}
+                    >
+                      {shape.label}
+                    </button>
+                  ))}
                 </div>
               </section>
 
               <section className="space-y-6">
-                <h3 className="text-xs font-black text-emerald-500 uppercase tracking-[0.2em]">Multimedia</h3>
+                <h3 className="text-xs font-black text-emerald-500 uppercase tracking-[0.2em]">Logotipos</h3>
                 <ImageUpload 
-                  label="Logo Principal (Navbar)" 
-                  value={draftSettings.branding.logo_url} 
-                  onUpload={(e) => handleFileUpload(e, 'branding', 'logo_url')}
+                  label="Logo Principal (Claro)" 
+                  value={draftSettings.branding.logo_url_light || draftSettings.branding.logo_url} 
+                  onUpload={(e) => handleFileUpload(e, 'branding', 'logo_url_light')}
                 />
                 <ImageUpload 
-                  label="Fondo (Hero / Login)" 
-                  value={draftSettings.branding.background_image} 
-                  onUpload={(e) => handleFileUpload(e, 'branding', 'background_image')}
+                  label="Logo Principal (Oscuro)" 
+                  value={draftSettings.branding.logo_url_dark} 
+                  onUpload={(e) => handleFileUpload(e, 'branding', 'logo_url_dark')}
+                />
+                <ImageUpload 
+                  label="Logo Institucional Adicional" 
+                  value={draftSettings.branding.logo_institucional_url} 
+                  onUpload={(e) => handleFileUpload(e, 'branding', 'logo_institucional_url')}
                 />
                 <ImageUpload 
                   label="Logo Reportes (PDF)" 
                   value={draftSettings.branding.reports_logo_url} 
                   onUpload={(e) => handleFileUpload(e, 'branding', 'reports_logo_url')}
+                />
+              </section>
+
+              <section className="space-y-6">
+                <h3 className="text-xs font-black text-emerald-500 uppercase tracking-[0.2em]">Fondos</h3>
+                <ImageUpload 
+                  label="Fondo del Hero (Landing)" 
+                  value={draftSettings.branding.background_image_hero || draftSettings.branding.background_image} 
+                  onUpload={(e) => handleFileUpload(e, 'branding', 'background_image_hero')}
+                />
+                <ImageUpload 
+                  label="Fondo de Acceso (Login)" 
+                  value={draftSettings.branding.background_image_login || draftSettings.branding.background_image} 
+                  onUpload={(e) => handleFileUpload(e, 'branding', 'background_image_login')}
                 />
               </section>
             </div>
@@ -252,7 +366,7 @@ const SystemCustomizer = () => {
               <section>
                 <h3 className="text-xs font-black text-emerald-500 uppercase tracking-[0.2em] mb-4">Pack de Reacciones</h3>
                 <div className="grid grid-cols-4 gap-2">
-                  {['👏', '🔥', '❤️', '💡', '🚀', '💯', '🤔', '🙌'].map(emoji => (
+                  {['👏', '🔥', '❤️', '💡', '🚀', '💯', '🤔', '🙌', '🎉', '🤩', '💎', '💪'].map(emoji => (
                     <button
                       key={emoji}
                       onClick={() => {
@@ -272,9 +386,11 @@ const SystemCustomizer = () => {
                 </div>
               </section>
               <section className="space-y-4">
-                <h3 className="text-xs font-black text-emerald-500 uppercase tracking-[0.2em]">Encuestas</h3>
+                <h3 className="text-xs font-black text-emerald-500 uppercase tracking-[0.2em]">Encuestas (Máx 4)</h3>
                 <TextInput label="Pregunta #1" value={draftSettings.interaction?.survey_q1} onChange={(v) => handleInputChange('interaction', 'survey_q1', v)} />
                 <TextInput label="Pregunta #2" value={draftSettings.interaction?.survey_q2} onChange={(v) => handleInputChange('interaction', 'survey_q2', v)} />
+                <TextInput label="Pregunta #3" value={draftSettings.interaction?.survey_q3} onChange={(v) => handleInputChange('interaction', 'survey_q3', v)} />
+                <TextInput label="Pregunta #4" value={draftSettings.interaction?.survey_q4} onChange={(v) => handleInputChange('interaction', 'survey_q4', v)} />
               </section>
             </div>
           )}
@@ -288,7 +404,10 @@ const SystemCustomizer = () => {
               <section className="space-y-4">
                 <h3 className="text-xs font-black text-emerald-500 uppercase tracking-[0.2em]">Plantilla de Email</h3>
                 <TextInput label="Asunto (Bienvenida)" value={draftSettings.comms?.email_welcome_subject} onChange={(v) => handleInputChange('comms', 'email_welcome_subject', v)} />
-                <TextArea label="Cuerpo del Mensaje" value={draftSettings.comms?.email_welcome_body} onChange={(v) => handleInputChange('comms', 'email_welcome_body', v)} rows={5} mono />
+                <TextArea label="Cuerpo del Mensaje" value={draftSettings.comms?.email_welcome_body} onChange={(v) => handleInputChange('comms', 'email_welcome_body', v)} rows={8} mono />
+                <p className="text-[9px] text-gray-500 italic">
+                  Usa {'{{name}}'}, {'{{event_name}}'} y {'{{institution}}'} como variables dinámicas.
+                </p>
               </section>
             </div>
           )}
@@ -315,31 +434,58 @@ const SystemCustomizer = () => {
             ))}
           </div>
 
-          <div className="flex gap-2">
-            <button 
-              onClick={() => setDeviceMode('desktop')}
-              className={`p-2 rounded-lg transition-colors ${deviceMode === 'desktop' ? 'bg-white/10 text-emerald-400' : 'text-gray-500'}`}
-            >
-              <Monitor size={18} />
-            </button>
-            <button 
-              onClick={() => setDeviceMode('mobile')}
-              className={`p-2 rounded-lg transition-colors ${deviceMode === 'mobile' ? 'bg-white/10 text-emerald-400' : 'text-gray-500'}`}
-            >
-              <Smartphone size={18} />
-            </button>
+          <div className="flex gap-4 items-center">
+            {/* Toggle Modo Oscuro Preview */}
+            <div className="flex bg-[#1a1a1a] rounded-lg p-1 border border-white/5">
+              <button 
+                onClick={() => setPreviewDarkMode(false)}
+                className={`p-1.5 rounded-md transition-all ${!previewDarkMode ? 'bg-white/10 text-amber-400' : 'text-gray-500'}`}
+                title="Modo Claro"
+              >
+                <Sun size={16} />
+              </button>
+              <button 
+                onClick={() => setPreviewDarkMode(true)}
+                className={`p-1.5 rounded-md transition-all ${previewDarkMode ? 'bg-white/10 text-emerald-400' : 'text-gray-500'}`}
+                title="Modo Oscuro"
+              >
+                <Moon size={16} />
+              </button>
+            </div>
+
+            <div className="h-6 w-[1px] bg-white/10" />
+
+            <div className="flex gap-2">
+              <button 
+                onClick={() => setDeviceMode('desktop')}
+                className={`p-2 rounded-lg transition-colors ${deviceMode === 'desktop' ? 'bg-white/10 text-emerald-400' : 'text-gray-500'}`}
+              >
+                <Monitor size={18} />
+              </button>
+              <button 
+                onClick={() => setDeviceMode('mobile')}
+                className={`p-2 rounded-lg transition-colors ${deviceMode === 'mobile' ? 'bg-white/10 text-emerald-400' : 'text-gray-500'}`}
+              >
+                <Smartphone size={18} />
+              </button>
+            </div>
           </div>
         </header>
 
         {/* Contenedor de la Vista Previa con Inyección de Estilos */}
         <div className="flex-1 overflow-auto p-12 flex justify-center items-start bg-[radial-gradient(#242424_1px,transparent_1px)] [background-size:24px_24px]">
           <div 
-            className={`transition-all duration-500 origin-top shadow-[0_40px_100px_rgba(0,0,0,0.5)] border border-white/10 rounded-xl overflow-hidden bg-[#FAF9F6] relative
-              ${deviceMode === 'mobile' ? 'w-[375px] h-[750px]' : 'w-full max-w-[1200px] h-[800px]'}
+            ref={previewContainerRef}
+            className={`transition-all duration-500 origin-top shadow-[0_40px_100px_rgba(0,0,0,0.5)] border border-white/10 overflow-hidden relative
+              ${previewDarkMode ? 'dark bg-bg-dark' : 'bg-bg-main'}
+              ${deviceMode === 'mobile' ? 'w-[375px] h-[750px] rounded-[2.5rem]' : 'w-full max-w-[1200px] h-[800px] rounded-xl'}
             `}
             style={{
               '--color-primary': draftSettings.branding.primary_color,
               '--color-secondary': draftSettings.branding.secondary_color,
+              '--color-bg-light': draftSettings.branding.bg_color_light,
+              '--color-bg-dark': draftSettings.branding.bg_color_dark,
+              '--border-radius-global': draftSettings.branding.border_radius || '0.5rem',
             }}
           >
             {/* Overlay de Carga del Preview */}
@@ -359,6 +505,7 @@ const SystemCustomizer = () => {
                   mode={viewMode} 
                   settings={draftSettings} 
                   activeJornada={activeJornada}
+                  previewDarkMode={previewDarkMode}
                 />
               </SettingsContext.Provider>
             </div>
@@ -378,27 +525,57 @@ const SystemCustomizer = () => {
 
 // ─── Sub-componentes de la Interfaz ───
 
-const ColorInput = ({ label, value, onChange }) => (
-  <div className="space-y-2">
-    <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest">{label}</label>
-    <div className="flex gap-2">
-      <div className="relative w-10 h-10 rounded-lg overflow-hidden border border-white/10 ring-2 ring-transparent hover:ring-emerald-500/50 transition-all">
-        <input 
-          type="color" 
-          value={value} 
-          onChange={(e) => onChange(e.target.value)}
-          className="absolute inset-[-10px] cursor-pointer" 
-        />
+const ColorInput = ({ label, value, onChange }) => {
+  const [showPalette, setShowPalette] = useState(false);
+  const palette = [
+    '#163020', '#10B981', '#34D399', '#059669', // Verdes
+    '#D97706', '#F59E0B', '#FBBF24', '#B45309', // Ambar/Naranja
+    '#2563EB', '#3B82F6', '#60A5FA', '#1E40AF', // Azules
+    '#7C3AED', '#8B5CF6', '#A78BFA', '#5B21B6', // Violetas
+    '#DC2626', '#EF4444', '#F87171', '#991B1B', // Rojos
+    '#0F172A', '#1E293B', '#334155', '#475569', // Slates
+  ];
+
+  return (
+    <div className="space-y-2 relative">
+      <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest">{label}</label>
+      <div className="flex gap-2">
+        <div className="relative w-10 h-10 rounded-lg overflow-hidden border border-white/10 ring-2 ring-transparent hover:ring-emerald-500/50 transition-all">
+          <input 
+            type="color" 
+            value={value} 
+            onChange={(e) => onChange(e.target.value)}
+            className="absolute inset-[-10px] cursor-pointer" 
+          />
+        </div>
+        <div className="flex-1 relative">
+          <input 
+            type="text" 
+            value={value} 
+            onFocus={() => setShowPalette(true)}
+            onChange={(e) => onChange(e.target.value)}
+            className="w-full h-full bg-[#1a1a1a] border border-white/5 rounded-lg px-3 text-xs font-mono focus:border-emerald-500 outline-none" 
+          />
+          {showPalette && (
+            <>
+              <div className="fixed inset-0 z-30" onClick={() => setShowPalette(false)} />
+              <div className="absolute top-full left-0 right-0 mt-2 p-3 bg-[#2a2a2a] border border-white/10 rounded-xl shadow-2xl z-40 grid grid-cols-4 gap-2 animate-in fade-in zoom-in-95 duration-200">
+                {palette.map(c => (
+                  <button 
+                    key={c}
+                    onClick={() => { onChange(c); setShowPalette(false); }}
+                    className="w-full aspect-square rounded-md border border-white/10 hover:scale-110 transition-transform"
+                    style={{ backgroundColor: c }}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
       </div>
-      <input 
-        type="text" 
-        value={value} 
-        onChange={(e) => onChange(e.target.value)}
-        className="flex-1 bg-[#1a1a1a] border border-white/5 rounded-lg px-3 text-xs font-mono focus:border-emerald-500 outline-none" 
-      />
     </div>
-  </div>
-);
+  );
+};
 
 const ImageUpload = ({ label, value, onUpload }) => (
   <div className="space-y-2">
@@ -466,7 +643,7 @@ const Toggle = ({ label, checked, onChange }) => (
 
 // ─── Renderizador de Previsualización ───
 
-const PreviewRenderer = ({ mode, settings, activeJornada }) => {
+const PreviewRenderer = ({ mode, settings, activeJornada, previewDarkMode }) => {
   // Combinar datos reales de la jornada con los textos del borrador (draft)
   const previewJornada = activeJornada ? {
     ...activeJornada,
@@ -501,32 +678,31 @@ const PreviewRenderer = ({ mode, settings, activeJornada }) => {
     case 'landing':
       return (
         <div className="flex flex-col h-full w-full relative">
-          <Navbar isPreview={true} />
+          <Navbar isPreview={true} forceDarkMode={previewDarkMode} />
           <div className="flex-1 overflow-y-auto pt-16">
-            <div className="pointer-events-none">
-              <ActiveEventView jornada={previewJornada} />
-              <Footer />
-            </div>
+            <ActiveEventView jornada={previewJornada} isPreview={true} forceDarkMode={previewDarkMode} />
+            <Footer forceDarkMode={previewDarkMode} />
           </div>
         </div>
       );
     case 'login':
       return (
         <div className="h-full w-full overflow-y-auto">
-          <div className="pointer-events-none">
-            <AuthLayout>
-               <div className="p-8 border-2 border-dashed border-emerald-500/20 rounded-2xl text-center">
-                 <p className="text-gray-400 font-bold uppercase tracking-tight">Pantalla de Acceso</p>
-                 <p className="text-[10px] text-gray-500 mt-2 uppercase tracking-widest leading-relaxed">
-                   Aquí los usuarios verán tu logo y fondo personalizado.<br/>
-                   Los colores primarios se aplican a los botones y enlaces.
-                 </p>
-                 <div className="mt-6 h-10 w-full bg-primary rounded-xl flex items-center justify-center text-white text-xs font-bold shadow-lg">
-                   BOTÓN DE EJEMPLO
-                 </div>
-               </div>
-            </AuthLayout>
-          </div>
+          <AuthLayout isPreview={true} forceDarkMode={previewDarkMode}>
+              <div className="p-8 border-2 border-dashed border-emerald-500/20 rounded-2xl text-center">
+                <p className="text-gray-400 font-bold uppercase tracking-tight">Pantalla de Acceso</p>
+                <p className="text-[10px] text-gray-500 mt-2 uppercase tracking-widest leading-relaxed">
+                  Aquí los usuarios verán tu logo y fondo personalizado.<br/>
+                  Los colores primarios se aplican a los botones y enlaces.
+                </p>
+                <div 
+                  className="mt-6 h-10 w-full rounded-xl flex items-center justify-center text-white text-xs font-bold shadow-lg"
+                  style={{ backgroundColor: 'var(--color-primary)' }}
+                >
+                  BOTÓN DE EJEMPLO
+                </div>
+              </div>
+          </AuthLayout>
         </div>
       );
     case 'ticket':
@@ -534,13 +710,51 @@ const PreviewRenderer = ({ mode, settings, activeJornada }) => {
         <div className="flex flex-col h-full w-full relative">
           <Navbar isPreview={true} />
           <div className="flex-1 overflow-y-auto pt-16 flex flex-col justify-between">
-            <div className="pointer-events-none flex-1 flex flex-col justify-between">
+            <div className="flex-1 flex flex-col justify-between">
               <div className="flex-1 flex items-center justify-center bg-gray-50 p-8">
                 <div className="scale-110">
                   <QRTicket participant={mockParticipant} session={mockSession} />
                 </div>
               </div>
               <Footer />
+            </div>
+          </div>
+        </div>
+      );
+    case 'email':
+      return (
+        <div className="h-full w-full bg-gray-100 p-8 overflow-y-auto">
+          <div className="max-w-[600px] mx-auto bg-white shadow-xl rounded-lg overflow-hidden border border-gray-200">
+            <div className="p-6 border-b border-gray-100 flex items-center gap-4">
+              {settings.branding.logo_url && <img src={settings.branding.logo_url} className="h-10 object-contain" alt="Logo" />}
+              <div className="h-10 w-[2px] bg-gray-200" />
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">{settings.event_info.event_name}</p>
+            </div>
+            <div className="p-10 space-y-6">
+              <h2 className="text-2xl font-black text-gray-900 leading-tight">
+                {settings.comms?.email_welcome_subject?.replace('{{name}}', 'Juan Pérez')?.replace('{{event_name}}', settings.event_info.event_name)}
+              </h2>
+              <div className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">
+                {settings.comms?.email_welcome_body
+                  ?.replace('{{name}}', 'Juan Pérez')
+                  ?.replace('{{event_name}}', settings.event_info.event_name)
+                  ?.replace('{{institution}}', settings.event_info.institution)}
+              </div>
+              <div className="pt-8">
+                <div 
+                  className="inline-block px-8 py-3 rounded-lg text-white text-sm font-bold shadow-lg"
+                  style={{ backgroundColor: 'var(--color-primary)' }}
+                >
+                  Confirmar Asistencia
+                </div>
+              </div>
+            </div>
+            <div className="bg-gray-50 p-6 text-center border-t border-gray-100">
+              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-2">Enviado por {settings.event_info.institution}</p>
+              <div className="flex justify-center gap-4 text-gray-400">
+                <Globe size={14} />
+                <Mail size={14} />
+              </div>
             </div>
           </div>
         </div>

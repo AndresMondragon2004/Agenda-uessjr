@@ -287,9 +287,10 @@ function CountdownTimer({ targetDate, endDate }) {
 }
 
 /* ─── ActiveEventView ─────────────────────────────────────────────────────────────── */
-export default function ActiveEventView({ jornada }) {
+export default function ActiveEventView({ jornada, isPreview = false, forceDarkMode = null }) {
   const navigate = useNavigate()
-  const isDark   = useDarkMode()
+  const systemDark = useDarkMode()
+  const isDark = forceDarkMode !== null ? forceDarkMode : systemDark
   const { settings } = useSettings()
 
   const [sesionesDestacadas, setSesionesDestacadas] = useState([])
@@ -350,9 +351,18 @@ export default function ActiveEventView({ jornada }) {
     ? { hero: '#05140B', stats: '#08120A', ejes: '#0B1A12', ses: '#08120A', id: '#05140B' }
     : { hero: '#FAF9F6', stats: '#F5F4F0', ejes: '#FAF9F6',  ses: '#F5F4F0', id: '#FAF9F6' }
 
-  return (
-    <div className="w-full bg-bg-main">
+  const animClass = (cls) => isPreview ? '' : cls;
 
+  return (
+    <div className={`w-full bg-bg-main ${isPreview ? 'no-animations' : ''}`}>
+      {isPreview && (
+        <style dangerouslySetInnerHTML={{ __html: `
+          .no-animations *, .no-animations *:before, .no-animations *:after {
+            animation: none !important;
+            transition: none !important;
+          }
+        `}} />
+      )}
       {/* ══════════════════════════════════════════
           HERO
       ══════════════════════════════════════════ */}
@@ -363,7 +373,7 @@ export default function ActiveEventView({ jornada }) {
           alt=""
           aria-hidden="true"
           onLoad={() => setImgLoaded(true)}
-          className={`absolute inset-0 w-full h-full object-cover object-center transition-all duration-1000 ${imgLoaded ? 'opacity-90 scale-105' : 'opacity-0 scale-100'}`}
+          className={`absolute inset-0 w-full h-full object-cover object-center transition-all duration-1000 ${imgLoaded || isPreview ? 'opacity-90 scale-105' : 'opacity-0 scale-100'}`}
         />
 
         {/* Gradientes de Legibilidad (Sin tinte verde, solo sombra para el texto) */}
@@ -385,9 +395,9 @@ export default function ActiveEventView({ jornada }) {
             {/* Columna izquierda */}
             <div className="flex flex-col gap-6">
 
-              <div className="flex items-center gap-3 self-start anim-reveal anim-stagger-1">
+              <div className={`flex items-center gap-3 self-start ${animClass('anim-reveal anim-stagger-1')}`}>
                 <span className="relative flex h-2.5 w-2.5 shrink-0">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className={`${isPreview ? '' : 'animate-ping'} absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75`} />
                   <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400" />
                 </span>
                 <span className="bg-white/10 border border-white/20 text-white/90 font-black text-[10px] px-4 py-1.5 rounded-xl uppercase tracking-widest backdrop-blur-sm">
@@ -399,7 +409,7 @@ export default function ActiveEventView({ jornada }) {
                 </span>
               </div>
 
-              <div className="anim-reveal anim-stagger-2">
+              <div className={animClass('anim-reveal anim-stagger-2')}>
                 <h1 className="font-black leading-[1.05] tracking-tight">
                   <span className="block text-white text-4xl sm:text-5xl lg:text-7xl drop-shadow-lg">
                     {jornada ? jornada.edicion : '12va'} jornada
@@ -410,11 +420,11 @@ export default function ActiveEventView({ jornada }) {
                 </h1>
               </div>
 
-              <p className="text-white/75 text-lg leading-relaxed max-w-lg border-l-4 border-amber-400/50 pl-4 anim-reveal anim-stagger-3">
+              <p className={`text-white/75 text-lg leading-relaxed max-w-lg border-l-4 border-amber-400/50 pl-4 ${animClass('anim-reveal anim-stagger-3')}`}>
                 {jornada?.lema || 'Cultura que inspira, conocimiento que transforma. Únete al evento académico más importante del año.'}
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-3 anim-reveal anim-stagger-4 mt-2">
+              <div className={`flex flex-col sm:flex-row gap-3 mt-2 ${animClass('anim-reveal anim-stagger-4')}`}>
                 <Link
                   to="/agenda"
                   className="inline-flex items-center justify-center gap-2 bg-[#D97706] hover:bg-amber-500 text-white font-black text-sm px-8 py-4 rounded-2xl transition-all shadow-lg shadow-amber-900/30 hover:-translate-y-0.5 uppercase tracking-wide"
@@ -429,7 +439,7 @@ export default function ActiveEventView({ jornada }) {
                 </Link>
               </div>
 
-              <div className="flex items-center gap-3 text-white/50 text-sm font-medium anim-reveal anim-stagger-5 mt-2">
+              <div className={`flex items-center gap-3 text-white/50 text-sm font-medium mt-2 ${animClass('anim-reveal anim-stagger-5')}`}>
                 <div className="h-px w-8 bg-white/30" />
                 <CalendarDays size={15} className="text-amber-400 shrink-0" />
                 <span>
@@ -447,13 +457,16 @@ export default function ActiveEventView({ jornada }) {
               )}
 
               {/* Logos Institucionales en Hero */}
-              <div className="flex items-center gap-6 pt-8 anim-reveal anim-stagger-6 border-t border-white/10 mt-4">
+              <div className={`flex items-center gap-6 pt-8 mt-4 border-t border-white/10 ${animClass('anim-reveal anim-stagger-6')}`}>
                 <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] [writing-mode:vertical-lr] rotate-180">
                   Respaldado por
                 </p>
                 <div className="flex items-center gap-6">
-                  {settings?.branding?.logo_url ? (
-                    <img src={settings.branding.logo_url} alt={settings.event_info?.event_name} className="h-10 sm:h-12 object-contain brightness-0 invert opacity-80 hover:opacity-100 transition-opacity" />
+                  {settings?.branding?.logo_url || settings?.branding?.logo_institucional_url ? (
+                    <>
+                      {settings.branding.logo_url && <img src={settings.branding.logo_url} alt="Logo Local" className="h-10 sm:h-12 object-contain brightness-0 invert opacity-80 hover:opacity-100 transition-opacity" />}
+                      {settings.branding.logo_institucional_url && <img src={settings.branding.logo_institucional_url} alt="Logo Institucional" className="h-10 sm:h-12 object-contain brightness-0 invert opacity-80 hover:opacity-100 transition-opacity" />}
+                    </>
                   ) : (
                     <>
                       <img src="https://sic.cultura.gob.mx/imagenes_cache/universidad_4260_g_74199.png" alt="UMB" className="h-10 sm:h-12 object-contain brightness-0 invert opacity-60 hover:opacity-100 transition-opacity drop-shadow-lg" />
@@ -588,21 +601,21 @@ export default function ActiveEventView({ jornada }) {
         </div>
       </section>
 
-      <section className="bg-[#FAF9F6] dark:bg-[#05140B] relative z-10 -mt-12 rounded-t-[3.5rem] pt-20" ref={statsRef}>
+      <section className="bg-bg-main dark:bg-bg-dark relative z-10 -mt-12 rounded-t-[3.5rem] pt-20" ref={statsRef}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className={`text-center mb-10 ${statsVis ? 'anim-reveal' : 'opacity-0'}`}>
-            <span className="text-[#163020]/60 dark:text-emerald-700 font-bold text-xs uppercase tracking-[0.2em]">
+            <span className="text-primary/60 dark:text-emerald-700 font-bold text-xs uppercase tracking-[0.2em]">
               {settings?.event_info?.institution || 'UES San José del Rincón'}
             </span>
-            <h2 className="text-2xl md:text-3xl font-extrabold text-[#163020] dark:text-emerald-400 mt-1">
+            <h2 className="text-2xl md:text-3xl font-extrabold text-primary dark:text-emerald-400 mt-1">
               Una jornada, múltiples experiencias
             </h2>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {statsVis && (
               <>
-                <StatCard icon={BookOpen}     value={stats.sesiones      > 0 ? `${stats.sesiones}+`      : '—'} label="Sesiones académicas"  color="#163020" delay={0.05} />
-                <StatCard icon={Mic2}         value={stats.conferencistas > 0 ? `${stats.conferencistas}+` : '—'} label="Conferencistas"        color="#D97706" delay={0.15} />
+                <StatCard icon={BookOpen}     value={stats.sesiones      > 0 ? `${stats.sesiones}+`      : '—'} label="Sesiones académicas"  color="var(--color-primary)" delay={0.05} />
+                <StatCard icon={Mic2}         value={stats.conferencistas > 0 ? `${stats.conferencistas}+` : '—'} label="Conferencistas"        color="var(--color-secondary)" delay={0.15} />
                 <StatCard icon={CalendarDays} value={stats.dias           > 0 ? `${stats.dias}`            : '—'} label="Días de actividades"   color="#2563EB" delay={0.25} />
                 <StatCard icon={Users}        value="4"                                                           label="Programas académicos"  color="#7C3AED" delay={0.35} />
               </>
@@ -614,22 +627,22 @@ export default function ActiveEventView({ jornada }) {
       {/* ══════════════════════════════════════════
           EJES ACADÉMICOS
       ══════════════════════════════════════════ */}
-      <section className="bg-[#FAF9F6] dark:bg-[#0B1A12] py-24" ref={ejesRef}>
+      <section className="bg-bg-main dark:bg-gray-900 py-24" ref={ejesRef}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className={`flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-14 ${ejesVis ? 'anim-reveal' : 'opacity-0'}`}>
             <div>
-              <span className="inline-flex items-center gap-2 text-[#163020]/60 dark:text-emerald-600 font-bold text-xs uppercase tracking-[0.15em] mb-3">
-                <span className="w-6 h-px bg-[#163020]/40 dark:bg-emerald-800" />
+              <span className="inline-flex items-center gap-2 text-primary/60 dark:text-emerald-600 font-bold text-xs uppercase tracking-[0.15em] mb-3">
+                <span className="w-6 h-px bg-primary/40 dark:bg-emerald-800" />
                 Ejes temáticos
               </span>
               <h2 className="text-4xl font-extrabold text-gray-900 dark:text-gray-100 leading-tight">
-                Filtra por tu <span className="text-[#163020] dark:text-emerald-400">área académica</span>
+                Filtra por tu <span className="text-primary dark:text-emerald-400">área académica</span>
               </h2>
               <p className="text-gray-500 dark:text-gray-400 mt-2 text-base">
                 Haz clic en tu carrera para ver las sesiones que te interesan.
               </p>
             </div>
-            <Link to="/agenda" className="text-[#163020] dark:text-emerald-400 font-semibold text-sm hover:underline flex items-center gap-1 shrink-0">
+            <Link to="/agenda" className="text-primary dark:text-emerald-400 font-semibold text-sm hover:underline flex items-center gap-1 shrink-0">
               Ver agenda completa <ArrowRight size={14} />
             </Link>
           </div>

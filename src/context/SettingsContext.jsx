@@ -15,7 +15,6 @@ export const SettingsProvider = ({ children }) => {
 
   /**
    * Carga la configuración inicial desde la tabla singleton 'system_settings'.
-   * Se ejecuta al inicio de la aplicación para asegurar que el branding esté disponible.
    */
   const fetchSettings = useCallback(async () => {
     try {
@@ -38,13 +37,61 @@ export const SettingsProvider = ({ children }) => {
 
   useEffect(() => {
     if (settings?.branding) {
-      const { primary_color, secondary_color } = settings.branding;
-      if (primary_color) {
-        document.documentElement.style.setProperty('--color-primary', primary_color);
+      const { 
+        primary_color, 
+        secondary_color,
+        bg_color_light,
+        bg_color_dark,
+        border_radius
+      } = settings.branding;
+      
+      const root = document.documentElement;
+      
+      if (primary_color) root.style.setProperty('--color-primary', primary_color);
+      if (secondary_color) root.style.setProperty('--color-secondary', secondary_color);
+      if (bg_color_light) root.style.setProperty('--color-bg-light', bg_color_light);
+      if (bg_color_dark) root.style.setProperty('--color-bg-dark', bg_color_dark);
+      if (border_radius) root.style.setProperty('--border-radius-global', border_radius);
+
+      // Inyectar anulaciones globales para clases CSS de Tailwind con colores hardcodeados
+      let styleEl = document.getElementById('brand-override-styles');
+      if (!styleEl) {
+        styleEl = document.createElement('style');
+        styleEl.id = 'brand-override-styles';
+        document.head.appendChild(styleEl);
       }
-      if (secondary_color) {
-        document.documentElement.style.setProperty('--color-secondary', secondary_color);
-      }
+      
+      styleEl.innerHTML = `
+        :root {
+          --color-primary: ${primary_color || '#163020'};
+          --color-secondary: ${secondary_color || '#D97706'};
+        }
+        
+        /* Reemplazar color primario hardcodeado (#163020) */
+        .bg-\\[\\#163020\\] { background-color: var(--color-primary) !important; }
+        .text-\\[\\#163020\\] { color: var(--color-primary) !important; }
+        .border-\\[\\#163020\\] { border-color: var(--color-primary) !important; }
+        .focus\\:border-\\[\\#163020\\]:focus { border-color: var(--color-primary) !important; }
+        .hover\\:bg-\\[\\#163020\\]:hover { background-color: var(--color-primary) !important; }
+        .hover\\:text-\\[\\#163020\\]:hover { color: var(--color-primary) !important; }
+        .group-hover\\:text-\\[\\#163020\\] { color: var(--color-primary) !important; }
+        .group-hover\\:bg-\\[\\#163020\\]:hover { background-color: var(--color-primary) !important; }
+        
+        /* Reemplazar color secundario hardcodeado (#D97706) */
+        .bg-\\[\\#D97706\\] { background-color: var(--color-secondary) !important; }
+        .text-\\[\\#D97706\\] { color: var(--color-secondary) !important; }
+        .border-\\[\\#D97706\\] { border-color: var(--color-secondary) !important; }
+        .focus\\:border-\\[\\#D97706\\]:focus { border-color: var(--color-secondary) !important; }
+        .hover\\:bg-\\[\\#D97706\\]:hover { background-color: var(--color-secondary) !important; }
+        .hover\\:text-\\[\\#D97706\\]:hover { color: var(--color-secondary) !important; }
+        .group-hover\\:text-\\[\\#D97706\\] { color: var(--color-secondary) !important; }
+        .group-hover\\:bg-\\[\\#D97706\\]:hover { background-color: var(--color-secondary) !important; }
+        
+        /* Reemplazar color de borde del QR y otros elementos primarios por defecto */
+        .border-primary { border-color: var(--color-primary) !important; }
+        .bg-primary { background-color: var(--color-primary) !important; }
+        .text-primary { color: var(--color-primary) !important; }
+      `;
     }
   }, [settings]);
 
@@ -53,17 +100,13 @@ export const SettingsProvider = ({ children }) => {
   }, [fetchSettings]);
 
   /**
-   * updateSettings: Permite al administrador guardar cambios en tiempo real.
-   * @param {Object} newSettings - Objeto con las claves branding, event_info, feature_flags o advanced_templates.
-   * 
-   * Nota Arquitectónica: Al usar JSONB, podemos actualizar solo una parte del objeto 
-   * (ej. solo branding) y Supabase manejará la persistencia de forma eficiente.
+   * saveDraft: Guarda los cambios en la columna draft_settings sin publicarlos.
    */
-  const updateSettings = async (newSettings) => {
+  const saveDraft = async (draftData) => {
     try {
       const { data, error } = await supabase
         .from('system_settings')
-        .update(newSettings)
+        .update({ draft_settings: draftData })
         .eq('id', 1)
         .select()
         .single();
@@ -72,7 +115,37 @@ export const SettingsProvider = ({ children }) => {
       setSettings(data);
       return { success: true, data };
     } catch (err) {
-      console.error('Error updating system settings:', err);
+      console.error('Error saving draft settings:', err);
+      return { success: false, error: err.message };
+    }
+  };
+
+  /**
+   * publishSettings: Mueve la configuración del borrador a la oficial.
+   */
+  const publishSettings = async (finalSettings) => {
+    try {
+      // Al publicar, el draft_settings se limpia o se iguala
+      const { data, error } = await supabase
+        .from('system_settings')
+        .update({
+          branding: finalSettings.branding,
+          event_info: finalSettings.event_info,
+          feature_flags: finalSettings.feature_flags,
+          interaction: finalSettings.interaction,
+          comms: finalSettings.comms,
+          advanced_templates: finalSettings.advanced_templates,
+          draft_settings: null // Limpiamos borrador al publicar
+        })
+        .eq('id', 1)
+        .select()
+        .single();
+
+      if (error) throw error;
+      setSettings(data);
+      return { success: true, data };
+    } catch (err) {
+      console.error('Error publishing system settings:', err);
       return { success: false, error: err.message };
     }
   };
@@ -81,7 +154,9 @@ export const SettingsProvider = ({ children }) => {
     settings,
     isLoadingSettings,
     error,
-    updateSettings,
+    saveDraft,
+    publishSettings,
+    updateSettings: publishSettings, // Alias para compatibilidad
     refreshSettings: fetchSettings
   };
 

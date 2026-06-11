@@ -3,21 +3,41 @@ import { useState, useEffect } from 'react'
 import { sesionesService } from '../../services/sesiones.service'
 import { useSettings } from '../../context/SettingsContext'
 import ScrollToTop from '../ui/ScrollToTop'
+import BrandedLogo from '../ui/BrandedLogo'
 
-export default function AuthLayout({ children }) {
+export default function AuthLayout({ children, isPreview = false, forceDarkMode = null }) {
   const { settings } = useSettings()
   const location = useLocation()
-  const isLogin = location.pathname === '/login'
 
-  const [loadingSessions, setLoadingSessions] = useState(true)
-  const [sessionCards, setSessionCards] = useState([])
+  const [darkMode, setDarkMode] = useState(() => {
+    if (forceDarkMode !== null) return forceDarkMode
+    try {
+      const saved = localStorage.getItem('uessjr-dark')
+      if (saved !== null) return saved === 'true'
+    } catch (e) {}
+    return typeof document !== 'undefined' ? document.documentElement.classList.contains('dark') : false
+  })
+
+  // Sincronizar darkMode con forceDarkMode si cambia
+  useEffect(() => {
+    if (forceDarkMode !== null) {
+      setDarkMode(forceDarkMode)
+    }
+  }, [forceDarkMode])
+
+  const [loadingSessions, setLoadingSessions] = useState(!isPreview)
+  const [sessionCards, setSessionCards] = useState([
+    { tipo: 'CONFERENCIA', nombre: 'Inteligencia Artificial' },
+    { tipo: 'TALLER', nombre: 'Desarrollo Web Moderno' },
+    { tipo: 'CHARLA', nombre: 'Ciberseguridad' },
+  ])
 
   const eventName = settings?.event_info?.event_name || 'Agenda'
   const institution = settings?.event_info?.institution || 'UESSJR'
-  const logoUrl = settings?.branding?.logo_url
-  const bgImage = settings?.branding?.background_image
+  const bgImage = settings?.branding?.background_image_login || settings?.branding?.background_image
 
   useEffect(() => {
+    if (isPreview) return;
     const loadSessions = async () => {
       try {
         setLoadingSessions(true)
@@ -36,38 +56,33 @@ export default function AuthLayout({ children }) {
       }
     }
     loadSessions()
-  }, [])
+  }, [isPreview])
 
   return (
-    <div className="h-screen w-full flex bg-white dark:bg-[#05140B] font-sans overflow-hidden">
-      <ScrollToTop />
+    <div className={`h-screen w-full flex bg-bg-main dark:bg-bg-dark font-sans overflow-hidden ${isPreview ? 'absolute inset-0 z-0' : ''}`}>
+      {!isPreview && <ScrollToTop />}
+      
       {/* Left Panel - Branding (Hidden on small screens) */}
-      <div className="hidden lg:flex lg:w-1/2 bg-[#1b3b2b] flex-col justify-between p-8 xl:p-12 relative h-full">
+      <div className="hidden lg:flex lg:w-1/2 bg-primary flex-col justify-between p-8 xl:p-12 relative h-full">
         
         {bgImage && (
           <img 
             src={bgImage} 
             alt="Background" 
-            className="absolute inset-0 w-full h-full object-cover opacity-20"
+            className="absolute inset-0 w-full h-full object-cover opacity-20 mix-blend-overlay"
           />
         )}
 
         {/* Logo */}
         <div className="z-10 flex-shrink-0">
-          <Link to="/" className="flex items-center gap-3">
-            {logoUrl ? (
-              <img src={logoUrl} alt={eventName} className="h-10 w-auto object-contain brightness-0 invert" />
-            ) : (
-              <h1 className="text-white text-xl xl:text-2xl font-bold tracking-tight">
-                {institution} {eventName}
-              </h1>
-            )}
+          <Link to="/">
+            <BrandedLogo isDarkTheme={true} showText={true} />
           </Link>
         </div>
 
         {/* Center Content */}
         <div className="z-10 flex-1 flex flex-col justify-center max-w-lg py-4">
-          <div className="text-[#e0a96d] text-4xl xl:text-6xl font-serif font-bold mb-2 xl:mb-4 leading-none">
+          <div className="text-secondary text-4xl xl:text-6xl font-serif font-bold mb-2 xl:mb-4 leading-none">
             ”
           </div>
           <h2 className="text-white text-3xl xl:text-4xl 2xl:text-5xl font-light italic leading-tight mb-6 xl:mb-10">
@@ -91,7 +106,7 @@ export default function AuthLayout({ children }) {
                 </div>
                 {/* Card 2 (Middle) */}
                 <div className="absolute top-8 xl:top-10 left-4 xl:left-6 w-72 xl:w-80 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-3 xl:p-4 shadow-lg transform transition-transform hover:-translate-y-1 z-10">
-                  <div className="w-1 h-6 xl:h-8 bg-[#e0a96d] absolute left-0 top-3 rounded-r-full"></div>
+                  <div className="w-1 h-6 xl:h-8 bg-secondary absolute left-0 top-3 rounded-r-full"></div>
                   <p className="text-white/60 text-[10px] xl:text-xs font-semibold tracking-wider mb-1 uppercase pl-3">{sessionCards[1]?.tipo}</p>
                   <p className="text-white font-medium text-sm xl:text-base pl-3 truncate">{sessionCards[1]?.nombre}</p>
                 </div>
@@ -116,18 +131,17 @@ export default function AuthLayout({ children }) {
           </p>
         </div>
         
-        {/* Optional decorative gradient/glow in the background */}
-        <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-[#2a5a43] rounded-full blur-3xl opacity-50"></div>
+        <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-secondary/20 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
       </div>
 
       {/* Right Panel - Form Area */}
-      <div className="w-full lg:w-1/2 flex flex-col relative h-full">
+      <div className="w-full lg:w-1/2 flex flex-col relative h-full bg-bg-main dark:bg-bg-dark">
         {/* Top Navigation */}
-        <nav className="absolute top-0 left-0 right-0 p-8 flex justify-end gap-6 text-sm font-medium text-emerald-800/60 dark:text-emerald-400/50 hidden sm:flex z-10 bg-white/80 dark:bg-[#05140B]/90 backdrop-blur-md">
-          <Link to="/" className="hover:text-emerald-900 transition-colors">Inicio</Link>
-          <Link to="/agenda" className="hover:text-emerald-900 transition-colors">Agenda</Link>
-          <Link to="/conferencistas" className="hover:text-emerald-900 transition-colors">Conferencistas</Link>
-          <Link to="/proponer" className="hover:text-emerald-900 transition-colors">Proponer actividad</Link>
+        <nav className="absolute top-0 left-0 right-0 p-8 flex justify-end gap-6 text-sm font-medium text-primary/60 dark:text-primary/50 hidden sm:flex z-10 bg-bg-main/80 dark:bg-bg-dark/90 backdrop-blur-md">
+          <Link to="/" className="hover:text-primary transition-colors">Inicio</Link>
+          <Link to="/agenda" className="hover:text-primary transition-colors">Agenda</Link>
+          <Link to="/conferencistas" className="hover:text-primary transition-colors">Conferencistas</Link>
+          <Link to="/proponer" className="hover:text-primary transition-colors">Proponer actividad</Link>
         </nav>
 
         {/* Scrollable Form Container */}

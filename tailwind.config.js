@@ -31,9 +31,9 @@ export default {
           900: '#1A1F1A',
         },
         bg: {
-          main: '#FAF9F6',    // Ivory
+          main: 'var(--color-bg-light, #FAF9F6)',    // Ivory
           surface: '#F5F4F0', // Sand
-          dark: '#08120A',    // Softer Dark
+          dark: 'var(--color-bg-dark, #05140B)',    // Softer Dark
         },
         gray: {
           50: '#F9FAF9',
@@ -48,6 +48,9 @@ export default {
           900: '#1A1A1A',
           950: '#0A0A0A',
         }
+      },
+      borderRadius: {
+        'global': 'var(--border-radius-global, 0.5rem)',
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'],

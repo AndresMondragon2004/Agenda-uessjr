@@ -38,13 +38,22 @@ const QRTicket = ({ participant, session }) => {
       >
         {/* Banner Superior con color de marca */}
         <div 
-          className="h-24 p-6 flex flex-col justify-end"
+          className="h-24 p-6 flex items-center justify-between"
           style={{ backgroundColor: 'var(--color-primary, #163020)' }}
         >
-          <h3 className="text-white font-bold text-lg leading-tight truncate">
-            {settings?.event_info?.event_name || 'Evento Universitario'}
-          </h3>
-          <p className="text-white/80 text-xs">Ticket de Acceso</p>
+          <div className="flex flex-col justify-end h-full">
+            <h3 className="text-white font-bold text-lg leading-tight truncate max-w-[180px]">
+              {settings?.event_info?.event_name || 'Evento Universitario'}
+            </h3>
+            <p className="text-white/80 text-xs">Ticket de Acceso</p>
+          </div>
+          {settings?.branding?.logo_url && (
+            <img 
+              src={settings.branding.logo_url} 
+              className="h-12 w-12 object-contain brightness-0 invert opacity-90" 
+              alt="Logo"
+            />
+          )}
         </div>
 
         {/* Cuerpo del Ticket */}
