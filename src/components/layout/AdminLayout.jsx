@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom'
-import { LayoutDashboard, CalendarDays, MapPin, ListVideo, FileText, Users, BarChart3, LogOut, Sun, Moon, Search, Shield, Brain, Sparkles, Megaphone } from 'lucide-react'
+import { LayoutDashboard, CalendarDays, MapPin, ListVideo, FileText, Users, BarChart3, LogOut, Sun, Moon, Search, Shield, Brain, Sparkles, Megaphone, Palette } from 'lucide-react'
 import { jornadaService } from '../../services/jornada.service'
 import { useAuth } from '../../context/AuthContext'
 import CommandPalette from '../admin/CommandPalette'
@@ -62,7 +62,9 @@ const SIDEBAR_ITEMS = [
   { label: 'Sesiones',         path: '/admin/sesiones',    icon: Sparkles },
   { label: 'Propuestas',       path: '/admin/propuestas',  icon: FileText },
   { label: 'Estudiantes',      path: '/admin/estudiantes', icon: Users },
-  { label: 'Anuncios y mensajes', path: '/admin/anuncios',   icon: Megaphone },  { label: 'Inteligencia IA',  path: '/admin/ia',          icon: Brain },
+  { label: 'Anuncios y mensajes', path: '/admin/anuncios',   icon: Megaphone },
+  { label: 'Configuración',     path: '/admin/configuracion', icon: Palette },
+  { label: 'Inteligencia IA',  path: '/admin/ia',          icon: Brain },
   { label: 'Reportes',         path: '/admin/reportes',    icon: BarChart3 },
 ]
 
@@ -123,7 +125,7 @@ function Sidebar({ navigate, location, open, onClose, user, onLogoutClick, onTog
                   onClick={() => { navigate(item.path); onClose() }}
                   className={`w-full text-left px-3 py-2 rounded-xl text-sm transition-all flex items-center gap-3 group relative
                     ${isActive
-                      ? 'bg-[#22573E] text-white font-bold'
+                      ? 'bg-[#163020] text-white font-bold'
                       : 'text-white/50 hover:text-white/90 hover:bg-white/5'}`}
                 >
                   <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-[#34D399]' : 'text-white/20 group-hover:text-white/40'}`} />
@@ -248,7 +250,7 @@ export default function AdminLayout() {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#F5F4F0] dark:bg-[#0A1A11]">
+    <div className="flex min-h-screen bg-[#F5F4F0] dark:bg-[#05140B]">
       <ScrollToTop />
       {/* Mobile topbar */}
       <div className="fixed top-0 left-0 right-0 h-14 bg-[#001F12] z-40 flex items-center justify-between px-4 lg:hidden border-b border-white/5">
@@ -306,7 +308,7 @@ export default function AdminLayout() {
       <button
         onClick={() => setShowCommandPalette(true)}
         aria-label="Abrir buscador"
-        className="fixed bottom-6 right-6 z-30 lg:hidden w-14 h-14 bg-[#22573E] text-white rounded-full shadow-xl flex items-center justify-center hover:bg-emerald-700 active:scale-90 transition-all"
+        className="fixed bottom-6 right-6 z-30 lg:hidden w-14 h-14 bg-[#163020] text-white rounded-full shadow-xl flex items-center justify-center hover:bg-emerald-700 active:scale-90 transition-all"
       >
         <Search size={22} />
       </button>

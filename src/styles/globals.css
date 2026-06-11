@@ -9,8 +9,24 @@ html {
 
 body {
   font-family: 'Plus Jakarta Sans', sans-serif;
-  background-color: #FAF9F6; /* Ivory base for light mode */
+  background-color: #FAF9F6; /* Marfil Editorial */
   color: #1a1a1a;
+  transition: background-color 0.3s ease;
+}
+
+/* Dark Mode: Verde Carbón Suave (Menos marcado) */
+html.dark body {
+  background-color: #05140B; 
+  color: #E2E8E4;
+}
+
+::selection {
+  background-color: #D97706;
+  color: #ffffff;
+}
+
+.bg-sand {
+  background-color: #F5F4F0;
 }
 
 /* Disable transitions for elements where it might look weird or cause lag */
@@ -159,7 +175,7 @@ html.dark .shimmer-bg {
 
 /* Dark mode base */
 html.dark body {
-  background-color: #0A1A11;
+  background-color: #05140B;
   color: #e6f4ec;
 }
 

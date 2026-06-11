@@ -186,7 +186,7 @@ export default function DigitalTicket() {
               />
             </div>
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mb-2">Escanea para asistencia</p>
-            <div className="flex items-center gap-2 text-[#22573E] font-black text-xs uppercase tracking-widest">
+            <div className="flex items-center gap-2 text-[#163020] font-black text-xs uppercase tracking-widest">
               <Calendar size={14} /> Mayo 2026
             </div>
           </div>

@@ -109,7 +109,7 @@ export default function CommandPalette({ isOpen, onClose }) {
         <div className="max-h-[60vh] overflow-y-auto p-3 space-y-2 scrollbar-hide">
           {loading ? (
             <div className="py-20 text-center">
-              <Loader2 className="w-8 h-8 animate-spin text-[#22573E] mx-auto mb-2" />
+              <Loader2 className="w-8 h-8 animate-spin text-[#163020] mx-auto mb-2" />
               <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Buscando en el sistema...</p>
             </div>
           ) : allResults.length === 0 ? (
@@ -124,20 +124,20 @@ export default function CommandPalette({ isOpen, onClose }) {
                 className="w-full flex items-center justify-between p-4 rounded-2xl hover:bg-emerald-50 dark:hover:bg-emerald-900/20 group transition-all text-left"
               >
                 <div className="flex items-center gap-4 min-w-0">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${item.highlight ? 'bg-emerald-100 text-[#22573E] dark:bg-emerald-900/40' : 'bg-gray-50 dark:bg-[#0F2018] text-gray-400'} group-hover:bg-[#22573E] group-hover:text-white`}>
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${item.highlight ? 'bg-emerald-100 text-[#163020] dark:bg-emerald-900/40' : 'bg-gray-50 dark:bg-[#0F2018] text-gray-400'} group-hover:bg-[#163020] group-hover:text-white`}>
                     <item.icon size={18} />
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-black text-gray-900 dark:text-gray-100 truncate">{item.title}</span>
-                      <span className={`px-1.5 py-0.5 text-[8px] font-black uppercase rounded ${item.type === 'Acción' ? 'bg-emerald-100 dark:bg-emerald-900/40 text-[#22573E] dark:text-emerald-400' : 'bg-gray-100 dark:bg-emerald-950 text-gray-500 dark:text-emerald-500'}`}>
+                      <span className={`px-1.5 py-0.5 text-[8px] font-black uppercase rounded ${item.type === 'Acción' ? 'bg-emerald-100 dark:bg-emerald-900/40 text-[#163020] dark:text-emerald-400' : 'bg-gray-100 dark:bg-emerald-950 text-gray-500 dark:text-emerald-500'}`}>
                         {item.type}
                       </span>
                     </div>
                     {item.sub && <p className="text-[11px] font-bold text-gray-400 mt-0.5 truncate">{item.sub}</p>}
                   </div>
                 </div>
-                <ArrowRight size={16} className="text-gray-200 dark:text-emerald-900/50 group-hover:text-[#22573E] group-hover:translate-x-1 transition-all" />
+                <ArrowRight size={16} className="text-gray-200 dark:text-emerald-900/50 group-hover:text-[#163020] group-hover:translate-x-1 transition-all" />
               </button>
             ))
           )}
@@ -154,7 +154,7 @@ export default function CommandPalette({ isOpen, onClose }) {
               <span>abrir buscador</span>
             </div>
           </div>
-          <span className="text-[10px] font-black text-[#22573E] dark:text-emerald-600 uppercase tracking-widest">UESSJR Agenda v1.0</span>
+          <span className="text-[10px] font-black text-[#163020] dark:text-emerald-600 uppercase tracking-widest">UESSJR Agenda v1.0</span>
         </div>
       </div>
     </div>

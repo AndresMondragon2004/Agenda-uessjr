@@ -60,7 +60,7 @@ function ConfirmModal({ count, programa, channels, onConfirm, onCancel, loading 
           Se enviará el mensaje a{' '}
           <strong className="text-gray-900 dark:text-gray-100">{count} alumnos</strong>
           {programa !== 'todos' && (
-            <> del programa <strong className="text-[#22573E] dark:text-emerald-400">{PROGRAMA_LABELS[programa]}</strong></>
+            <> del programa <strong className="text-[#163020] dark:text-emerald-400">{PROGRAMA_LABELS[programa]}</strong></>
           )}.
         </p>
 
@@ -87,7 +87,7 @@ function ConfirmModal({ count, programa, channels, onConfirm, onCancel, loading 
           <button
             onClick={onConfirm}
             disabled={loading}
-            className="w-full py-4 bg-[#22573E] text-white font-black rounded-2xl hover:bg-emerald-800 transition-all disabled:opacity-50 flex items-center justify-center gap-2 text-xs uppercase tracking-[0.2em] shadow-lg shadow-emerald-900/20"
+            className="w-full py-4 bg-[#163020] text-white font-black rounded-2xl hover:bg-emerald-800 transition-all disabled:opacity-50 flex items-center justify-center gap-2 text-xs uppercase tracking-[0.2em] shadow-lg shadow-emerald-900/20"
           >
             {loading
               ? <><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> Procesando...</>
@@ -268,7 +268,7 @@ export default function AnunciosMensajes() {
   const pct = destinatarios.length > 0 ? Math.round((progress / destinatarios.length) * 100) : 0
 
   return (
-    <div className="min-h-screen bg-[#F2F5F3] dark:bg-[#0A1A11] pb-20">
+    <div className="min-h-screen bg-[#FAF9F6] dark:bg-[#05140B] pb-20">
       {/* Header */}
       <div className="bg-white dark:bg-[#122A1C] border-b border-gray-100 dark:border-emerald-900/40 px-4 py-6 sticky top-0 z-20 shadow-sm">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
@@ -315,7 +315,7 @@ export default function AnunciosMensajes() {
                       onClick={() => setPrograma(val)}
                       className={`p-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border text-left flex flex-col justify-between h-24
                         ${active 
-                          ? 'bg-[#22573E] text-white border-[#22573E] shadow-xl shadow-emerald-900/20 translate-y-[-2px]' 
+                          ? 'bg-[#163020] text-white border-[#163020] shadow-xl shadow-emerald-900/20 translate-y-[-2px]' 
                           : 'bg-gray-50 dark:bg-[#0F2018] text-gray-400 dark:text-gray-500 border-gray-100 dark:border-emerald-900/40 hover:border-emerald-200'
                         }`}
                     >
@@ -388,7 +388,7 @@ export default function AnunciosMensajes() {
                 onChange={e => setMensaje(e.target.value)}
                 rows={8}
                 placeholder="Escribe el mensaje que llegará a todos los canales seleccionados..."
-                className="w-full p-6 bg-gray-50 dark:bg-[#0F2018] border border-gray-100 dark:border-emerald-900/50 rounded-[2rem] outline-none focus:border-[#22573E] text-base font-medium dark:text-gray-200 resize-none transition-all placeholder:text-gray-400"
+                className="w-full p-6 bg-gray-50 dark:bg-[#0F2018] border border-gray-100 dark:border-emerald-900/50 rounded-[2rem] outline-none focus:border-[#163020] text-base font-medium dark:text-gray-200 resize-none transition-all placeholder:text-gray-400"
               />
 
               <div className="flex items-center justify-between mt-4 mb-8 px-2">
@@ -403,7 +403,7 @@ export default function AnunciosMensajes() {
               {sending ? (
                 <div className="space-y-4">
                   <div className="h-4 bg-gray-100 dark:bg-emerald-900/20 rounded-full overflow-hidden shadow-inner">
-                    <div className="h-full bg-gradient-to-r from-[#22573E] to-emerald-500 transition-all duration-300" style={{ width: `${pct}%` }} />
+                    <div className="h-full bg-gradient-to-r from-[#163020] to-emerald-500 transition-all duration-300" style={{ width: `${pct}%` }} />
                   </div>
                   <p className="text-center text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
                     Procesando difusión: {progress} / {destinatarios.length} ({pct}%)
@@ -413,7 +413,7 @@ export default function AnunciosMensajes() {
                 <button
                   onClick={() => setShowConfirm(true)}
                   disabled={!mensaje.trim() || destinatarios.length === 0}
-                  className="w-full py-5 rounded-[1.5rem] font-black text-xs uppercase tracking-[0.3em] transition-all flex items-center justify-center gap-4 bg-[#22573E] text-white shadow-xl shadow-emerald-900/30 hover:bg-emerald-800 disabled:opacity-40 active:scale-[0.98]"
+                  className="w-full py-5 rounded-[1.5rem] font-black text-xs uppercase tracking-[0.3em] transition-all flex items-center justify-center gap-4 bg-[#163020] text-white shadow-xl shadow-emerald-900/30 hover:bg-emerald-800 disabled:opacity-40 active:scale-[0.98]"
                 >
                   <Send size={20} /> Iniciar Envío Masivo
                 </button>
@@ -461,7 +461,7 @@ export default function AnunciosMensajes() {
             </div>
 
             {/* Info Card */}
-            <div className="bg-gradient-to-br from-[#22573E] to-[#0D2B1D] rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-xl">
+            <div className="bg-gradient-to-br from-[#163020] to-[#05140B] rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-xl">
               <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12"><Globe size={120} /></div>
               <div className="relative z-10">
                 <h4 className="font-black text-sm uppercase tracking-widest mb-4">Ayuda técnica</h4>

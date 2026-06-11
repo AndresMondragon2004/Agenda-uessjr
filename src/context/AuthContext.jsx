@@ -181,6 +181,10 @@ export function AuthProvider({ children }) {
     if (error) throw error
   }
 
+  const recargarPerfil = async () => {
+    if (user) await cargarPerfil(user)
+  }
+
   const value = useMemo(() => ({
     user,
     estudiante,
@@ -190,6 +194,7 @@ export function AuthProvider({ children }) {
     signIn,
     signUp,
     signOut,
+    recargarPerfil,
     isLoggedIn: !!user,
   }), [user, estudiante, isAdmin, isSuperAdmin, loading])
 

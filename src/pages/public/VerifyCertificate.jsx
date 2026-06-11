@@ -60,7 +60,7 @@ export default function VerifyCertificate() {
   }, [codigo])
 
   return (
-    <div className="min-h-screen bg-[#F8FAFB] dark:bg-[#0A1A11] flex items-center justify-center p-4 sm:p-8">
+    <div className="min-h-screen bg-[#F5F4F0] dark:bg-[#05140B] flex items-center justify-center p-4 sm:p-8">
       
       <div className="w-full max-w-2xl bg-white dark:bg-[#122A1C] rounded-[3rem] shadow-2xl border border-gray-100 dark:border-emerald-900/30 overflow-hidden relative">
         
@@ -71,7 +71,7 @@ export default function VerifyCertificate() {
           
           {loading ? (
             <div className="py-20 text-center">
-              <Loader2 className="w-12 h-12 animate-spin text-[#22573E] mx-auto mb-4" />
+              <Loader2 className="w-12 h-12 animate-spin text-[#163020] mx-auto mb-4" />
               <p className="text-sm font-black text-gray-400 uppercase tracking-[0.2em]">Validando con el servidor...</p>
             </div>
           ) : error ? (
@@ -81,7 +81,7 @@ export default function VerifyCertificate() {
               </div>
               <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-2">Error de Validación</h2>
               <p className="text-gray-500 dark:text-gray-400 mb-8">{error}</p>
-              <Link to="/" className="inline-flex items-center gap-2 text-[#22573E] dark:text-emerald-400 font-bold hover:underline">
+              <Link to="/" className="inline-flex items-center gap-2 text-[#163020] dark:text-emerald-400 font-bold hover:underline">
                 <ArrowLeft size={16} /> Volver al portal
               </Link>
             </div>
@@ -129,7 +129,7 @@ export default function VerifyCertificate() {
                   Este documento ha sido validado electrónicamente a través de la plataforma oficial de la Unidad de Estudios Superiores San José del Rincón.
                 </p>
                 <div className="mt-8">
-                   <Link to="/" className="bg-[#22573E] text-white px-8 py-3 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-emerald-800 transition-all shadow-lg shadow-emerald-900/20">
+                   <Link to="/" className="bg-[#163020] text-white px-8 py-3 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-emerald-800 transition-all shadow-lg shadow-emerald-900/20">
                     Portal de Jornada
                    </Link>
                 </div>

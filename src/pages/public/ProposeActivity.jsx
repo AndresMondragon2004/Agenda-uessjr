@@ -47,7 +47,7 @@ function Toggle({ checked, onChange, label, hint }) {
         className={`relative w-11 h-6 rounded-full transition-all shrink-0
                     border-2 focus:outline-none
                     ${checked
-                      ? 'bg-[#22573E] border-[#22573E]'
+                      ? 'bg-[#163020] border-[#163020]'
                       : 'bg-gray-100 dark:bg-[#0F2018] border-gray-200 dark:border-emerald-900/50 hover:border-gray-300 dark:hover:border-emerald-800'}`}
       >
         <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full
@@ -73,7 +73,7 @@ function Field({ label, required, hint, children }) {
 }
 
 const INPUT_CLASS = `w-full px-4 py-3 bg-white dark:bg-[#0F2018] border border-gray-200 dark:border-emerald-900/50 rounded-xl
-                     focus:border-[#22573E] focus:ring-4 focus:ring-[#22573E]/8
+                     focus:border-[#163020] focus:ring-4 focus:ring-[#163020]/8
                      outline-none transition-all text-sm text-gray-900 dark:text-gray-300
                      placeholder:text-gray-300 dark:placeholder:text-gray-600`
 
@@ -84,7 +84,7 @@ function StepIndicator({ step, current }) {
   return (
     <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs
                      font-black transition-all shrink-0
-                     ${done   ? 'bg-[#22573E] text-white'
+                     ${done   ? 'bg-[#163020] text-white'
                      : active ? 'bg-[#D97706] text-white ring-4 ring-[#D97706]/20'
                               : 'bg-gray-100 dark:bg-emerald-950 text-gray-400 dark:text-gray-600'}`}>
       {done ? <Check size={13} strokeWidth={3} /> : step}
@@ -219,7 +219,7 @@ export default function ProposeActivity() {
 
   // ── Estado de éxito ────────────────────────────────────────────────────────
   if (success) return (
-    <div className="min-h-screen bg-[#F0F7F4] dark:bg-[#0A1A11] flex items-center justify-center px-4 py-20">
+    <div className="min-h-screen bg-[#F5F4F0] dark:bg-[#05140B] flex items-center justify-center px-4 py-20">
       <div className="max-w-md w-full text-center">
 
         {/* Círculos de confeti */}
@@ -227,7 +227,7 @@ export default function ProposeActivity() {
           <div className="absolute inset-0 rounded-full bg-emerald-100 animate-ping opacity-30" />
           <div className="absolute inset-2 rounded-full bg-emerald-200 animate-ping opacity-20"
                style={{ animationDelay: '0.2s' }} />
-          <div className="relative w-32 h-32 rounded-full bg-[#22573E] flex items-center justify-center shadow-xl shadow-emerald-900/20">
+          <div className="relative w-32 h-32 rounded-full bg-[#163020] flex items-center justify-center shadow-xl shadow-emerald-900/20">
             <span className="text-5xl">✨</span>
           </div>
         </div>
@@ -257,7 +257,7 @@ export default function ProposeActivity() {
         <div className="flex flex-col gap-3">
           <button
             onClick={() => { setSuccess(false); setStep(1); setForm(prev => ({ ...prev, titulo: '', descripcion: '', tipo_actividad: '' })) }}
-            className="w-full py-3 bg-[#22573E] text-white font-bold rounded-xl
+            className="w-full py-3 bg-[#163020] text-white font-bold rounded-xl
                        hover:bg-emerald-800 transition-colors"
           >
             Enviar otra propuesta
@@ -275,7 +275,7 @@ export default function ProposeActivity() {
   )
 
   if (loading) return (
-    <div className="min-h-screen bg-[#F8FAFB] dark:bg-[#0A1A11] animate-pulse pt-32 px-4">
+    <div className="min-h-screen bg-[#F5F4F0] dark:bg-[#05140B] animate-pulse pt-32 px-4">
       <div className="max-w-3xl mx-auto space-y-8">
         <div className="h-10 bg-gray-200 dark:bg-emerald-900/30 rounded-lg w-1/3"></div>
         <div className="h-6 bg-gray-200 dark:bg-emerald-900/30 rounded-lg w-1/2"></div>
@@ -295,7 +295,7 @@ export default function ProposeActivity() {
       </div>
       
       <h1 className="text-4xl sm:text-5xl font-black text-gray-900 dark:text-white mb-6 uppercase tracking-tight anim-fade-up">
-        Convocatoria <span className="text-[#22573E] dark:text-emerald-500">Cerrada</span>
+        Convocatoria <span className="text-[#163020] dark:text-emerald-500">Cerrada</span>
       </h1>
       
       <p className="text-gray-500 dark:text-gray-400 text-lg sm:text-xl mb-12 max-w-2xl mx-auto leading-relaxed anim-fade-up anim-delay-100">
@@ -306,14 +306,14 @@ export default function ProposeActivity() {
       <div className="bg-white dark:bg-[#122A1C] p-10 rounded-[2.5rem] border border-gray-100 dark:border-emerald-900/30 inline-block shadow-2xl shadow-emerald-900/5 anim-fade-up anim-delay-200">
         <div className="inline-flex items-center gap-2 bg-emerald-50 dark:bg-emerald-950/50 px-4 py-1.5 rounded-full mb-4">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <p className="text-[10px] font-black text-[#22573E] dark:text-emerald-400 uppercase tracking-widest">Próxima Edición</p>
+          <p className="text-[10px] font-black text-[#163020] dark:text-emerald-400 uppercase tracking-widest">Próxima Edición</p>
         </div>
         <p className="text-gray-900 dark:text-white font-black text-xl">Mayo 2027</p>
         <p className="text-gray-400 dark:text-gray-500 text-xs mt-1">Te esperamos con más innovación y cultura.</p>
       </div>
 
       <div className="mt-16 anim-fade-up anim-delay-300">
-        <Link to="/" className="inline-flex items-center gap-2 bg-[#0D2B1D] text-white px-8 py-4 rounded-2xl font-black uppercase text-xs tracking-[0.2em] hover:bg-emerald-900 transition-all shadow-lg hover:-translate-y-1">
+        <Link to="/" className="inline-flex items-center gap-2 bg-[#05140B] text-white px-8 py-4 rounded-2xl font-black uppercase text-xs tracking-[0.2em] hover:bg-emerald-900 transition-all shadow-lg hover:-translate-y-1">
           Ir al resumen del evento <ArrowRight size={16} />
         </Link>
       </div>
@@ -326,15 +326,15 @@ export default function ProposeActivity() {
   return (
     <>
       <SEO title="Propón una actividad" description="¿Tienes una conferencia, taller o actividad cultural que quieras compartir? Cuéntanos tu idea." />
-      <div className="min-h-screen bg-[#F8FAFB] dark:bg-[#0A1A11]">
+      <div className="min-h-screen bg-[#F5F4F0] dark:bg-[#05140B]">
 
       {/* Header institucional */}
-      <div className="relative bg-[#22573E] pt-28 pb-16 px-4 overflow-hidden">
+      <div className="relative bg-[#163020] pt-28 pb-16 px-4 overflow-hidden">
 
         {/* Patrón de fondo */}
         <div className="absolute inset-0 opacity-5 pointer-events-none"
              style={{ backgroundImage: 'radial-gradient(white 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
-        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-[#F8FAFB] dark:from-[#0A1A11] to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-[#F5F4F0] dark:from-[#05140B] to-transparent" />
         <div className="absolute top-0 right-0 w-96 h-96 bg-amber-400/5 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 max-w-2xl mx-auto text-center">
@@ -366,11 +366,11 @@ export default function ProposeActivity() {
                 <div key={s} className="flex items-center gap-2 flex-1">
                   <StepIndicator step={s} current={step} />
                   <span className={`text-xs font-bold hidden sm:block transition-colors
-                                   ${step === s ? 'text-gray-900 dark:text-gray-100' : step > s ? 'text-[#22573E] dark:text-emerald-400' : 'text-gray-400 dark:text-gray-600'}`}>
+                                   ${step === s ? 'text-gray-900 dark:text-gray-100' : step > s ? 'text-[#163020] dark:text-emerald-400' : 'text-gray-400 dark:text-gray-600'}`}>
                     {label}
                   </span>
                   {i < STEP_LABELS.length - 1 && (
-                    <div className={`flex-1 h-0.5 mx-2 rounded-full transition-colors ${step > s ? 'bg-[#22573E]' : 'bg-gray-200 dark:bg-emerald-900/40'}`} />
+                    <div className={`flex-1 h-0.5 mx-2 rounded-full transition-colors ${step > s ? 'bg-[#163020]' : 'bg-gray-200 dark:bg-emerald-900/40'}`} />
                   )}
                 </div>
               )
@@ -451,7 +451,7 @@ export default function ProposeActivity() {
               <button
                 type="button"
                 onClick={handleNext}
-                className="w-full py-3.5 bg-[#22573E] text-white font-black text-sm
+                className="w-full py-3.5 bg-[#163020] text-white font-black text-sm
                            uppercase tracking-widest rounded-xl hover:bg-emerald-800
                            transition-all hover:-translate-y-0.5 shadow-sm
                            flex items-center justify-center gap-2 mt-2"
@@ -485,18 +485,18 @@ export default function ProposeActivity() {
                       className={`relative p-4 rounded-2xl border-2 text-left transition-all
                                   hover:-translate-y-0.5
                                   ${form.tipo_actividad === t.value
-                                    ? 'border-[#22573E] bg-emerald-50/60 dark:bg-emerald-900/20 shadow-sm'
+                                    ? 'border-[#163020] bg-emerald-50/60 dark:bg-emerald-900/20 shadow-sm'
                                     : 'border-gray-100 dark:border-emerald-900/40 bg-white dark:bg-[#0F2018] hover:border-gray-200 dark:hover:border-emerald-800'}`}
                     >
                       {form.tipo_actividad === t.value && (
                         <div className="absolute top-2.5 right-2.5 w-4 h-4 rounded-full
-                                        bg-[#22573E] flex items-center justify-center">
+                                        bg-[#163020] flex items-center justify-center">
                           <Check size={9} strokeWidth={3} className="text-white" />
                         </div>
                       )}
                       <span className="text-2xl block mb-2">{t.emoji}</span>
                       <p className={`text-sm font-bold leading-tight
-                                    ${form.tipo_actividad === t.value ? 'text-[#22573E] dark:text-emerald-400' : 'text-gray-800 dark:text-gray-300'}`}>
+                                    ${form.tipo_actividad === t.value ? 'text-[#163020] dark:text-emerald-400' : 'text-gray-800 dark:text-gray-300'}`}>
                         {t.label}
                       </p>
                       <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 leading-tight">{t.desc}</p>
@@ -613,7 +613,7 @@ export default function ProposeActivity() {
                   ← Atrás
                 </button>
                 <button type="button" onClick={handleNext}
-                        className="flex-[2] py-3 bg-[#22573E] text-white font-black text-sm
+                        className="flex-[2] py-3 bg-[#163020] text-white font-black text-sm
                                    uppercase tracking-widest rounded-xl hover:bg-emerald-800
                                    transition-all hover:-translate-y-0.5 shadow-sm
                                    flex items-center justify-center gap-2">
@@ -656,8 +656,8 @@ export default function ProposeActivity() {
                             className={`px-4 py-2.5 rounded-xl text-sm font-bold
                                         transition-all border-2
                                         ${sel
-                                          ? 'bg-[#22573E] text-white border-[#22573E] shadow-sm'
-                                          : 'bg-white dark:bg-[#0F2018] text-gray-600 dark:text-gray-400 border-gray-200 dark:border-emerald-900/40 hover:border-[#22573E]/30 dark:hover:border-emerald-700/50'}`}
+                                          ? 'bg-[#163020] text-white border-[#163020] shadow-sm'
+                                          : 'bg-white dark:bg-[#0F2018] text-gray-600 dark:text-gray-400 border-gray-200 dark:border-emerald-900/40 hover:border-[#163020]/30 dark:hover:border-emerald-700/50'}`}
                           >
                             {sel && <Check size={11} strokeWidth={3} className="inline mr-1 -mt-0.5" />}
                             {label}
@@ -683,10 +683,10 @@ export default function ProposeActivity() {
                         onClick={() => setForm(p => ({ ...p, horario_preferido: h.value }))}
                         className={`p-3.5 rounded-xl border-2 text-left transition-all
                                     ${form.horario_preferido === h.value
-                                      ? 'border-[#22573E] bg-emerald-50/60 dark:bg-emerald-900/20'
+                                      ? 'border-[#163020] bg-emerald-50/60 dark:bg-emerald-900/20'
                                       : 'border-gray-100 dark:border-emerald-900/40 hover:border-gray-200 dark:hover:border-emerald-800'}`}
                       >
-                        <p className={`text-sm font-bold ${form.horario_preferido === h.value ? 'text-[#22573E] dark:text-emerald-400' : 'text-gray-800 dark:text-gray-300'}`}>
+                        <p className={`text-sm font-bold ${form.horario_preferido === h.value ? 'text-[#163020] dark:text-emerald-400' : 'text-gray-800 dark:text-gray-300'}`}>
                           {h.label}
                         </p>
                         <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{h.sub}</p>

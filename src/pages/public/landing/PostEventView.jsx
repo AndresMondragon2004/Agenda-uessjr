@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { Trophy, Users, Calendar, ChevronRight, Award, Star, MapPin, Clock, ArrowRight, Loader2, Download, CheckCircle2 } from 'lucide-react'
+import { toast } from 'react-hot-toast'
 import { sesionesService } from '../../../services/sesiones.service'
 import { supabase } from '../../../services/supabase'
 import { useAuth } from '../../../context/AuthContext'
@@ -99,21 +100,21 @@ export default function PostEventView({ jornada }) {
       await generateConstanciaPDF(estudiante, jornada)
     } catch (err) {
       console.error(err)
-      alert('Error al generar la constancia')
+      toast.error('Error al generar la constancia')
     } finally {
       setGenerating(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0A1A11]">
+    <div className="min-h-screen bg-[#F5F4F0] dark:bg-[#05140B]">
       
       {/* 1. Hero: Agradecimiento */}
-      <section className="relative pt-32 pb-20 bg-[#0D2B1D] overflow-hidden">
+      <section className="relative pt-32 pb-20 bg-[#05140B] overflow-hidden">
         <div className="absolute inset-0 opacity-20">
           <img src="/images/campus/aula-magna-1.jpg" className="w-full h-full object-cover" alt="" />
         </div>
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0D2B1D]/90 to-[#0D2B1D]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#05140B]/90 to-[#05140B]" />
         
         <div className="relative z-10 max-w-7xl mx-auto px-4 text-center">
           <div className="w-20 h-20 bg-amber-400/20 border border-amber-400/30 rounded-full flex items-center justify-center mx-auto mb-8 anim-reveal anim-stagger-1">
@@ -167,9 +168,9 @@ export default function PostEventView({ jornada }) {
             <div className="relative z-10 flex flex-col md:flex-row items-center gap-10">
               <div className="shrink-0">
                 <div className="w-32 h-32 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center relative">
-                  <Award className="w-16 h-16 text-[#22573E] dark:text-emerald-500" />
+                  <Award className="w-16 h-16 text-[#163020] dark:text-emerald-500" />
                   {asistencias.length >= 6 && (
-                    <div className="absolute -bottom-2 -right-2 bg-amber-400 text-[#0D2B1D] p-2 rounded-xl shadow-lg transform rotate-12">
+                    <div className="absolute -bottom-2 -right-2 bg-amber-400 text-[#05140B] p-2 rounded-xl shadow-lg transform rotate-12">
                       <CheckCircle2 size={24} />
                     </div>
                   )}
@@ -200,7 +201,7 @@ export default function PostEventView({ jornada }) {
                         <button
                           onClick={handleDescargarConstancia}
                           disabled={generating}
-                          className="bg-[#22573E] hover:bg-emerald-800 text-white px-8 py-4 rounded-2xl font-black uppercase text-xs tracking-[0.2em] transition-all shadow-xl shadow-emerald-950/20 flex items-center gap-3 disabled:opacity-50"
+                          className="bg-[#163020] hover:bg-emerald-800 text-white px-8 py-4 rounded-2xl font-black uppercase text-xs tracking-[0.2em] transition-all shadow-xl shadow-emerald-950/20 flex items-center gap-3 disabled:opacity-50"
                         >
                           {generating ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
                           Descargar Constancia
@@ -223,7 +224,7 @@ export default function PostEventView({ jornada }) {
       <section className="py-24 max-w-7xl mx-auto px-4" ref={fameRef}>
         <div className={`flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 ${fameVis ? 'anim-reveal' : 'opacity-0'}`}>
           <div>
-            <h2 className="text-3xl font-black text-gray-900 dark:text-white mb-2">Lo más <span className="text-[#22573E] dark:text-emerald-500">destacado</span></h2>
+            <h2 className="text-3xl font-black text-gray-900 dark:text-white mb-2">Lo más <span className="text-[#163020] dark:text-emerald-500">destacado</span></h2>
             <p className="text-gray-500 dark:text-gray-400 font-medium">Las sesiones que marcaron tendencia en esta edición.</p>
           </div>
           <div className="hidden md:block h-px flex-1 bg-gray-200 dark:bg-emerald-900/30 mx-8" />
@@ -239,12 +240,12 @@ export default function PostEventView({ jornada }) {
               className={`group relative bg-white dark:bg-[#122A1C] rounded-[2.5rem] p-8 border border-gray-100 dark:border-emerald-900/30 shadow-sm hover:shadow-2xl transition-all hover:-translate-y-2 ${fameVis ? 'anim-fade-up' : 'opacity-0'}`}
               style={{ animationDelay: `${0.1 + i * 0.1}s` }}
             >
-              <div className="absolute -top-4 -right-4 w-12 h-12 bg-amber-400 rounded-2xl flex items-center justify-center text-[#0D2B1D] font-black shadow-lg transform rotate-12 group-hover:rotate-0 transition-transform">
+              <div className="absolute -top-4 -right-4 w-12 h-12 bg-amber-400 rounded-2xl flex items-center justify-center text-[#05140B] font-black shadow-lg transform rotate-12 group-hover:rotate-0 transition-transform">
                 #{i+1}
               </div>
               
               <div className="flex items-center gap-2 mb-6">
-                <span className="bg-emerald-50 dark:bg-emerald-900/40 text-[#22573E] dark:text-emerald-400 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
+                <span className="bg-emerald-50 dark:bg-emerald-900/40 text-[#163020] dark:text-emerald-400 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
                   {ses.total_inscritos} Inscritos
                 </span>
                 <div className="flex gap-0.5 text-amber-400">
@@ -260,16 +261,16 @@ export default function PostEventView({ jornada }) {
 
               <div className="space-y-3 mb-8">
                 <div className="flex items-center gap-3 text-gray-500 dark:text-gray-400 text-sm">
-                  <MapPin size={16} className="text-[#22573E] dark:text-emerald-500" />
+                  <MapPin size={16} className="text-[#163020] dark:text-emerald-500" />
                   <span>{ses.escenarios?.nombre || 'UES SJR'}</span>
                 </div>
                 <div className="flex items-center gap-3 text-gray-500 dark:text-gray-400 text-sm">
-                  <Clock size={16} className="text-[#22573E] dark:text-emerald-500" />
+                  <Clock size={16} className="text-[#163020] dark:text-emerald-500" />
                   <span>{ses.hora_inicio?.slice(0,5)} hrs</span>
                 </div>
               </div>
 
-              <Link to={`/agenda/${ses.id}`} className="flex items-center justify-between w-full p-4 bg-gray-50 dark:bg-emerald-950/30 rounded-2xl group-hover:bg-[#22573E] group-hover:text-white transition-all">
+              <Link to={`/agenda/${ses.id}`} className="flex items-center justify-between w-full p-4 bg-gray-50 dark:bg-emerald-950/30 rounded-2xl group-hover:bg-[#163020] group-hover:text-white transition-all">
                 <span className="font-bold text-sm uppercase tracking-widest">Ver Detalles</span>
                 <ChevronRight size={20} />
               </Link>
@@ -279,7 +280,7 @@ export default function PostEventView({ jornada }) {
       </section>
 
       {/* 4. Banner de cierre */}
-      <section className="bg-white dark:bg-[#0E1F15] py-20" ref={cierreRef}>
+      <section className="bg-white dark:bg-[#0B1A12] py-20" ref={cierreRef}>
         <div className={`max-w-4xl mx-auto px-4 text-center ${cierreVis ? 'anim-fade-up' : 'opacity-0'}`}>
           <h2 className="text-3xl font-black text-gray-900 dark:text-white mb-6">¡Nos vemos en la siguiente edición!</h2>
           <p className="text-gray-500 dark:text-gray-400 mb-10 leading-relaxed italic">

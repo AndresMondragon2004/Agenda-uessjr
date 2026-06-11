@@ -115,7 +115,7 @@ export default function Speakers() {
   return (
     <>
       <SEO title="Conferencistas" description="Conoce a los expertos que forman parte de la jornada académica." />
-      <div className="min-h-screen bg-gray-50 dark:bg-[#0A1A11]">
+      <div className="min-h-screen bg-gray-50 dark:bg-[#05140B]">
 
       {/* HEADER */}
       <div className="bg-white dark:bg-[#122A1C] border-b border-gray-100 dark:border-emerald-900/40 pt-16">
@@ -123,11 +123,11 @@ export default function Speakers() {
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
               <p className="text-sm text-gray-400 dark:text-gray-500 mb-1 flex items-center gap-1">
-                <Link to="/" className="hover:text-[#22573E] dark:text-gray-500 dark:hover:text-emerald-400 transition-colors">Inicio</Link>
+                <Link to="/" className="hover:text-[#163020] dark:text-gray-500 dark:hover:text-emerald-400 transition-colors">Inicio</Link>
                 <span>/</span>
                 <span className="text-gray-600 dark:text-gray-400">Conferencistas</span>
               </p>
-              <h1 className="text-3xl sm:text-4xl font-extrabold text-[#22573E] dark:text-emerald-400 tracking-tight">
+              <h1 className="text-3xl sm:text-4xl font-extrabold text-[#163020] dark:text-emerald-400 tracking-tight">
                 Conferencistas
               </h1>
               <p className="text-gray-500 dark:text-gray-400 mt-2">
@@ -148,7 +148,7 @@ export default function Speakers() {
                 value={busqueda}
                 onChange={e => setBusqueda(e.target.value)}
                 placeholder="Buscar conferencista..."
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-emerald-900/50 rounded-xl text-sm focus:border-[#22573E] dark:focus:border-emerald-600 focus:ring-1 focus:ring-[#22573E]/20 outline-none min-h-[44px] bg-white dark:bg-[#0F2018] dark:text-gray-300 dark:placeholder-gray-600"
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-emerald-900/50 rounded-xl text-sm focus:border-[#163020] dark:focus:border-emerald-600 focus:ring-1 focus:ring-[#163020]/20 outline-none min-h-[44px] bg-white dark:bg-[#0F2018] dark:text-gray-300 dark:placeholder-gray-600"
               />
             </div>
           </div>
@@ -167,7 +167,7 @@ export default function Speakers() {
                 onClick={() => setProgramaFiltro(value)}
                 className={`shrink-0 px-4 py-1.5 rounded-full text-sm font-semibold transition-all min-h-[34px] ${
                   programaFiltro === value
-                    ? 'bg-[#22573E] text-white shadow-sm'
+                    ? 'bg-[#163020] text-white shadow-sm'
                     : 'bg-gray-100 dark:bg-emerald-950/50 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-emerald-900/40'
                 }`}
               >
@@ -209,7 +209,7 @@ export default function Speakers() {
                   style={{ animationDelay: `${i * 0.06}s` }}
                 >
                   {/* Color bar top */}
-                  <div className="h-1 bg-gradient-to-r from-[#22573E] to-emerald-400" />
+                  <div className="h-1 bg-gradient-to-r from-[#163020] to-emerald-400" />
 
                   <div className="p-6 flex flex-col flex-1">
                     {/* Avatar + nombre */}
@@ -218,14 +218,14 @@ export default function Speakers() {
                         <img src={p.foto} alt={p.nombre}
                              className="w-20 h-20 rounded-full object-cover mb-3 border-2 border-emerald-100 dark:border-emerald-900/50 shadow-sm group-hover/card:scale-105 transition-transform duration-300" />
                       ) : (
-                        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#22573E] to-emerald-600 flex items-center justify-center mb-3 shadow-sm group-hover/card:scale-105 transition-transform duration-300">
+                        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#163020] to-emerald-600 flex items-center justify-center mb-3 shadow-sm group-hover/card:scale-105 transition-transform duration-300">
                           <span className="text-white text-2xl font-bold">
                             {p.nombre.charAt(0).toUpperCase()}
                           </span>
                         </div>
                       )}
                       <h3 className="font-bold text-gray-900 dark:text-gray-100 text-base leading-snug">
-                        {p.grado && <span className="text-[#22573E] dark:text-emerald-400">{p.grado} </span>}
+                        {p.grado && <span className="text-[#163020] dark:text-emerald-400">{p.grado} </span>}
                         {p.nombre}
                       </h3>
                       {p.institucion && (
@@ -267,7 +267,7 @@ export default function Speakers() {
                         {p.sesiones.map(ses => (
                           <Link key={ses.id} to={`/agenda/${ses.id}`}
                                 onClick={(e) => e.stopPropagation()}
-                                className="flex items-start gap-2 text-xs text-[#22573E] dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium group/link">
+                                className="flex items-start gap-2 text-xs text-[#163020] dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium group/link">
                             <ChevronRight size={12} className="shrink-0 mt-0.5 group-hover/link:translate-x-0.5 transition-transform" />
                             <span className="hover:underline line-clamp-2 leading-snug">{ses.nombre}</span>
                           </Link>
@@ -355,7 +355,7 @@ export default function Speakers() {
                     className="w-28 h-28 rounded-2xl object-cover border-4 border-emerald-50 dark:border-emerald-900/50 shadow-md shrink-0 animate-fade-in"
                   />
                 ) : (
-                  <div className="w-28 h-28 rounded-2xl bg-gradient-to-br from-[#22573E] to-emerald-600 flex items-center justify-center shadow-md shrink-0">
+                  <div className="w-28 h-28 rounded-2xl bg-gradient-to-br from-[#163020] to-emerald-600 flex items-center justify-center shadow-md shrink-0">
                     <span className="text-white text-4xl font-bold">
                       {selectedSpeaker.nombre.charAt(0).toUpperCase()}
                     </span>
@@ -365,7 +365,7 @@ export default function Speakers() {
                 <div className="space-y-2 flex-1">
                   <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-gray-100 leading-tight">
                     {selectedSpeaker.grado && (
-                      <span className="text-[#22573E] dark:text-emerald-400 font-semibold">{selectedSpeaker.grado} </span>
+                      <span className="text-[#163020] dark:text-emerald-400 font-semibold">{selectedSpeaker.grado} </span>
                     )}
                     {selectedSpeaker.nombre}
                   </h2>
@@ -414,14 +414,14 @@ export default function Speakers() {
                         key={ses.id}
                         to={`/agenda/${ses.id}`}
                         onClick={() => setSelectedSpeaker(null)}
-                        className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-emerald-950/30 border border-gray-100 dark:border-emerald-900/30 hover:border-emerald-500/30 hover:bg-[#22573E]/5 dark:hover:bg-emerald-900/20 transition-all group/ses-item"
+                        className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-emerald-950/30 border border-gray-100 dark:border-emerald-900/30 hover:border-emerald-500/30 hover:bg-[#163020]/5 dark:hover:bg-emerald-900/20 transition-all group/ses-item"
                       >
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300 flex items-center justify-center shrink-0">
                             <BookOpen size={16} />
                           </div>
                           <div className="text-left">
-                            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 group-hover/ses-item:text-[#22573E] dark:group-hover/ses-item:text-emerald-400 transition-colors">
+                            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 group-hover/ses-item:text-[#163020] dark:group-hover/ses-item:text-emerald-400 transition-colors">
                               {ses.nombre}
                             </p>
                             {ses.tipo && (

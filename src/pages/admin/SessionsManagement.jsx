@@ -4,6 +4,7 @@ import {
   Plus, Search, Eye, Edit2, Trash2,
   CalendarDays, Check
 } from 'lucide-react'
+import { toast } from 'react-hot-toast'
 import { sesionesService } from '../../services/sesiones.service'
 import { jornadaService } from '../../services/jornada.service'
 import { norm } from '../../utils/search'
@@ -106,7 +107,7 @@ function SesionCard({ ses, inscritos, cupo, navigate, onDelete, dias, onAsignarD
           <span className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">
             {diaFecha ? formatShortDay(diaFecha) : '—'}
           </span>
-          <span className="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/30 text-[#22573E] dark:text-emerald-400 rounded-xl
+          <span className="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/30 text-[#163020] dark:text-emerald-400 rounded-xl
                            text-xs font-black border border-emerald-100 dark:border-emerald-900/50">
             {formatTime(ses.hora_inicio)}
           </span>
@@ -128,7 +129,7 @@ function SesionCard({ ses, inscritos, cupo, navigate, onDelete, dias, onAsignarD
               </span>
             )}
           </div>
-          <h3 className="text-lg font-black text-gray-900 dark:text-gray-100 group-hover:text-[#22573E] dark:group-hover:text-emerald-400
+          <h3 className="text-lg font-black text-gray-900 dark:text-gray-100 group-hover:text-[#163020] dark:group-hover:text-emerald-400
                          transition-colors truncate">
             {ses.nombre}
           </h3>
@@ -158,7 +159,7 @@ function SesionCard({ ses, inscritos, cupo, navigate, onDelete, dias, onAsignarD
           <div className="h-2 bg-gray-50 dark:bg-emerald-900/20 rounded-full overflow-hidden border border-gray-100 dark:border-emerald-900/30">
             <div
               className={`h-full rounded-full transition-all duration-700
-                          ${pct >= 90 ? 'bg-red-500' : 'bg-[#22573E]'}`}
+                          ${pct >= 90 ? 'bg-red-500' : 'bg-[#163020]'}`}
               style={{ width: `${pct}%` }}
             />
           </div>
@@ -193,13 +194,13 @@ function SesionCard({ ses, inscritos, cupo, navigate, onDelete, dias, onAsignarD
                         transition-all pt-4 md:pt-0 border-t md:border-t-0 border-gray-50 dark:border-emerald-900/30">
           <button onClick={() => navigate('/admin/sesiones/' + ses.id)}
                   className="p-2.5 text-gray-400 border border-gray-100 dark:border-emerald-900/40 rounded-xl
-                             hover:text-[#22573E] hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:border-emerald-100 dark:hover:border-emerald-800
+                             hover:text-[#163020] hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:border-emerald-100 dark:hover:border-emerald-800
                              transition-all" title="Ver detalle">
             <Eye className="w-5 h-5" />
           </button>
           <button onClick={() => navigate('/admin/sesiones/editar/' + ses.id)}
                   className="p-2.5 text-gray-400 border border-gray-100 dark:border-emerald-900/40 rounded-xl
-                             hover:text-[#22573E] hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:border-emerald-100 dark:hover:border-emerald-800
+                             hover:text-[#163020] hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:border-emerald-100 dark:hover:border-emerald-800
                              transition-all" title="Editar">
             <Edit2 className="w-5 h-5" />
           </button>
@@ -225,14 +226,14 @@ function DaySeparator({ fecha, nombreDia, count }) {
 
   return (
     <div className="flex items-center gap-4 mb-4 mt-6 first:mt-0">
-      <div className="flex items-center gap-2 bg-[#22573E]/8 dark:bg-emerald-900/30 px-4 py-2 rounded-xl">
-        <CalendarDays className="w-3.5 h-3.5 text-[#22573E] dark:text-emerald-400" />
-        <span className="text-[10px] font-black text-[#22573E] dark:text-emerald-400 uppercase tracking-widest">
+      <div className="flex items-center gap-2 bg-[#163020]/8 dark:bg-emerald-900/30 px-4 py-2 rounded-xl">
+        <CalendarDays className="w-3.5 h-3.5 text-[#163020] dark:text-emerald-400" />
+        <span className="text-[10px] font-black text-[#163020] dark:text-emerald-400 uppercase tracking-widest">
           {nombreDia && fechaFormateada
             ? `${nombreDia} ${fechaFormateada}`
             : fechaFormateada || 'Sin día asignado'}
         </span>
-        <span className="text-[9px] font-bold text-[#22573E]/50">
+        <span className="text-[9px] font-bold text-[#163020]/50">
           · {count} sesión{count !== 1 ? 'es' : ''}
         </span>
       </div>
@@ -257,12 +258,6 @@ export default function SessionsManagement() {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [sesionAEliminar, setSesionAEliminar] = useState(null)
   const [deleting,        setDeleting]        = useState(false)
-  const [toast,           setToast]           = useState(null)
-
-  const showToast = (msg) => {
-    setToast(msg)
-    setTimeout(() => setToast(null), 2500)
-  }
 
   // ── Carga ──────────────────────────────────────────────────────────────────
   const cargarDatos = async () => {
@@ -340,7 +335,7 @@ export default function SessionsManagement() {
     try {
       await sesionesService.update(sesionId, { dia_jornada_id: diaJornadaId }, adminName)
       cargarDatos()
-      showToast('Día asignado correctamente')
+      toast.success('Día asignado correctamente')
     } catch (err) {
       setError(err.message)
     }
@@ -356,7 +351,7 @@ export default function SessionsManagement() {
       await sesionesService.delete(sesionAEliminar.id, adminName)
       handleDeleteClose()
       cargarDatos()
-      showToast('Sesión eliminada')
+      toast.success('Sesión eliminada')
     } catch (err) {
       setError(err.message)
     } finally {
@@ -396,7 +391,7 @@ export default function SessionsManagement() {
         </div>
         <button
           onClick={() => navigate('/admin/sesiones/nueva')}
-          className="flex items-center gap-2 px-5 py-2.5 bg-[#22573E] text-white
+          className="flex items-center gap-2 px-5 py-2.5 bg-[#163020] text-white
                      text-[10px] font-black uppercase tracking-widest rounded-xl
                      hover:bg-[#002F1D] hover:-translate-y-0.5 transition-all
                      shadow-lg shadow-emerald-900/10"
@@ -436,14 +431,14 @@ export default function SessionsManagement() {
               {/* Búsqueda + tipo */}
               <div className="flex flex-col md:flex-row gap-4">
                 <div className="relative flex-1 group">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-[#22573E] transition-colors" />
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-[#163020] transition-colors" />
                   <input
                     type="text"
                     placeholder="Buscar sesión o ponente..."
                     value={busqueda}
                     onChange={e => setBusqueda(e.target.value)}
                     className="w-full pl-11 pr-4 py-3.5 rounded-2xl border border-gray-100 dark:border-emerald-900/50
-                               bg-gray-50/50 dark:bg-[#0F2018] focus:bg-white dark:focus:bg-[#0F2018] focus:border-[#22573E]
+                               bg-gray-50/50 dark:bg-[#0F2018] focus:bg-white dark:focus:bg-[#0F2018] focus:border-[#163020]
                                outline-none transition-all text-sm font-bold text-gray-900 dark:text-gray-100 dark:placeholder-gray-500"
                   />
                 </div>
@@ -451,7 +446,7 @@ export default function SessionsManagement() {
                   value={tipoFiltro}
                   onChange={e => setTipoFiltro(e.target.value)}
                   className="px-4 py-3.5 rounded-2xl border border-gray-100 dark:border-emerald-900/50 bg-gray-50/50 dark:bg-[#0F2018]
-                             focus:bg-white dark:focus:bg-[#0F2018] focus:border-[#22573E] outline-none text-[10px] font-black uppercase
+                             focus:bg-white dark:focus:bg-[#0F2018] focus:border-[#163020] outline-none text-[10px] font-black uppercase
                              tracking-[0.15em] cursor-pointer min-w-[180px] text-gray-700 dark:text-gray-300 transition-all"
                 >
                   <option value="todos">Todos los tipos</option>
@@ -468,8 +463,8 @@ export default function SessionsManagement() {
                   className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase
                               tracking-widest transition-all whitespace-nowrap shrink-0 border-2
                               ${diaFiltro === 'todos'
-                                ? 'bg-[#22573E] text-white border-[#22573E] shadow-lg shadow-emerald-900/20'
-                                : 'bg-white dark:bg-[#0F2018] text-gray-400 dark:text-gray-500 border-gray-100 dark:border-emerald-900/30 hover:border-[#22573E] dark:hover:border-emerald-700'}`}
+                                ? 'bg-[#163020] text-white border-[#163020] shadow-lg shadow-emerald-900/20'
+                                : 'bg-white dark:bg-[#0F2018] text-gray-400 dark:text-gray-500 border-gray-100 dark:border-emerald-900/30 hover:border-[#163020] dark:hover:border-emerald-700'}`}
                 >
                   Ver todos los días
                 </button>
@@ -482,8 +477,8 @@ export default function SessionsManagement() {
                       className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase
                                   tracking-widest transition-all whitespace-nowrap shrink-0 border-2
                                   ${isActive
-                                    ? 'bg-[#22573E] text-white border-[#22573E] shadow-lg shadow-emerald-900/20'
-                                    : 'bg-white dark:bg-[#0F2018] text-gray-400 dark:text-gray-500 border-gray-100 dark:border-emerald-900/30 hover:border-[#22573E] dark:hover:border-emerald-700'}`}
+                                    ? 'bg-[#163020] text-white border-[#163020] shadow-lg shadow-emerald-900/20'
+                                    : 'bg-white dark:bg-[#0F2018] text-gray-400 dark:text-gray-500 border-gray-100 dark:border-emerald-900/30 hover:border-[#163020] dark:hover:border-emerald-700'}`}
                     >
                       {formatShortDay(dia.fecha)}
                     </button>
@@ -582,15 +577,6 @@ export default function SessionsManagement() {
           onConfirm={handleDeleteConfirm}
           deleting={deleting}
         />
-      )}
-
-      {toast && (
-        <div className="fixed bottom-8 left-4 right-4 sm:left-auto sm:right-8 z-50 bg-[#22573E] text-white
-                        px-8 py-4 rounded-2xl shadow-2xl font-black text-sm
-                        flex items-center gap-3">
-          <Check className="w-5 h-5" strokeWidth={3} />
-          {toast}
-        </div>
       )}
     </>
   )

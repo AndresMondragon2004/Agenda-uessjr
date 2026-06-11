@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Html5Qrcode } from 'html5-qrcode'
+import { toast } from 'react-hot-toast'
 import { 
   MessageSquare, Users, ScanLine, LogOut, CheckCircle2, XCircle, 
   Clock, Send, Check, Loader2, Star, TrendingUp, BarChart3, 
@@ -192,8 +193,8 @@ export default function SpeakerDashboard() {
       const { data: { publicUrl } } = supabase.storage.from('materiales').getPublicUrl(filePath)
       setMaterialUrl(publicUrl)
       if (!materialNombre) setMaterialNombre(file.name)
-      alert('Archivo subido con éxito.')
-    } catch (err) { alert('Error al subir: ' + err.message) }
+      toast.success('Archivo subido con éxito.')
+    } catch (err) { toast.error('Error al subir: ' + err.message) }
     finally { setUploadingFile(false) }
   }
 
@@ -203,8 +204,8 @@ export default function SpeakerDashboard() {
       const { error } = await supabase.from('sesiones').update({ material_url: materialUrl, material_nombre: materialNombre }).eq('id', sesion.id)
       if (error) throw error
       setSesion({ ...sesion, material_url: materialUrl, material_nombre: materialNombre })
-      alert('Material actualizado.')
-    } catch (err) { alert('Error al guardar: ' + err.message) }
+      toast.success('Material actualizado.')
+    } catch (err) { toast.error('Error al guardar: ' + err.message) }
     finally { setSavingMaterial(false) }
   }
 
@@ -256,7 +257,7 @@ export default function SpeakerDashboard() {
       }))
 
       if (opcionesEstructuradas.length < 2) {
-        alert("Debes tener al menos 2 opciones válidas.")
+        toast.error("Debes tener al menos 2 opciones válidas.")
         return
       }
 
@@ -271,7 +272,7 @@ export default function SpeakerDashboard() {
       setPollOptions(['Sí', 'No'])
       loadData(true)
     } catch (e) { 
-      alert('Error: ' + e.message) 
+      toast.error('Error: ' + e.message) 
     } finally {
       setCreandoEncuesta(false)
     }
@@ -284,7 +285,7 @@ export default function SpeakerDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-[#0A1A11] flex flex-col font-sans">
+      <div className="min-h-screen bg-gray-50 dark:bg-[#05140B] flex flex-col font-sans">
         {/* Skeleton Header */}
         <div className="bg-[#001F12] p-6 sm:p-14 pb-20 sm:pb-28">
           <div className="max-w-7xl mx-auto space-y-4">
@@ -320,7 +321,7 @@ export default function SpeakerDashboard() {
     )
   }
 
-  if (error || !sesion) return <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-[#F2F5F3] dark:bg-[#0A1A11]"><XCircle className="text-red-500 w-16 h-16 mb-4" /><h2 className="text-2xl font-black text-gray-900 dark:text-white">Error de acceso</h2><p className="text-gray-500 dark:text-gray-400 mt-2 text-justify">{error}</p><button onClick={handleLogout} className="mt-8 px-8 py-3 bg-[#22573E] text-white rounded-2xl font-bold">Volver</button></div>
+  if (error || !sesion) return <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-[#FAF9F6] dark:bg-[#05140B]"><XCircle className="text-red-500 w-16 h-16 mb-4" /><h2 className="text-2xl font-black text-gray-900 dark:text-white">Error de acceso</h2><p className="text-gray-500 dark:text-gray-400 mt-2 text-justify">{error}</p><button onClick={handleLogout} className="mt-8 px-8 py-3 bg-[#163020] text-white rounded-2xl font-bold">Volver</button></div>
 
   if (presentationMode) {
     const topQuestion = preguntas.filter(p => p.estado === 'pendiente')[0]
@@ -361,7 +362,7 @@ export default function SpeakerDashboard() {
   return (
     <>
       <SEO title={`Speaker: ${sesion.nombre}`} />
-      <div className="min-h-screen bg-[#F2F5F3] dark:bg-[#0A1A11] flex flex-col font-sans relative overflow-hidden">
+      <div className="min-h-screen bg-[#FAF9F6] dark:bg-[#05140B] flex flex-col font-sans relative overflow-hidden">
         
         {/* Render Reactions */}
         <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden">
@@ -407,7 +408,7 @@ export default function SpeakerDashboard() {
               { id: 'networking', label: 'Networking', icon: Briefcase, count: networkingLeads.length },
               { id: 'scan', label: 'Control de acceso', icon: ScanLine },
             ].map(tab => (
-              <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`py-5 px-1 border-b-4 font-black text-xs uppercase tracking-widest transition-all flex items-center gap-2.5 whitespace-nowrap ${activeTab === tab.id ? 'border-[#22573E] dark:border-emerald-500 text-[#22573E] dark:text-emerald-400' : 'border-transparent text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}>{tab.icon && <tab.icon size={16} />} {tab.label} {tab.count > 0 && <span className="bg-red-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] animate-pulse">{tab.count}</span>}</button>
+              <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`py-5 px-1 border-b-4 font-black text-xs uppercase tracking-widest transition-all flex items-center gap-2.5 whitespace-nowrap ${activeTab === tab.id ? 'border-[#163020] dark:border-emerald-500 text-[#163020] dark:text-emerald-400' : 'border-transparent text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}>{tab.icon && <tab.icon size={16} />} {tab.label} {tab.count > 0 && <span className="bg-red-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] animate-pulse">{tab.count}</span>}</button>
             ))}
           </div>
         </div>
@@ -418,7 +419,7 @@ export default function SpeakerDashboard() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="bg-white dark:bg-[#122A1C] p-8 rounded-[2.5rem] shadow-xl border border-white dark:border-emerald-900/20 relative overflow-hidden group">
                   <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full -translate-y-12 translate-x-12" />
-                  <div className="w-14 h-14 bg-emerald-50 dark:bg-emerald-900/40 rounded-2xl flex items-center justify-center text-[#22573E] dark:text-emerald-400 mb-6 group-hover:scale-110 transition-transform"><Users size={28} /></div>
+                  <div className="w-14 h-14 bg-emerald-50 dark:bg-emerald-900/40 rounded-2xl flex items-center justify-center text-[#163020] dark:text-emerald-400 mb-6 group-hover:scale-110 transition-transform"><Users size={28} /></div>
                   <h3 className="text-gray-400 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Audiencia Total</h3>
                   <p className="text-4xl font-black text-gray-900 dark:text-white">{sesion.total_inscritos}</p>
                 </div>
@@ -428,10 +429,10 @@ export default function SpeakerDashboard() {
                   <div className="flex items-end gap-2"><p className="text-4xl font-black text-gray-900 dark:text-white">{(sesion.rating_avg || 0).toFixed(1)}</p><div className="flex text-amber-400 mb-1.5">{[1,2,3,4,5].map(s => <Star key={s} size={12} fill={s <= (sesion.rating_avg || 0) ? "currentColor" : "none"} />)}</div></div>
                   <p className="text-xs text-gray-500 mt-2 font-bold uppercase tracking-widest">{sesion.rating_count} valoraciones</p>
                 </div>
-                <div className="bg-[#22573E] dark:bg-emerald-900 p-8 rounded-[2.5rem] shadow-xl relative overflow-hidden group flex flex-col justify-center items-center text-center">
-                  <div className="absolute inset-0 bg-gradient-to-tr from-[#0A1A11] to-transparent opacity-50" />
+                <div className="bg-[#163020] dark:bg-emerald-900 p-8 rounded-[2.5rem] shadow-xl relative overflow-hidden group flex flex-col justify-center items-center text-center">
+                  <div className="absolute inset-0 bg-gradient-to-tr from-[#05140B] to-transparent opacity-50" />
                   <MonitorPlay size={40} className="text-emerald-400 mb-4 relative z-10" />
-                  <button onClick={() => setPresentationMode(true)} className="relative z-10 w-full py-4 bg-white text-[#22573E] hover:bg-emerald-50 rounded-[1.5rem] font-black uppercase text-xs tracking-widest shadow-2xl transition-all active:scale-95">Modo Escenario</button>
+                  <button onClick={() => setPresentationMode(true)} className="relative z-10 w-full py-4 bg-white text-[#163020] hover:bg-emerald-50 rounded-[1.5rem] font-black uppercase text-xs tracking-widest shadow-2xl transition-all active:scale-95">Modo Escenario</button>
                   <p className="text-emerald-300 text-[10px] font-medium uppercase mt-4 relative z-10">Vista libre de distracciones</p>
                 </div>
               </div>
@@ -447,8 +448,8 @@ export default function SpeakerDashboard() {
                         const pct = (count / sesion.total_inscritos) * 100
                         return (
                           <div key={carrera} className="space-y-2">
-                            <div className="flex justify-between items-center text-xs font-black uppercase tracking-widest"><span className="text-gray-500">{PROGRAMA_LABELS[carrera] || carrera}</span><span className="text-[#22573E] dark:text-emerald-400">{count} alumnos ({Math.round(pct)}%)</span></div>
-                            <div className="h-3 bg-gray-50 dark:bg-black/40 rounded-full overflow-hidden"><div className={`h-full transition-all duration-1000 ${PROGRAMA_COLORS[carrera] || 'bg-[#22573E]'}`} style={{ width: `${pct}%` }} /></div>
+                            <div className="flex justify-between items-center text-xs font-black uppercase tracking-widest"><span className="text-gray-500">{PROGRAMA_LABELS[carrera] || carrera}</span><span className="text-[#163020] dark:text-emerald-400">{count} alumnos ({Math.round(pct)}%)</span></div>
+                            <div className="h-3 bg-gray-50 dark:bg-black/40 rounded-full overflow-hidden"><div className={`h-full transition-all duration-1000 ${PROGRAMA_COLORS[carrera] || 'bg-[#163020]'}`} style={{ width: `${pct}%` }} /></div>
                           </div>
                         )
                       })
@@ -478,7 +479,7 @@ export default function SpeakerDashboard() {
                 <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">Preguntas del auditorio</h2>
                 <div className="flex gap-4">
                   <button onClick={() => setPresentationMode(true)} className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 px-5 py-2 rounded-2xl text-xs font-black flex items-center gap-2"><MonitorPlay size={14} /> Modo Escenario</button>
-                  <span className="bg-[#22573E] text-white px-5 py-2 rounded-2xl text-xs font-black shadow-lg shadow-emerald-900/20">{preguntas.length} TOTALES</span>
+                  <span className="bg-[#163020] text-white px-5 py-2 rounded-2xl text-xs font-black shadow-lg shadow-emerald-900/20">{preguntas.length} TOTALES</span>
                 </div>
               </div>
               <div className="divide-y divide-gray-100 dark:divide-emerald-900/20">
@@ -491,7 +492,7 @@ export default function SpeakerDashboard() {
                         <div className="flex items-center gap-3"><span className="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">De: {p.estudiantes?.nombre}</span><span className="bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded text-[10px] font-black">{p.votos} VOTOS</span></div>
                         <p className="text-gray-800 dark:text-gray-100 font-black text-lg leading-tight tracking-tight text-justify">{p.pregunta}</p>
                       </div>
-                      {p.estado === 'pendiente' && ( <button onClick={() => updatePreguntaEstado(p.id, 'respondida')} className="shrink-0 flex items-center justify-center gap-2 px-6 py-3 bg-[#22573E] hover:bg-emerald-800 text-white rounded-2xl text-xs font-black shadow-xl shadow-emerald-950/20 active:scale-95"><Check size={16} /> LISTO</button> )}
+                      {p.estado === 'pendiente' && ( <button onClick={() => updatePreguntaEstado(p.id, 'respondida')} className="shrink-0 flex items-center justify-center gap-2 px-6 py-3 bg-[#163020] hover:bg-emerald-800 text-white rounded-2xl text-xs font-black shadow-xl shadow-emerald-950/20 active:scale-95"><Check size={16} /> LISTO</button> )}
                     </div>
                   ))
                 )}
@@ -506,7 +507,7 @@ export default function SpeakerDashboard() {
                   <h2 className="text-2xl font-black text-gray-900 dark:text-white">Encuestas en Vivo</h2>
                   <p className="text-sm text-gray-500">Haz preguntas rápidas a la audiencia</p>
                 </div>
-                <button onClick={() => setShowPollModal(true)} className="flex items-center gap-2 px-6 py-3 bg-[#22573E] text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl active:scale-95"><Plus size={16} /> Crear Encuesta</button>
+                <button onClick={() => setShowPollModal(true)} className="flex items-center gap-2 px-6 py-3 bg-[#163020] text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl active:scale-95"><Plus size={16} /> Crear Encuesta</button>
               </div>
               
               <div className="space-y-6">
@@ -559,7 +560,7 @@ export default function SpeakerDashboard() {
                     <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">Talento Interesado</h2>
                     <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 text-justify">Alumnos que desean conectar profesionalmente contigo.</p>
                   </div>
-                  <button onClick={downloadCSV} disabled={networkingLeads.length === 0} className="flex items-center gap-2 px-6 py-3 bg-[#22573E] text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl disabled:opacity-50 active:scale-95"><Download size={16} /> Exportar CSV</button>
+                  <button onClick={downloadCSV} disabled={networkingLeads.length === 0} className="flex items-center gap-2 px-6 py-3 bg-[#163020] text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl disabled:opacity-50 active:scale-95"><Download size={16} /> Exportar CSV</button>
                 </div>
                 
                 {networkingLeads.length === 0 ? (
@@ -596,12 +597,12 @@ export default function SpeakerDashboard() {
           {activeTab === 'scan' && (
             <div className="max-w-lg mx-auto anim-fade-up">
               <div className="bg-white dark:bg-[#122A1C] rounded-[3rem] shadow-2xl border-4 border-white dark:border-emerald-900/30 p-10 text-center">
-                <div className="w-20 h-20 bg-emerald-50 dark:bg-emerald-900/30 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-inner"><ScanLine size={32} className="text-[#22573E] dark:text-emerald-400" /></div>
+                <div className="w-20 h-20 bg-emerald-50 dark:bg-emerald-900/30 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-inner"><ScanLine size={32} className="text-[#163020] dark:text-emerald-400" /></div>
                 <h2 className="text-3xl font-black text-gray-900 dark:text-white mb-4 tracking-tight">Registro directo</h2>
                 <p className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-10 px-4 text-justify">Puedes registrar la asistencia de los alumnos escaneando su ticket digital.</p>
                 <div className="relative rounded-[2.5rem] overflow-hidden bg-black aspect-square mb-10 border-8 border-gray-50 dark:border-black shadow-2xl">
                   {!scanning ? (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center p-8"><Sparkles size={48} className="text-emerald-500/20 mb-6" /><button onClick={() => setScanning(true)} className="w-full py-4 bg-[#22573E] text-white rounded-[1.5rem] font-black uppercase text-xs tracking-widest shadow-xl shadow-emerald-950/20">Iniciar Escáner</button></div>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center p-8"><Sparkles size={48} className="text-emerald-500/20 mb-6" /><button onClick={() => setScanning(true)} className="w-full py-4 bg-[#163020] text-white rounded-[1.5rem] font-black uppercase text-xs tracking-widest shadow-xl shadow-emerald-950/20">Iniciar Escáner</button></div>
                   ) : (
                     <>
                       <div id="speaker-reader" className="w-full h-full object-cover" />
@@ -652,7 +653,7 @@ export default function SpeakerDashboard() {
                   value={pollQuestion}
                   onChange={e => setPollQuestion(e.target.value)}
                   placeholder="Ej. ¿Qué opinan de la IA generativa?"
-                  className="w-full px-5 py-4 bg-gray-50 dark:bg-[#0F2018] border border-gray-100 dark:border-emerald-900/50 rounded-2xl outline-none focus:border-[#22573E] text-sm font-bold text-gray-900 dark:text-gray-100"
+                  className="w-full px-5 py-4 bg-gray-50 dark:bg-[#0F2018] border border-gray-100 dark:border-emerald-900/50 rounded-2xl outline-none focus:border-[#163020] text-sm font-bold text-gray-900 dark:text-gray-100"
                 />
               </div>
 
@@ -670,7 +671,7 @@ export default function SpeakerDashboard() {
                           setPollOptions(newOpts)
                         }}
                         placeholder={`Opción ${i + 1}`}
-                        className="flex-1 px-4 py-3 bg-gray-50 dark:bg-[#0F2018] border border-gray-100 dark:border-emerald-900/50 rounded-xl outline-none focus:border-[#22573E] text-sm font-semibold text-gray-900 dark:text-gray-100"
+                        className="flex-1 px-4 py-3 bg-gray-50 dark:bg-[#0F2018] border border-gray-100 dark:border-emerald-900/50 rounded-xl outline-none focus:border-[#163020] text-sm font-semibold text-gray-900 dark:text-gray-100"
                       />
                       {pollOptions.length > 2 && (
                         <button 
@@ -686,7 +687,7 @@ export default function SpeakerDashboard() {
                 {pollOptions.length < 5 && (
                   <button 
                     onClick={() => setPollOptions([...pollOptions, ''])}
-                    className="mt-4 text-xs font-bold text-[#22573E] dark:text-emerald-400 uppercase tracking-widest flex items-center gap-1 hover:opacity-70 transition-opacity"
+                    className="mt-4 text-xs font-bold text-[#163020] dark:text-emerald-400 uppercase tracking-widest flex items-center gap-1 hover:opacity-70 transition-opacity"
                   >
                     <Plus size={14} /> Añadir opción
                   </button>
@@ -696,7 +697,7 @@ export default function SpeakerDashboard() {
               <button 
                 onClick={handleCreatePoll}
                 disabled={creandoEncuesta || !pollQuestion.trim() || pollOptions.filter(o => o.trim()).length < 2}
-                className="w-full py-4 mt-4 bg-[#22573E] text-white font-black uppercase text-xs tracking-widest rounded-2xl hover:bg-emerald-800 transition-all shadow-lg shadow-emerald-900/20 disabled:opacity-50"
+                className="w-full py-4 mt-4 bg-[#163020] text-white font-black uppercase text-xs tracking-widest rounded-2xl hover:bg-emerald-800 transition-all shadow-lg shadow-emerald-900/20 disabled:opacity-50"
               >
                 {creandoEncuesta ? 'Lanzando...' : 'Lanzar Encuesta En Vivo'}
               </button>

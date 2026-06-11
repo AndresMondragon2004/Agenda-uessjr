@@ -1,14 +1,21 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { sesionesService } from '../../services/sesiones.service'
+import { useSettings } from '../../context/SettingsContext'
 import ScrollToTop from '../ui/ScrollToTop'
 
 export default function AuthLayout({ children }) {
+  const { settings } = useSettings()
   const location = useLocation()
   const isLogin = location.pathname === '/login'
 
   const [loadingSessions, setLoadingSessions] = useState(true)
   const [sessionCards, setSessionCards] = useState([])
+
+  const eventName = settings?.event_info?.event_name || 'Agenda'
+  const institution = settings?.event_info?.institution || 'UESSJR'
+  const logoUrl = settings?.branding?.logo_url
+  const bgImage = settings?.branding?.background_image
 
   useEffect(() => {
     const loadSessions = async () => {
@@ -32,16 +39,30 @@ export default function AuthLayout({ children }) {
   }, [])
 
   return (
-    <div className="h-screen w-full flex bg-white dark:bg-[#0A1A11] font-sans overflow-hidden">
+    <div className="h-screen w-full flex bg-white dark:bg-[#05140B] font-sans overflow-hidden">
       <ScrollToTop />
       {/* Left Panel - Branding (Hidden on small screens) */}
       <div className="hidden lg:flex lg:w-1/2 bg-[#1b3b2b] flex-col justify-between p-8 xl:p-12 relative h-full">
         
+        {bgImage && (
+          <img 
+            src={bgImage} 
+            alt="Background" 
+            className="absolute inset-0 w-full h-full object-cover opacity-20"
+          />
+        )}
+
         {/* Logo */}
         <div className="z-10 flex-shrink-0">
-          <h1 className="text-white text-xl xl:text-2xl font-bold tracking-tight">
-            UESSJR AGENDA
-          </h1>
+          <Link to="/" className="flex items-center gap-3">
+            {logoUrl ? (
+              <img src={logoUrl} alt={eventName} className="h-10 w-auto object-contain brightness-0 invert" />
+            ) : (
+              <h1 className="text-white text-xl xl:text-2xl font-bold tracking-tight">
+                {institution} {eventName}
+              </h1>
+            )}
+          </Link>
         </div>
 
         {/* Center Content */}
@@ -50,9 +71,7 @@ export default function AuthLayout({ children }) {
             ”
           </div>
           <h2 className="text-white text-3xl xl:text-4xl 2xl:text-5xl font-light italic leading-tight mb-6 xl:mb-10">
-            Cultura que inspira, conocimiento<br />
-            que<br />
-            transforma.
+            {settings?.event_info?.lema || "Cultura que inspira, conocimiento que transforma."}
           </h2>
 
           {/* Cards Stack */}
@@ -88,8 +107,13 @@ export default function AuthLayout({ children }) {
 
         {/* Bottom Info */}
         <div className="z-10 flex-shrink-0">
-          <p className="text-white font-medium text-sm xl:text-base">13va Jornada Académica y Cultural 2026</p>
-          <p className="text-white/60 text-xs xl:text-sm mt-1">11 — 15 de mayo de 2026 · UES San José del Rincón</p>
+          <p className="text-white font-medium text-sm xl:text-base">{settings?.event_info?.event_name || "Cargando..."}</p>
+          <p className="text-white/60 text-xs xl:text-sm mt-1">
+            {settings?.event_info?.start_date && new Date(settings.event_info.start_date + 'T12:00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'long' })} 
+            {" — "}
+            {settings?.event_info?.end_date && new Date(settings.event_info.end_date + 'T12:00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' })} 
+            {` · ${settings?.event_info?.sede || "Sede por confirmar"}`}
+          </p>
         </div>
         
         {/* Optional decorative gradient/glow in the background */}
@@ -99,7 +123,7 @@ export default function AuthLayout({ children }) {
       {/* Right Panel - Form Area */}
       <div className="w-full lg:w-1/2 flex flex-col relative h-full">
         {/* Top Navigation */}
-        <nav className="absolute top-0 left-0 right-0 p-8 flex justify-end gap-6 text-sm font-medium text-emerald-800/60 dark:text-emerald-400/50 hidden sm:flex z-10 bg-white/80 dark:bg-[#0A1A11]/90 backdrop-blur-md">
+        <nav className="absolute top-0 left-0 right-0 p-8 flex justify-end gap-6 text-sm font-medium text-emerald-800/60 dark:text-emerald-400/50 hidden sm:flex z-10 bg-white/80 dark:bg-[#05140B]/90 backdrop-blur-md">
           <Link to="/" className="hover:text-emerald-900 transition-colors">Inicio</Link>
           <Link to="/agenda" className="hover:text-emerald-900 transition-colors">Agenda</Link>
           <Link to="/conferencistas" className="hover:text-emerald-900 transition-colors">Conferencistas</Link>
