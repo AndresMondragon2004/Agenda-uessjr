@@ -24,7 +24,8 @@ export default function ForgotPassword() {
     try {
       setLoading(true)
       setError(null)
-      const redirectTo = `${window.location.origin}/nueva-contrasena`;
+      const productionUrl = 'https://agenda-uessjr.vercel.app';
+      const redirectTo = `${productionUrl}/nueva-contrasena`;
       
       const { error } = await supabase.auth
         .resetPasswordForEmail(correo, {

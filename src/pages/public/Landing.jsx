@@ -70,7 +70,7 @@ export default function Landing() {
   }, [])
 
   if (loading) return (
-    <div className="min-h-screen bg-[#0D2B1D] flex items-center justify-center">
+    <div className="min-h-screen bg-[#05140B] flex items-center justify-center">
       <div className="flex flex-col items-center gap-4">
         <div className="w-12 h-12 rounded-full border-4 border-white/10 border-t-amber-400 animate-spin" />
         <p className="text-white/50 font-bold text-xs uppercase tracking-widest">Iniciando Experiencia...</p>

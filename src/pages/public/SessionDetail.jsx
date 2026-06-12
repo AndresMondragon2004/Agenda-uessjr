@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { Clock, MapPin, CalendarDays, Users, Share2, ChevronRight, CheckCircle2, Download, Star, X, MessageSquare, Send, ThumbsUp, BarChart, Briefcase, Heart, ThumbsDown, Smile } from 'lucide-react'
+import { toast } from 'react-hot-toast'
 import { sesionesService } from '../../services/sesiones.service'
 import { inscripcionesService } from '../../services/inscripciones.service'
+import { votosService } from '../../services/votos.service'
 import { useAuth }         from '../../context/AuthContext'
 import { supabase }        from '../../services/supabase'
 
@@ -59,7 +61,6 @@ export default function SessionDetail() {
   const [inscribiendo,   setInscribiendo]   = useState(false)
   const [finalizada,     setFinalizada]     = useState(false)
   const [showRatingModal, setShowRatingModal] = useState(false)
-  const [toast,          setToast]          = useState(null)
 
   // Q&A
   const [preguntas, setPreguntas] = useState([])
@@ -79,15 +80,15 @@ export default function SessionDetail() {
   })
   const [compartioNetworking, setCompartioNetworking] = useState(false)
 
+  // Votos (Interés)
+  const [votosStats, setVotosStats] = useState({ likes: 0, dislikes: 0, total: 0 })
+  const [votoUsuario, setVotoUsuario] = useState(null)
+  const [votando, setVotando] = useState(false)
+
 
   useEffect(() => {
     if (error) window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [error])
-
-  const showToast = (msg, type = 'success') => {
-    setToast({ msg, type })
-    setTimeout(() => setToast(null), 3000)
-  }
 
   useEffect(() => {
     async function cargar() {
@@ -149,6 +150,14 @@ export default function SessionDetail() {
           const { data: encData } = await supabase.from('sesion_encuestas').select('*').eq('sesion_id', id).eq('estado', 'activa')
           if (encData) setEncuestas(encData)
 
+          // Votos
+          const vStats = await votosService.getResumen(id)
+          setVotosStats(vStats)
+          if (estudiante?.id) {
+            const vUser = await votosService.getVotoUsuario(id, estudiante.id)
+            setVotoUsuario(vUser)
+          }
+
           // Verificar Networking
           if (estudiante?.id) {
              const { data: net } = await supabase.from('sesion_networking').select('*').eq('sesion_id', id).eq('estudiante_id', estudiante.id).maybeSingle()
@@ -187,7 +196,7 @@ export default function SessionDetail() {
 
   const handleValorar = async () => {
     if (valoracion.estrellas === 0) {
-      showToast('Por favor selecciona una calificación', 'error')
+      toast.error('Por favor selecciona una calificación')
       return
     }
     try {
@@ -202,9 +211,9 @@ export default function SessionDetail() {
         }])
       if (vErr) throw vErr
       setYaValoro(true)
-      showToast('¡Gracias por tu opinión!')
+      toast.success('¡Gracias por tu opinión!')
     } catch (err) {
-      showToast(err.message, 'error')
+      toast.error(err.message)
     } finally {
       setEnviandoVal(false)
     }
@@ -212,7 +221,7 @@ export default function SessionDetail() {
 
   const handleEnviarPregunta = async () => {
     if (!isLoggedIn || !estudiante) {
-      showToast('Debes iniciar sesión para preguntar', 'error')
+      toast.error('Debes iniciar sesión para preguntar')
       return
     }
     if (!nuevaPregunta.trim()) return
@@ -232,9 +241,9 @@ export default function SessionDetail() {
       if (qErr) throw qErr
       setPreguntas([data, ...preguntas])
       setNuevaPregunta('')
-      showToast('Pregunta enviada')
+      toast.success('Pregunta enviada')
     } catch (err) {
-      showToast('Error al enviar pregunta', 'error')
+      toast.error('Error al enviar pregunta')
     } finally {
       setEnviandoPregunta(false)
     }
@@ -242,7 +251,7 @@ export default function SessionDetail() {
 
   const toggleVote = async (preguntaId) => {
     if (!isLoggedIn) {
-      showToast('Debes iniciar sesión para votar', 'error')
+      toast.error('Debes iniciar sesión para votar')
       return
     }
 
@@ -267,7 +276,7 @@ export default function SessionDetail() {
         localStorage.setItem('voted_preguntas', JSON.stringify(revertidos))
         return revertidos
       })
-      showToast('Error al procesar el voto', 'error')
+      toast.error('Error al procesar el voto')
     }
   }
 
@@ -278,9 +287,9 @@ export default function SessionDetail() {
       const { error } = await supabase.from('sesion_networking').insert([{ sesion_id: id, estudiante_id: estudiante.id }])
       if (error) throw error
       setCompartioNetworking(true)
-      showToast('Perfil compartido exitosamente con el ponente')
+      toast.success('Perfil compartido exitosamente con el ponente')
     } catch (e) {
-      showToast('Error al compartir perfil', 'error')
+      toast.error('Error al compartir perfil')
     }
   }
 
@@ -302,7 +311,7 @@ export default function SessionDetail() {
       const { error } = await supabase.rpc('votar_encuesta', { p_encuesta_id: encuestaId, p_estudiante_id: estudiante.id, p_opcion_index: opcionIndex })
       if (error) throw error
     } catch (e) {
-      showToast('Error al votar en encuesta', 'error')
+      toast.error('Error al votar en encuesta')
     }
   }
 
@@ -312,7 +321,7 @@ export default function SessionDetail() {
       event: 'reaction',
       payload: { type }
     })
-    showToast('¡Reacción enviada!', 'success')
+    toast.success('¡Reacción enviada!')
   }
 
   const handleInscribirse = async () => {
@@ -324,14 +333,39 @@ export default function SessionDetail() {
       setInscripcionEstado(res.estado)
       if (res.estado === 'confirmada') {
         setTotalInscritos(prev => prev + 1) // Actualización optimista local
-        showToast('¡Inscripción exitosa!')
+        toast.success('¡Inscripción exitosa!')
       } else {
-        showToast('Registrado en la lista de espera')
+        toast.success('Registrado en la lista de espera')
       }
     } catch (err) {
-      showToast(err.message, 'error')
+      toast.error(err.message)
     } finally {
       setInscribiendo(false)
+    }
+  }
+
+  const handleVotar = async (valor) => {
+    if (!isLoggedIn || !estudiante) {
+      toast.error('Inicia sesión para indicar tu interés');
+      return;
+    }
+    try {
+      setVotando(true);
+      await votosService.votar(id, estudiante.id, valor);
+      
+      // Actualización local para feedback inmediato
+      const newVoto = votoUsuario === valor ? null : valor;
+      setVotoUsuario(newVoto);
+      
+      // Recargar resumen
+      const newStats = await votosService.getResumen(id);
+      setVotosStats(newStats);
+      
+      if (newVoto === 1) toast.success('¡Te interesa esta sesión!');
+    } catch (err) {
+      toast.error('Error al procesar voto');
+    } finally {
+      setVotando(false);
     }
   }
 
@@ -350,9 +384,9 @@ export default function SessionDetail() {
       if (antEstado === 'confirmada') {
         setTotalInscritos(prev => Math.max(0, prev - 1)) // Actualización optimista local
       }
-      showToast('Inscripción cancelada')
+      toast.success('Inscripción cancelada')
     } catch (err) {
-      showToast('Error al cancelar', 'error')
+      toast.error('Error al cancelar')
     } finally {
       setInscribiendo(false)
     }
@@ -389,23 +423,23 @@ export default function SessionDetail() {
   }
 
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#0A1A11]">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#05140B]">
       <div className="flex flex-col items-center gap-4">
-        <div className="w-12 h-12 rounded-full border-4 border-[#1B4332]/20 dark:border-emerald-900/50 border-t-[#1B4332] dark:border-t-emerald-500 animate-spin" />
+        <div className="w-12 h-12 rounded-full border-4 border-[#163020]/20 dark:border-emerald-900/50 border-t-[#163020] dark:border-t-emerald-500 animate-spin" />
         <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">Cargando sesión...</p>
       </div>
     </div>
   )
 
   if (error || !sesion) return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#0A1A11] px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#05140B] px-4">
       <div className="text-center py-16 max-w-sm">
         <div className="w-20 h-20 bg-gray-100 dark:bg-[#122A1C] rounded-full flex items-center justify-center mx-auto mb-4">
           <CalendarDays className="w-10 h-10 text-gray-300 dark:text-emerald-900" />
         </div>
         <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">Sesión no encontrada</h2>
         <p className="text-gray-500 dark:text-gray-400 mb-6">Esta sesión no existe o fue eliminada.</p>
-        <Link to="/agenda" className="px-6 py-2.5 bg-[#1B4332] text-white font-semibold rounded-xl hover:bg-emerald-800 transition-colors">
+        <Link to="/agenda" className="px-6 py-2.5 bg-[#163020] text-white font-semibold rounded-xl hover:bg-emerald-800 transition-colors">
           Ver agenda
         </Link>
       </div>
@@ -422,7 +456,7 @@ export default function SessionDetail() {
   const lleno = cupo > 0 && totalInscritos >= cupo
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0A1A11] pb-12">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#05140B] pb-12">
 
       {/* Reactions Bar Flotante (Solo si la sesion no ha finalizado) */}
       {!finalizada && (
@@ -437,7 +471,7 @@ export default function SessionDetail() {
       {/* Hero banner — thematic background */}
       <div className="relative pt-32 lg:pt-36 pb-20 overflow-hidden">
         {/* Background Layer */}
-        <div className="absolute inset-0 bg-[#0A1A11]" />
+        <div className="absolute inset-0 bg-[#05140B]" />
         {(sesion.dias_jornada?.imagen_url || IMAGENES_POR_DIA[sesion.dias_jornada?.nombre_dia]) ? (
           <img 
             src={sesion.dias_jornada?.imagen_url || IMAGENES_POR_DIA[sesion.dias_jornada?.nombre_dia]} 
@@ -445,11 +479,11 @@ export default function SessionDetail() {
             className="absolute inset-0 w-full h-full object-cover opacity-50 transition-opacity duration-700"
           />
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0D2B1D] to-[#1B4332]" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#05140B] to-[#163020]" />
         )}
         
         {/* Glassmorphism/Readability Overlay: Más claro en el centro para ver la foto */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0A1A11]/60 via-[#0A1A11]/30 to-[#0A1A11]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#05140B]/60 via-[#05140B]/30 to-[#05140B]" />
         <div className="absolute inset-0 bg-black/20" /> {/* Filtro extra de contraste */}
 
         <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -470,6 +504,40 @@ export default function SessionDetail() {
           <h1 className="text-2xl sm:text-3xl font-extrabold text-white leading-snug max-w-2xl mb-6">
             {sesion.nombre}
           </h1>
+
+          {/* Acciones de interés (Votos) */}
+          <div className="flex items-center gap-4 mb-8">
+            <div className="flex items-center bg-white/10 backdrop-blur-md rounded-2xl p-1 border border-white/10">
+              <button 
+                onClick={() => handleVotar(1)}
+                disabled={votando}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
+                  votoUsuario === 1 
+                    ? 'bg-amber-400 text-[#163020] shadow-lg' 
+                    : 'text-white hover:bg-white/10'
+                }`}
+              >
+                <ThumbsUp size={18} className={votoUsuario === 1 ? 'fill-current' : ''} />
+                <span className="text-xs font-black">{votosStats.likes}</span>
+              </button>
+              <div className="w-px h-6 bg-white/10 mx-1" />
+              <button 
+                onClick={() => handleVotar(-1)}
+                disabled={votando}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
+                  votoUsuario === -1 
+                    ? 'bg-gray-200 text-gray-900 shadow-lg' 
+                    : 'text-white hover:bg-white/10'
+                }`}
+              >
+                <ThumbsDown size={18} className={votoUsuario === -1 ? 'fill-current' : ''} />
+                <span className="text-xs font-black">{votosStats.dislikes}</span>
+              </button>
+            </div>
+            <p className="text-[10px] font-black text-white/40 uppercase tracking-widest leading-none">
+              Nivel de <br/>interés
+            </p>
+          </div>
 
           <div className="flex flex-wrap gap-4 text-sm text-white/70">
             {fechaFormateada && (
@@ -516,7 +584,7 @@ export default function SessionDetail() {
                     <img src={sesion.ponente_foto_url} alt={sesion.ponente_nombre}
                          className="w-16 h-16 rounded-full object-cover border-2 border-emerald-100 dark:border-emerald-900/50 shrink-0" />
                   ) : (
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#1B4332] to-emerald-600 flex items-center justify-center shrink-0">
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#163020] to-emerald-600 flex items-center justify-center shrink-0">
                       <span className="text-white text-2xl font-bold">
                         {sesion.ponente_nombre.charAt(0).toUpperCase()}
                       </span>
@@ -525,7 +593,7 @@ export default function SessionDetail() {
                   <div>
                     <p className="font-bold text-gray-900 dark:text-gray-100 text-lg leading-tight">
                       {sesion.ponente_grado && (
-                        <span className="text-[#1B4332] dark:text-emerald-400">{sesion.ponente_grado} </span>
+                        <span className="text-[#163020] dark:text-emerald-400">{sesion.ponente_grado} </span>
                       )}
                       {sesion.ponente_nombre}
                     </p>
@@ -548,7 +616,7 @@ export default function SessionDetail() {
             {/* Descripción */}
             {sesion.descripcion && (
               <div className="bg-white dark:bg-[#122A1C] rounded-2xl shadow-sm border border-gray-100 dark:border-emerald-900/40 p-6">
-                <h2 className="font-bold text-gray-900 dark:text-gray-100 text-lg border-l-4 border-[#1B4332] dark:border-emerald-600 pl-3 mb-4">
+                <h2 className="font-bold text-gray-900 dark:text-gray-100 text-lg border-l-4 border-[#163020] dark:border-emerald-600 pl-3 mb-4">
                   Acerca de esta sesión
                 </h2>
                 <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-justify">{sesion.descripcion}</p>
@@ -575,13 +643,13 @@ export default function SessionDetail() {
 
             {/* Detalles */}
             <div className="bg-white dark:bg-[#122A1C] rounded-2xl shadow-sm border border-gray-100 dark:border-emerald-900/40 p-6">
-              <h2 className="font-bold text-gray-900 dark:text-gray-100 text-base mb-4 border-l-4 border-[#1B4332] dark:border-emerald-600 pl-3">
+              <h2 className="font-bold text-gray-900 dark:text-gray-100 text-base mb-4 border-l-4 border-[#163020] dark:border-emerald-600 pl-3">
                 Detalles de la sesión
               </h2>
               <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {fechaFormateada && (
                   <div className="flex items-start gap-3">
-                    <CalendarDays size={16} className="text-[#1B4332] dark:text-emerald-500 shrink-0 mt-0.5" />
+                    <CalendarDays size={16} className="text-[#163020] dark:text-emerald-500 shrink-0 mt-0.5" />
                     <div>
                       <dt className="text-xs text-gray-400 dark:text-gray-500 uppercase font-bold tracking-wide mb-0.5">Día</dt>
                       <dd className="text-sm font-semibold text-gray-800 dark:text-gray-200 capitalize">{fechaFormateada}</dd>
@@ -590,7 +658,7 @@ export default function SessionDetail() {
                 )}
                 {sesion.hora_inicio && (
                   <div className="flex items-start gap-3">
-                    <Clock size={16} className="text-[#1B4332] dark:text-emerald-500 shrink-0 mt-0.5" />
+                    <Clock size={16} className="text-[#163020] dark:text-emerald-500 shrink-0 mt-0.5" />
                     <div>
                       <dt className="text-xs text-gray-400 dark:text-gray-500 uppercase font-bold tracking-wide mb-0.5">Horario</dt>
                       <dd className="text-sm font-semibold text-gray-800 dark:text-gray-200">
@@ -601,7 +669,7 @@ export default function SessionDetail() {
                 )}
                 {sesion.escenarios?.nombre && (
                   <div className="flex items-start gap-3">
-                    <MapPin size={16} className="text-[#1B4332] dark:text-emerald-500 shrink-0 mt-0.5" />
+                    <MapPin size={16} className="text-[#163020] dark:text-emerald-500 shrink-0 mt-0.5" />
                     <div>
                       <dt className="text-xs text-gray-400 dark:text-gray-500 uppercase font-bold tracking-wide mb-0.5">Escenario</dt>
                       <dd className="text-sm font-semibold text-gray-800 dark:text-gray-200">{sesion.escenarios.nombre}</dd>
@@ -610,7 +678,7 @@ export default function SessionDetail() {
                 )}
                 {(sesion.programa_academico || []).length > 0 && (
                   <div className="flex items-start gap-3">
-                    <Users size={16} className="text-[#1B4332] dark:text-emerald-500 shrink-0 mt-0.5" />
+                    <Users size={16} className="text-[#163020] dark:text-emerald-500 shrink-0 mt-0.5" />
                     <div>
                       <dt className="text-xs text-gray-400 dark:text-gray-500 uppercase font-bold tracking-wide mb-0.5">Dirigido a</dt>
                       <dd className="text-sm font-semibold text-gray-800 dark:text-gray-200">
@@ -625,7 +693,7 @@ export default function SessionDetail() {
             {/* Q&A Section */}
             {yaInscrito && (
               <div className="bg-white dark:bg-[#122A1C] rounded-2xl shadow-sm border border-gray-100 dark:border-emerald-900/40 p-6 mt-8">
-                <h2 className="font-bold text-gray-900 dark:text-gray-100 text-lg border-l-4 border-[#1B4332] dark:border-emerald-600 pl-3 mb-4 flex items-center gap-2">
+                <h2 className="font-bold text-gray-900 dark:text-gray-100 text-lg border-l-4 border-[#163020] dark:border-emerald-600 pl-3 mb-4 flex items-center gap-2">
                   <MessageSquare size={20} /> Preguntas y Respuestas
                 </h2>
                 <div className="mb-6 flex gap-3">
@@ -634,12 +702,12 @@ export default function SessionDetail() {
                     value={nuevaPregunta}
                     onChange={(e) => setNuevaPregunta(e.target.value)}
                     placeholder="Pregunta algo al ponente..."
-                    className="flex-1 px-4 py-3 bg-gray-50 dark:bg-[#0F2018] rounded-xl outline-none focus:border-[#1B4332] text-sm text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-emerald-900/50"
+                    className="flex-1 px-4 py-3 bg-gray-50 dark:bg-[#0F2018] rounded-xl outline-none focus:border-[#163020] text-sm text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-emerald-900/50"
                   />
                   <button
                     onClick={handleEnviarPregunta}
                     disabled={enviandoPregunta || !nuevaPregunta.trim()}
-                    className="px-4 py-3 bg-[#1B4332] text-white rounded-xl hover:bg-emerald-800 transition-colors disabled:opacity-50 shrink-0 flex items-center gap-2"
+                    className="px-4 py-3 bg-[#163020] text-white rounded-xl hover:bg-emerald-800 transition-colors disabled:opacity-50 shrink-0 flex items-center gap-2"
                   >
                     <Send size={16} /> <span className="hidden sm:inline">Enviar</span>
                   </button>
@@ -694,7 +762,7 @@ export default function SessionDetail() {
                   <div className="bg-gray-100 dark:bg-emerald-950/50 rounded-full h-2.5 overflow-hidden">
                     <div
                       className={`rounded-full h-2.5 transition-all ${
-                        lleno ? 'bg-red-500' : pct >= 80 ? 'bg-amber-500' : 'bg-[#1B4332]'
+                        lleno ? 'bg-red-500' : pct >= 80 ? 'bg-amber-500' : 'bg-[#163020]'
                       }`}
                       style={{ width: `${pct}%` }}
                     />
@@ -737,7 +805,7 @@ export default function SessionDetail() {
                       <p className="text-amber-600 dark:text-amber-400 text-xs mt-0.5">Te avisaremos si se libera un lugar</p>
                     </div>
                   ) : (
-                    <div className="p-4 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800/50 rounded-xl text-center">
+                    <div className="p-4 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-100 dark:border-emerald-800/50 rounded-xl text-center">
                       <p className="text-emerald-700 dark:text-emerald-300 font-bold text-sm">✓ Estás inscrito(a)</p>
                       <p className="text-emerald-600 dark:text-emerald-400 text-xs mt-0.5">Recibirás confirmación por correo</p>
                     </div>
@@ -762,7 +830,7 @@ export default function SessionDetail() {
                   onClick={handleInscribirse}
                   disabled={inscribiendo}
                   className={`w-full py-3.5 text-white font-bold rounded-xl transition-all mb-3 disabled:opacity-50 text-sm ${
-                    lleno ? 'bg-amber-600 hover:bg-amber-700' : 'bg-[#1B4332] hover:bg-emerald-800'
+                    lleno ? 'bg-amber-600 hover:bg-amber-700' : 'bg-[#163020] hover:bg-emerald-800'
                   }`}
                 >
                   {inscribiendo
@@ -801,7 +869,7 @@ export default function SessionDetail() {
                       return `https://calendar.google.com/calendar/render?${p}`
                     })()}
                     target="_blank" rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 w-full py-2.5 border-2 border-[#1B4332] dark:border-emerald-700 text-[#1B4332] dark:text-emerald-400 font-semibold rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all text-sm"
+                    className="flex items-center justify-center gap-2 w-full py-2.5 border-2 border-[#163020] dark:border-emerald-700 text-[#163020] dark:text-emerald-400 font-semibold rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all text-sm"
                   >
                     <CalendarDays size={14} /> Añadir a Google Calendar
                   </a>
@@ -818,7 +886,7 @@ export default function SessionDetail() {
               <button
                 onClick={() => {
                   navigator.clipboard.writeText(window.location.href)
-                  showToast('Enlace copiado al portapapeles')
+                  toast.success('Enlace copiado al portapapeles')
                 }}
                 className="flex items-center justify-center gap-2 w-full text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors py-2"
               >
@@ -914,7 +982,7 @@ export default function SessionDetail() {
                 </p>
                 <button 
                   onClick={() => setShowRatingModal(true)}
-                  className="w-full py-4 bg-[#1B4332] text-white font-black uppercase text-xs tracking-widest rounded-2xl hover:bg-emerald-800 transition-all shadow-lg shadow-emerald-900/20"
+                  className="w-full py-4 bg-[#163020] text-white font-black uppercase text-xs tracking-widest rounded-2xl hover:bg-emerald-800 transition-all shadow-lg shadow-emerald-900/20"
                 >
                   {yaValoro ? 'Ver mi calificación' : 'Calificar sesión'}
                 </button>
@@ -945,7 +1013,7 @@ export default function SessionDetail() {
                     <Star key={n} size={20} className={n <= valoracion.estrellas ? 'text-amber-400 fill-amber-400' : 'text-gray-200 dark:text-emerald-900/50'} />
                   ))}
                 </div>
-                <p className="text-[#1B4332] dark:text-emerald-400 font-bold">¡Valoración enviada!</p>
+                <p className="text-[#163020] dark:text-emerald-400 font-bold">¡Valoración enviada!</p>
                 <p className="text-emerald-600 dark:text-emerald-500 text-sm italic mt-2">
                   {valoracion.comentario ? `"${valoracion.comentario}"` : 'Sin comentarios adicionales.'}
                 </p>
@@ -976,7 +1044,7 @@ export default function SessionDetail() {
                     value={valoracion.comentario}
                     onChange={e => setValoracion(p => ({ ...p, comentario: e.target.value }))}
                     placeholder="Escribe un comentario opcional sobre la sesión, el ponente o el contenido..."
-                    className="w-full p-5 bg-gray-50 dark:bg-[#0F2018] border border-gray-100 dark:border-emerald-900/50 rounded-[2rem] outline-none focus:border-[#1B4332] text-sm font-medium dark:text-gray-200 resize-none h-32"
+                    className="w-full p-5 bg-gray-50 dark:bg-[#0F2018] border border-gray-100 dark:border-emerald-900/50 rounded-[2rem] outline-none focus:border-[#163020] text-sm font-medium dark:text-gray-200 resize-none h-32"
                   />
                 </div>
 
@@ -985,21 +1053,13 @@ export default function SessionDetail() {
                     await handleValorar();
                   }}
                   disabled={enviandoVal || valoracion.estrellas === 0}
-                  className="px-10 py-4 w-full bg-[#1B4332] text-white font-black uppercase text-xs tracking-widest rounded-2xl hover:bg-emerald-800 transition-all shadow-lg shadow-emerald-900/20 disabled:opacity-50"
+                  className="px-10 py-4 w-full bg-[#163020] text-white font-black uppercase text-xs tracking-widest rounded-2xl hover:bg-emerald-800 transition-all shadow-lg shadow-emerald-900/20 disabled:opacity-50"
                 >
                   {enviandoVal ? 'Enviando...' : 'Enviar Calificación'}
                 </button>
               </div>
             )}
           </div>
-        </div>
-      )}
-
-      {toast && (
-        <div className={`fixed bottom-6 left-4 right-4 sm:left-auto sm:right-6 z-50 px-6 py-3.5 rounded-2xl shadow-xl text-sm font-semibold flex items-center gap-2 anim-fade-up ${
-          toast.type === 'error' ? 'bg-red-600 text-white' : 'bg-[#1B4332] text-white'
-        }`}>
-          {toast.type === 'error' ? '⚠️' : '✓'} {toast.msg}
         </div>
       )}
     </div>

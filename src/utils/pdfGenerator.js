@@ -99,7 +99,7 @@ async function tryLoadImage(url) {
   })
 }
 
-function drawPDFHeader(doc, jornada, dia, isContinuation, imgUES, imgUMB) {
+function drawPDFHeader(doc, jornada, dia, isContinuation, imgUES, imgUMB, instName) {
   const cx = PAGE_W / 2
   doc.setDrawColor(27, 67, 50)
   doc.setLineWidth(1.5)
@@ -129,7 +129,7 @@ function drawPDFHeader(doc, jornada, dia, isContinuation, imgUES, imgUMB) {
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(13)
   doc.setTextColor(27, 67, 50)
-  doc.text('UES SAN JOSÉ DEL RINCÓN', cx, 10, { align: 'center' })
+  doc.text(instName || 'UES SAN JOSÉ DEL RINCÓN', cx, 10, { align: 'center' })
   const dayText = isContinuation
     ? formatDayLong(dia.fecha) + ' — continuación'
     : formatDayLong(dia.fecha)
@@ -146,7 +146,7 @@ function drawPDFHeader(doc, jornada, dia, isContinuation, imgUES, imgUMB) {
   doc.line(MARGIN, HEADER_H - 2, PAGE_W - MARGIN, HEADER_H - 2)
 }
 
-function drawPDFFooter(doc, logosConImagen, jornada, pageNum, totalPages) {
+function drawPDFFooter(doc, logosConImagen, jornada, pageNum, totalPages, lema) {
   const cx = PAGE_W / 2
   const fy = FOOTER_Y
   doc.setDrawColor(229, 231, 235)
@@ -173,7 +173,7 @@ function drawPDFFooter(doc, logosConImagen, jornada, pageNum, totalPages) {
       doc.text((inst.nombre?.[0] || '?').toUpperCase(), lx, fy + 8.5, { align: 'center' })
     }
   })
-  const raw  = (jornada.lema || 'Cultura que inspira, conocimiento que transforma').replace(/^"|"$/g, '')
+  const raw  = (lema || jornada.lema || 'Cultura que inspira, conocimiento que transforma').replace(/^"|"$/g, '')
   doc.setFont('helvetica', 'italic')
   doc.setFontSize(7)
   doc.setTextColor(107, 114, 128)
@@ -184,7 +184,7 @@ function drawPDFFooter(doc, logosConImagen, jornada, pageNum, totalPages) {
   doc.text(`${pageNum} / ${totalPages}`, PAGE_W - MARGIN, fy + 14, { align: 'right' })
 }
 
-function drawPDFPortada(doc, jornada, imgUES, imgUMB, logosConImagen) {
+function drawPDFPortada(doc, jornada, imgUES, imgUMB, logosConImagen, instName, lema) {
   const cx = PAGE_W / 2
   const cy = PAGE_H / 2
   doc.setFillColor(249, 247, 242)
@@ -217,7 +217,7 @@ function drawPDFPortada(doc, jornada, imgUES, imgUMB, logosConImagen) {
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(13)
   doc.setTextColor(27, 67, 50)
-  doc.text('UES SAN JOSÉ DEL RINCÓN', cx, 12, { align: 'center' })
+  doc.text(instName || 'UES SAN JOSÉ DEL RINCÓN', cx, 12, { align: 'center' })
   doc.setDrawColor(212, 160, 23)
   doc.setLineWidth(1)
   doc.line(MARGIN, 22, PAGE_W - MARGIN, 22)
@@ -254,7 +254,7 @@ function drawPDFPortada(doc, jornada, imgUES, imgUMB, logosConImagen) {
       doc.addImage(inst.imgData, 'PNG', lx - 7, fy + 2, 14, 9, undefined, 'FAST')
     }
   })
-  const raw  = (jornada?.lema || 'Cultura que inspira, conocimiento que transforma').replace(/^"|"$/g, '')
+  const raw  = (lema || jornada?.lema || 'Cultura que inspira, conocimiento que transforma').replace(/^"|"$/g, '')
   doc.setFont('helvetica', 'italic')
   doc.setFontSize(7)
   doc.setTextColor(107, 114, 128)
@@ -319,7 +319,17 @@ function drawSessionsColumn(doc, sesiones, incluyePonentes) {
   })
 }
 
+async function loadSettings() {
+  const { data } = await supabase.from('system_settings').select('*').eq('id', 1).single()
+  return data
+}
+
 export async function generateAgendaPDF(jornada, sesiones, options = {}) {
+  const settings = await loadSettings()
+  const reportsLogoUrl = settings?.branding?.reports_logo_url
+  const instName = settings?.event_info?.institution?.toUpperCase() || 'UES SAN JOSÉ DEL RINCÓN'
+  const eventLema = settings?.event_info?.lema || 'Cultura que inspira, conocimiento que transforma'
+
   const { jsPDF } = await import('jspdf')
   const {
     incluyePonentes = true,
@@ -329,7 +339,7 @@ export async function generateAgendaPDF(jornada, sesiones, options = {}) {
   if (!jornada) throw new Error('No hay jornada activa')
 
   const [imgUES, imgUMB] = await Promise.all([
-    tryLoadImage('/images/logos/ues-sjr.png'),
+    tryLoadImage(reportsLogoUrl || '/images/logos/ues-sjr.png'),
     tryLoadImage('/images/logos/umb.png')
   ])
 
@@ -355,7 +365,7 @@ export async function generateAgendaPDF(jornada, sesiones, options = {}) {
   const totalPaginas = 1 + diasAIncluir.length
   const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'landscape' })
 
-  drawPDFPortada(doc, jornada, imgUES, imgUMB, logosConImagen)
+  drawPDFPortada(doc, jornada, imgUES, imgUMB, logosConImagen, instName, eventLema)
 
   let pageNum = 1
   for (let idx = 0; idx < diasAIncluir.length; idx++) {
@@ -371,10 +381,10 @@ export async function generateAgendaPDF(jornada, sesiones, options = {}) {
     const imgUrl = dia.imagen_url || IMAGENES_POR_DIA[dia.nombre_dia]
     const loadedImg = imgUrl ? await tryLoadImage(imgUrl) : null
 
-    drawPDFHeader(doc, jornada, dia, false, imgUES, imgUMB)
+    drawPDFHeader(doc, jornada, dia, false, imgUES, imgUMB, instName)
     drawSessionsColumn(doc, sesDia, incluyePonentes)
     drawPhotoPlaceholder(doc, loadedImg)
-    drawPDFFooter(doc, logosConImagen, jornada, pageNum, totalPaginas - 1)
+    drawPDFFooter(doc, logosConImagen, jornada, pageNum, totalPaginas - 1, eventLema)
     pageNum++
   }
 

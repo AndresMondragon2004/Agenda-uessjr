@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Download, ChevronLeft, ChevronRight, Check, FileText, FileSpreadsheet, Filter, X } from 'lucide-react'
+import { Download, ChevronLeft, ChevronRight, Check, FileText, FileSpreadsheet, Filter, X, AlertTriangle } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { toast } from 'react-hot-toast'
 import { jornadaService } from '../../services/jornada.service'
 import { sesionesService } from '../../services/sesiones.service'
 import { estudiantesService } from '../../services/estudiantes.service'
@@ -461,7 +463,7 @@ function ImageAdjusterModal({ data, onCancel, onConfirm, loading }) {
       <div className="bg-white dark:bg-[#122A1C] w-full max-w-lg max-h-[95vh] flex flex-col rounded-[2.5rem] overflow-hidden shadow-2xl animate-scale-in">
         <div className="p-8 border-b border-gray-100 dark:border-emerald-900/40 flex items-center justify-between shrink-0">
           <div>
-            <h3 className="font-black text-xl text-[#1B4332] dark:text-emerald-400 uppercase">Encuadre del Programa</h3>
+            <h3 className="font-black text-xl text-[#163020] dark:text-emerald-400 uppercase">Encuadre del Programa</h3>
             <p className="text-xs text-gray-500 font-bold uppercase tracking-widest mt-1">Elige el área que saldrá en el PDF</p>
           </div>
           <button onClick={onCancel} className="text-gray-400 hover:text-red-500 transition-colors">
@@ -499,7 +501,7 @@ function ImageAdjusterModal({ data, onCancel, onConfirm, loading }) {
                 <span className="text-[10px] font-bold text-emerald-500">{offset.x}%</span>
               </div>
               <input type="range" min="0" max="100" value={offset.x} onChange={(e) => setOffset(p => ({...p, x: e.target.value}))} 
-                className="w-full h-1.5 bg-gray-100 dark:bg-emerald-900/40 rounded-lg appearance-none cursor-pointer accent-[#1B4332]" />
+                className="w-full h-1.5 bg-gray-100 dark:bg-emerald-900/40 rounded-lg appearance-none cursor-pointer accent-[#163020]" />
             </div>
             
             <div>
@@ -508,14 +510,14 @@ function ImageAdjusterModal({ data, onCancel, onConfirm, loading }) {
                 <span className="text-[10px] font-bold text-emerald-500">{offset.y}%</span>
               </div>
               <input type="range" min="0" max="100" value={offset.y} onChange={(e) => setOffset(p => ({...p, y: e.target.value}))} 
-                className="w-full h-1.5 bg-gray-100 dark:bg-emerald-900/40 rounded-lg appearance-none cursor-pointer accent-[#1B4332]" />
+                className="w-full h-1.5 bg-gray-100 dark:bg-emerald-900/40 rounded-lg appearance-none cursor-pointer accent-[#163020]" />
             </div>
 
             <div className="flex gap-4">
               <div className="flex-1">
                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Zoom Escala</label>
                 <input type="range" min="100" max="300" value={zoom} onChange={(e) => setZoom(e.target.value)} 
-                  className="w-full h-1.5 bg-gray-100 dark:bg-emerald-900/40 rounded-lg appearance-none cursor-pointer accent-[#1B4332]" />
+                  className="w-full h-1.5 bg-gray-100 dark:bg-emerald-900/40 rounded-lg appearance-none cursor-pointer accent-[#163020]" />
               </div>
             </div>
           </div>
@@ -525,7 +527,7 @@ function ImageAdjusterModal({ data, onCancel, onConfirm, loading }) {
           <button onClick={onCancel} className="flex-1 py-4 text-gray-500 font-black uppercase text-xs tracking-widest hover:bg-gray-100 dark:hover:bg-emerald-900/40 rounded-2xl transition-all">
             Cancelar
           </button>
-          <button onClick={handleSave} disabled={loading} className="flex-2 px-10 py-4 bg-[#1B4332] text-white font-black uppercase text-xs tracking-widest rounded-2xl hover:bg-emerald-800 shadow-xl shadow-emerald-950/20 transition-all flex items-center justify-center gap-2">
+          <button onClick={handleSave} disabled={loading} className="flex-2 px-10 py-4 bg-[#163020] text-white font-black uppercase text-xs tracking-widest rounded-2xl hover:bg-emerald-800 shadow-xl shadow-emerald-950/20 transition-all flex items-center justify-center gap-2">
             {loading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Check size={16} />}
             Aplicar y Subir
           </button>
@@ -548,18 +550,14 @@ export default function Reports() {
   const [incluyeDescripcion, setIncluyeDescripcion]= useState(false)
   const [incluyeMateriales,  setIncluyeMateriales] = useState(false)
   const [logos,              setLogos]             = useState([])
+  const [logosEncabezado,    setLogosEncabezado]   = useState([])
   const [generando,          setGenerando]         = useState(false)
+  const [deleteConfirm,      setDeleteConfirm]     = useState(null)
   const [exportando,         setExportando]        = useState(null)
-  const [toast,              setToast]             = useState(null)
   const [paginaPreview,      setPaginaPreview]     = useState(1)
   const [showModalImagenes,  setShowModalImagenes] = useState(false)
   const [loadingImagen,      setLoadingImagen]     = useState(null) // ID del día cargando
   const [cropFile,           setCropFile]          = useState(null) // { diaId, file, previewUrl }
-
-  const showToast = (msg, tipo = 'ok') => {
-    setToast({ msg, tipo })
-    setTimeout(() => setToast(null), 3000)
-  }
 
   const cargarDatos = async () => {
     try {
@@ -570,7 +568,8 @@ export default function Reports() {
       setSesiones(ses || [])
       try {
         const { data } = await supabase.from('instituciones').select('*').order('orden')
-        setLogos(data || [])
+        setLogos(data ? data.filter(l => !l.es_institucional) : [])
+        setLogosEncabezado(data ? data.filter(l => l.es_institucional) : [])
       } catch { /* tabla puede no existir */ }
     } catch {
       // sin jornada activa
@@ -607,16 +606,16 @@ export default function Reports() {
 
   // ── PDF generation ──────────────────────────────────────────────────────────
   const handleGenerarPDF = async () => {
-    if (!jornada) { showToast('No hay jornada activa disponible', 'error'); return }
-    if (sesionesFiltradas.length === 0) { showToast('No hay sesiones para generar el PDF', 'error'); return }
+    if (!jornada) { toast.error('No hay jornada activa disponible'); return }
+    if (sesionesFiltradas.length === 0) { toast.error('No hay sesiones para generar el PDF'); return }
     try {
       setGenerando(true)
       const { jsPDF } = await import('jspdf')
       
-      // Cargar logos fijos
+      // Cargar logos fijos o personalizados
       const [imgUES, imgUMB] = await Promise.all([
-        tryLoadImage('/images/logos/ues-sjr.png'),
-        tryLoadImage('/images/logos/umb.png'),
+        tryLoadImage(logosEncabezado[1]?.logotipo_url || '/images/logos/ues-sjr.png'),
+        tryLoadImage(logosEncabezado[0]?.logotipo_url || '/images/logos/umb.png'),
       ])
 
       // Cargar logos de instituciones (footer)
@@ -674,10 +673,10 @@ export default function Reports() {
         ? `-${dias.find(d => d.id === diasSeleccionados)?.nombre_dia || 'dia'}`
         : ''
       doc.save(`Programa-${safeNombre}${sufijo}-UESSJR.pdf`)
-      showToast('PDF generado y descargado exitosamente')
+      toast.success('PDF generado y descargado exitosamente')
     } catch (err) {
       console.error('Error generando PDF:', err)
-      showToast('Error al generar el PDF. Inténtalo de nuevo.', 'error')
+      toast.error('Error al generar el PDF. Inténtalo de nuevo.')
     } finally {
       setGenerando(false)
     }
@@ -685,7 +684,7 @@ export default function Reports() {
 
   // ── Exportar lista de inscritos por sesión (CSV) ──────────────────────────
   const handleExportarInscritos = async () => {
-    if (!jornada) { showToast('No hay jornada activa', 'error'); return }
+    if (!jornada) { toast.error('No hay jornada activa'); return }
     try {
       setExportando('inscritos')
       const { data, error } = await supabase
@@ -718,9 +717,9 @@ export default function Reports() {
 
       const headers = ['Nombre','Matrícula','Correo','Programa','Sesión','Tipo','Día','Fecha','Hora inicio','Hora fin','Escenario']
       downloadCSV(toCSV(rows, headers), `Inscritos-${jornada.nombre || 'Jornada'}.csv`)
-      showToast(`${rows.length} registros exportados`)
+      toast.success(`${rows.length} registros exportados`)
     } catch (err) {
-      showToast('Error exportando inscritos: ' + err.message, 'error')
+      toast.error('Error exportando inscritos: ' + err.message)
     } finally {
       setExportando(null)
     }
@@ -740,9 +739,9 @@ export default function Reports() {
       }))
       const headers = ['Nombre','Matrícula','Correo','Programa','Fecha de registro']
       downloadCSV(toCSV(rows, headers), 'Estudiantes-UESSJR.csv')
-      showToast(`${rows.length} estudiantes exportados`)
+      toast.success(`${rows.length} estudiantes exportados`)
     } catch (err) {
-      showToast('Error exportando estudiantes: ' + err.message, 'error')
+      toast.error('Error exportando estudiantes: ' + err.message)
     } finally {
       setExportando(null)
     }
@@ -750,7 +749,7 @@ export default function Reports() {
 
   // ── Exportar resumen por programa académico (CSV) ─────────────────────────
   const handleExportarResumenPrograma = async () => {
-    if (!jornada) { showToast('No hay jornada activa', 'error'); return }
+    if (!jornada) { toast.error('No hay jornada activa'); return }
     try {
       setExportando('programa')
       const { data, error } = await supabase
@@ -782,9 +781,9 @@ export default function Reports() {
       const headers = ['programa', 'total', ...Object.keys(TIPO_LABELS)]
       const rows = Object.values(resumen).filter(r => r.total > 0)
       downloadCSV(toCSV(rows, headers), 'Resumen-por-programa-UESSJR.csv')
-      showToast(`Resumen exportado (${rows.length} programas)`)
+      toast.success(`Resumen exportado (${rows.length} programas)`)
     } catch (err) {
-      showToast('Error exportando resumen: ' + err.message, 'error')
+      toast.error('Error exportando resumen: ' + err.message)
     } finally {
       setExportando(null)
     }
@@ -812,9 +811,9 @@ export default function Reports() {
       }))
       const headers = ['Proponente','Correo','Teléfono','Relación','Tipo','Título','Descripción','Duración','Estado','Horario preferido','Días disponibles','Requiere materiales','Fecha de envío']
       downloadCSV(toCSV(rows, headers), 'Propuestas-UESSJR.csv')
-      showToast(`${rows.length} propuestas exportadas`)
+      toast.success(`${rows.length} propuestas exportadas`)
     } catch (err) {
-      showToast('Error exportando propuestas: ' + err.message, 'error')
+      toast.error('Error exportando propuestas: ' + err.message)
     } finally {
       setExportando(null)
     }
@@ -822,7 +821,7 @@ export default function Reports() {
 
   // ── Exportar lista de inscritos por sesión individual (CSV) ───────────────
   const handleExportarInscritosPorSesion = async () => {
-    if (!jornada) { showToast('No hay jornada activa', 'error'); return }
+    if (!jornada) { toast.error('No hay jornada activa'); return }
     try {
       setExportando('inscritos-sesion')
       const sesFiltradas = sesionesFiltradas.filter(s => s.estado !== 'cancelada')
@@ -921,17 +920,17 @@ export default function Reports() {
         ? `-${dias.find(d => d.id === diasSeleccionados)?.nombre_dia || 'dia'}`
         : ''
       doc.save(`Programa-${safeNombre}${sufijo}-UESSJR.pdf`)
-      showToast('PDF generado y descargado exitosamente')
+      toast.success('PDF generado y descargado exitosamente')
     } catch (err) {
       console.error('Error generando PDF:', err)
-      showToast('Error al generar el PDF. Inténtalo de nuevo.', 'error')
+      toast.error('Error al generar el PDF. Inténtalo de nuevo.')
     } finally {
       setGenerando(false)
     }
   }
 // ── Exportar Reporte Maestro de Asistencia (CSV) ─────────────────────────
 const handleExportarMaestroAsistencia = async () => {
-  if (!jornada) { showToast('No hay jornada activa', 'error'); return }
+  if (!jornada) { toast.error('No hay jornada activa'); return }
   try {
     setExportando('maestro')
 
@@ -970,9 +969,9 @@ const handleExportarMaestroAsistencia = async () => {
 
     const headers = ['Nombre','Matrícula','Carrera','Correo','Sesiones Asistidas','Total Sesiones Jornada','% Cumplimiento']
     downloadCSV(toCSV(rows, headers), `Reporte-Maestro-Asistencia-${jornada.nombre}.csv`)
-    showToast(`${rows.length} estudiantes procesados`)
+    toast.success(`${rows.length} estudiantes procesados`)
   } catch (err) {
-    showToast('Error: ' + err.message, 'error')
+    toast.error('Error: ' + err.message)
   } finally {
     setExportando(null)
   }
@@ -980,7 +979,7 @@ const handleExportarMaestroAsistencia = async () => {
 
 const handleExportarConstanciasPonentes = async () => {
   if (!jornada || !sesiones || sesiones.length === 0) {
-    showToast('No hay datos suficientes para generar las constancias', 'error')
+    toast.error('No hay datos suficientes para generar las constancias')
     return
   }
   
@@ -993,14 +992,14 @@ const handleExportarConstanciasPonentes = async () => {
     )
 
     if (sesionesValidas.length === 0) {
-      showToast('No se encontraron ponentes en esta jornada', 'error')
+      toast.error('No se encontraron ponentes en esta jornada')
       return
     }
 
     await generateConstanciasPonentesMasivoPDF(sesionesValidas, jornada)
-    showToast(`Se generaron ${sesionesValidas.length} constancias`)
+    toast.success(`Se generaron ${sesionesValidas.length} constancias`)
   } catch (err) {
-    showToast('Error al generar constancias: ' + err.message, 'error')
+    toast.error('Error al generar constancias: ' + err.message)
   } finally {
     setExportando(null)
   }
@@ -1041,11 +1040,11 @@ const EXPORT_ROWS = [
       
       if (dbError) throw dbError
 
-      showToast('Imagen encuadrada y actualizada')
+      toast.success('Imagen encuadrada y actualizada')
       setCropFile(null)
       cargarDatos()
     } catch (err) {
-      showToast(err.message, 'error')
+      toast.error(err.message)
     } finally {
       setLoadingImagen(null)
     }
@@ -1086,28 +1085,76 @@ const EXPORT_ROWS = [
         .insert([{
           nombre: file.name.split('.')[0],
           logotipo_url: publicUrl,
+          es_institucional: false,
           orden: logos.length
         }])
 
       if (dbError) throw dbError
 
       cargarDatos()
-      showToast('Logo institucional añadido correctamente')
+      toast.success('Logo institucional añadido correctamente')
     } catch (err) {
-      showToast('Error al subir logo: ' + err.message, 'error')
+      toast.error('Error al subir logo: ' + err.message)
     } finally {
       setLoading(false)
     }
   }
 
-  const handleDeleteLogo = async (id, url) => {
-    if (!confirm('¿Estás seguro de eliminar este logo?')) return
+  const handleUploadHeaderLogo = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (logosEncabezado.length >= 2) {
+      toast.error('Solo se permiten cargar hasta 2 logos para el encabezado')
+      return
+    }
+
+    try {
+      setLoading(true)
+      const fileExt = file.name.split('.').pop()
+      const fileName = `header-${Date.now()}-${Math.floor(Math.random() * 1000)}.${fileExt}`
+      const filePath = fileName
+
+      const { error: uploadError } = await supabase.storage
+        .from('logos')
+        .upload(filePath, file)
+
+      if (uploadError) throw uploadError
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('logos')
+        .getPublicUrl(filePath)
+
+      const { error: dbError } = await supabase
+        .from('instituciones')
+        .insert([{
+          nombre: file.name.split('.')[0],
+          logotipo_url: publicUrl,
+          es_institucional: true,
+          orden: logosEncabezado.length
+        }])
+
+      if (dbError) throw dbError
+
+      cargarDatos()
+      toast.success('Logo de encabezado añadido correctamente')
+    } catch (err) {
+      toast.error('Error al subir logo: ' + err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const executeDeleteLogo = async () => {
+    if (!deleteConfirm) return
+    const { id, logotipo_url } = deleteConfirm
+    setDeleteConfirm(null)
 
     try {
       setLoading(true)
       
-      if (url && url.includes('/storage/v1/object/public/logos/')) {
-        const filePath = url.split('/logos/')[1]
+      if (logotipo_url && logotipo_url.includes('/storage/v1/object/public/logos/')) {
+        const filePath = logotipo_url.split('/logos/')[1]
         await supabase.storage.from('logos').remove([filePath])
       }
 
@@ -1119,9 +1166,9 @@ const EXPORT_ROWS = [
       if (error) throw error
 
       cargarDatos()
-      showToast('Logo eliminado')
+      toast.success('Logo eliminado')
     } catch (err) {
-      showToast('Error al eliminar: ' + err.message, 'error')
+      toast.error('Error al eliminar: ' + err.message)
     } finally {
       setLoading(false)
     }
@@ -1143,7 +1190,7 @@ const EXPORT_ROWS = [
         {loading ? (
           <div className="flex items-center justify-center py-24">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#1B4332] mx-auto mb-3" />
+              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#163020] mx-auto mb-3" />
               <p className="text-gray-400 text-sm">Preparando base de datos...</p>
             </div>
           </div>
@@ -1157,7 +1204,7 @@ const EXPORT_ROWS = [
               <div className="bg-white dark:bg-[#122A1C] rounded-2xl shadow-sm p-8 border border-gray-100 dark:border-emerald-900/40">
                 <div className="flex items-center gap-3 mb-1">
                   <div className="p-2 bg-emerald-50 dark:bg-emerald-900/40 rounded-lg">
-                    <FileText className="w-5 h-5 text-[#1B4332] dark:text-emerald-400" />
+                    <FileText className="w-5 h-5 text-[#163020] dark:text-emerald-400" />
                   </div>
                   <h2 className="font-black text-lg text-gray-900 dark:text-gray-100">Programa oficial</h2>
                 </div>
@@ -1175,8 +1222,8 @@ const EXPORT_ROWS = [
                       onClick={() => { setDiasSeleccionados('todos'); setPaginaPreview(1) }}
                       className={`px-5 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all shadow-sm
                         ${diasSeleccionados === 'todos'
-                          ? 'bg-[#1B4332] text-white'
-                          : 'bg-white dark:bg-[#0F2018] border border-gray-200 dark:border-emerald-900/40 text-gray-600 dark:text-gray-300 hover:border-[#1B4332]/30 hover:bg-emerald-50 dark:hover:bg-emerald-900/30'}`}>
+                          ? 'bg-[#163020] text-white'
+                          : 'bg-white dark:bg-[#0F2018] border border-gray-200 dark:border-emerald-900/40 text-gray-600 dark:text-gray-300 hover:border-[#163020]/30 hover:bg-emerald-50 dark:hover:bg-emerald-900/30'}`}>
                       Evento completo
                     </button>
                     {dias.map(dia => (
@@ -1184,8 +1231,8 @@ const EXPORT_ROWS = [
                         onClick={() => { setDiasSeleccionados(dia.id); setPaginaPreview(1) }}
                         className={`px-5 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all shadow-sm
                           ${diasSeleccionados === dia.id
-                            ? 'bg-[#1B4332] text-white'
-                            : 'bg-white dark:bg-[#0F2018] border border-gray-200 dark:border-emerald-900/40 text-gray-600 dark:text-gray-300 hover:border-[#1B4332]/30 hover:bg-emerald-50 dark:hover:bg-emerald-900/30'}`}>
+                            ? 'bg-[#163020] text-white'
+                            : 'bg-white dark:bg-[#0F2018] border border-gray-200 dark:border-emerald-900/40 text-gray-600 dark:text-gray-300 hover:border-[#163020]/30 hover:bg-emerald-50 dark:hover:bg-emerald-900/30'}`}>
                         {formatShortDay(dia)}
                       </button>
                     ))}
@@ -1204,12 +1251,12 @@ const EXPORT_ROWS = [
                     ].map((item, i) => (
                       <label key={i} className="flex items-start gap-3 p-4 rounded-xl border border-gray-100 dark:border-emerald-900/40 hover:border-emerald-100 dark:hover:border-emerald-800/50 hover:bg-emerald-50/30 dark:hover:bg-emerald-900/20 transition-all cursor-pointer group">
                         <div className={`mt-0.5 flex shrink-0 items-center justify-center w-5 h-5 rounded-lg border-2 transition-all
-                          ${item.checked ? 'bg-[#1B4332] border-[#1B4332]' : 'border-gray-200 dark:border-emerald-900/60 bg-white dark:bg-[#0F2018] group-hover:border-[#1B4332]/50'}`}>
+                          ${item.checked ? 'bg-[#163020] border-[#163020]' : 'border-gray-200 dark:border-emerald-900/60 bg-white dark:bg-[#0F2018] group-hover:border-[#163020]/50'}`}>
                           {item.checked && <Check className="w-3.5 h-3.5 text-white" strokeWidth={4} />}
                         </div>
                         <input type="checkbox" checked={item.checked} onChange={() => item.set(!item.checked)} className="sr-only" />
                         <div>
-                          <p className="text-sm text-gray-800 dark:text-gray-200 font-bold group-hover:text-[#1B4332] dark:group-hover:text-emerald-400 transition-colors">{item.label}</p>
+                          <p className="text-sm text-gray-800 dark:text-gray-200 font-bold group-hover:text-[#163020] dark:group-hover:text-emerald-400 transition-colors">{item.label}</p>
                           <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 leading-tight">{item.desc}</p>
                         </div>
                       </label>
@@ -1224,12 +1271,12 @@ const EXPORT_ROWS = [
                   </div>
                   <div className="text-right">
                     <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">Total de páginas</p>
-                    <p className="text-sm font-black text-[#1B4332] dark:text-emerald-400">{totalPages}</p>
+                    <p className="text-sm font-black text-[#163020] dark:text-emerald-400">{totalPages}</p>
                   </div>
                 </div>
 
                 <button type="button" onClick={handleGenerarPDF} disabled={generando}
-                  className="w-full py-4 text-white font-black uppercase tracking-widest rounded-2xl bg-[#1B4332] hover:bg-[#002F1D] hover:-translate-y-0.5 transition-all shadow-lg shadow-emerald-900/10 disabled:opacity-50 flex items-center justify-center gap-3">
+                  className="w-full py-4 text-white font-black uppercase tracking-widest rounded-2xl bg-[#163020] hover:bg-[#002F1D] hover:-translate-y-0.5 transition-all shadow-lg shadow-emerald-900/10 disabled:opacity-50 flex items-center justify-center gap-3">
                   {generando ? (
                     <>
                       <div className="animate-spin rounded-full h-5 w-5 border-2 border-white/30 border-b-white" />
@@ -1264,7 +1311,7 @@ const EXPORT_ROWS = [
                         </div>
                         <div className="min-w-0">
                           <div className="flex items-center gap-2 mb-1 flex-wrap">
-                            <p className="text-sm text-gray-800 dark:text-gray-200 font-black group-hover:text-[#1B4332] dark:group-hover:text-emerald-400 transition-colors">{row.label}</p>
+                            <p className="text-sm text-gray-800 dark:text-gray-200 font-black group-hover:text-[#163020] dark:group-hover:text-emerald-400 transition-colors">{row.label}</p>
                             <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider shrink-0 ${FORMAT_COLORS[row.format] || 'bg-gray-100 text-gray-600'}`}>
                               {row.format}
                             </span>
@@ -1275,7 +1322,7 @@ const EXPORT_ROWS = [
                       <button type="button"
                         onClick={row.fn}
                         disabled={!!exportando}
-                        className="shrink-0 ml-4 px-5 py-2 text-xs font-black uppercase tracking-wider text-[#1B4332] dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 rounded-xl hover:bg-[#1B4332] dark:hover:bg-[#1B4332] hover:text-white transition-all disabled:opacity-40 min-w-[110px] border border-transparent hover:shadow-md">
+                        className="shrink-0 ml-4 px-5 py-2 text-xs font-black uppercase tracking-wider text-[#163020] dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 rounded-xl hover:bg-[#163020] dark:hover:bg-[#163020] hover:text-white transition-all disabled:opacity-40 min-w-[110px] border border-transparent hover:shadow-md">
                         {exportando === row.key ? (
                           <div className="animate-spin rounded-full h-3 w-3 border-2 border-current border-b-transparent mx-auto" />
                         ) : (
@@ -1288,51 +1335,105 @@ const EXPORT_ROWS = [
               </div>
 
               {/* Logos institucionales */}
-              <div className="bg-white dark:bg-[#122A1C] rounded-2xl shadow-sm p-8 border border-gray-100 dark:border-emerald-900/40">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="font-black text-lg text-gray-900 dark:text-gray-100">Activos institucionales</h2>
-                  <div className="flex gap-2 flex-wrap justify-end">
-                    <button 
-                      onClick={() => setShowModalImagenes(true)}
-                      className="px-4 py-2 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-blue-600 hover:text-white transition-all flex items-center gap-2">
-                      <Filter className="w-3 h-3" />
-                      Imágenes del Programa
-                    </button>
-                    <label className="cursor-pointer px-4 py-2 bg-emerald-50 dark:bg-emerald-900/30 text-[#1B4332] dark:text-emerald-400 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-[#1B4332] hover:text-white dark:hover:bg-emerald-700 transition-all flex items-center gap-2">
+              <div className="bg-white dark:bg-[#122A1C] rounded-2xl shadow-sm p-8 border border-gray-100 dark:border-emerald-900/40 space-y-8">
+                <div>
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="font-black text-lg text-gray-900 dark:text-gray-100">Activos institucionales</h2>
+                    <div className="flex gap-2 flex-wrap justify-end">
+                      <button 
+                        onClick={() => setShowModalImagenes(true)}
+                        className="px-4 py-2 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-blue-600 hover:text-white transition-all flex items-center gap-2">
+                        <Filter className="w-3 h-3" />
+                        Imágenes del Programa
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* LOGOS ENCABEZADO */}
+                <div className="border-t border-gray-100 dark:border-emerald-900/20 pt-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className="font-bold text-sm text-gray-800 dark:text-gray-200">Logos del encabezado (Máx. 2)</h3>
+                      <p className="text-[10px] text-gray-400 dark:text-gray-500 font-medium">Se colocarán a la izquierda y derecha en el encabezado del reporte.</p>
+                    </div>
+                    {logosEncabezado.length < 2 && (
+                      <label className="cursor-pointer px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/30 text-[#163020] dark:text-emerald-400 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-[#163020] hover:text-white dark:hover:bg-emerald-700 transition-all flex items-center gap-2">
+                        <Download className="w-3 h-3 rotate-180" />
+                        Cargar Logo
+                        <input type="file" className="hidden" accept="image/*" onChange={handleUploadHeaderLogo} />
+                      </label>
+                    )}
+                  </div>
+                  
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    {logosEncabezado.map((logo, index) => (
+                      <div key={logo.id} className="bg-gray-50 dark:bg-[#0F2018] rounded-2xl p-4 text-center group border border-transparent hover:border-red-100 dark:hover:border-red-900/40 transition-all relative">
+                        <button 
+                          onClick={() => setDeleteConfirm(logo)}
+                          className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 hover:bg-red-600">
+                          <span className="text-[10px] font-bold">×</span>
+                        </button>
+                        {logo.logotipo_url ? (
+                          <img src={logo.logotipo_url} alt={logo.nombre} className="h-10 mx-auto object-contain mb-2 grayscale group-hover:grayscale-0 transition-all" />
+                        ) : (
+                          <div className="w-10 h-10 rounded-xl bg-white dark:bg-[#122A1C] border border-gray-200 dark:border-emerald-900/40 flex items-center justify-center mx-auto mb-2">
+                            <span className="text-gray-300 dark:text-gray-600 font-black text-lg">{logo.nombre?.[0] || '?'}</span>
+                          </div>
+                        )}
+                        <p className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-tight truncate">{logo.nombre}</p>
+                        <span className="text-[8px] font-bold text-[#163020] dark:text-emerald-400 block mt-1 bg-[#163020]/10 dark:bg-emerald-950/40 px-2 py-0.5 rounded">
+                          {index === 0 ? 'Izquierdo (UMB)' : 'Derecho (UES)'}
+                        </span>
+                      </div>
+                    ))}
+                    {logosEncabezado.length === 0 && (
+                      <div className="col-span-full py-6 text-center border-2 border-dashed border-gray-100 dark:border-emerald-900/30 rounded-2xl">
+                        <p className="text-[10px] font-black text-gray-300 dark:text-gray-600 uppercase tracking-widest">Predeterminados (UMB y UES SJR)</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* LOGOS PIE DE PÁGINA */}
+                <div className="border-t border-gray-100 dark:border-emerald-900/20 pt-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className="font-bold text-sm text-gray-800 dark:text-gray-200">Logos del pie de página</h3>
+                      <p className="text-[10px] text-gray-400 dark:text-gray-500 font-medium">Logotipos que aparecerán en el pie de página del reporte PDF.</p>
+                    </div>
+                    <label className="cursor-pointer px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/30 text-[#163020] dark:text-emerald-400 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-[#163020] hover:text-white dark:hover:bg-emerald-700 transition-all flex items-center gap-2">
                       <Download className="w-3 h-3 rotate-180" />
                       Cargar Logo
                       <input type="file" className="hidden" accept="image/*" onChange={handleUploadLogo} />
                     </label>
                   </div>
+                  
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    {logos.map(logo => (
+                      <div key={logo.id} className="bg-gray-50 dark:bg-[#0F2018] rounded-2xl p-4 text-center group border border-transparent hover:border-red-100 dark:hover:border-red-900/40 transition-all relative">
+                        <button 
+                          onClick={() => setDeleteConfirm(logo)}
+                          className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 hover:bg-red-600">
+                          <span className="text-[10px] font-bold">×</span>
+                        </button>
+                        {logo.logotipo_url ? (
+                          <img src={logo.logotipo_url} alt={logo.nombre} className="h-10 mx-auto object-contain mb-2 grayscale group-hover:grayscale-0 transition-all" />
+                        ) : (
+                          <div className="w-10 h-10 rounded-xl bg-white dark:bg-[#122A1C] border border-gray-200 dark:border-emerald-900/40 flex items-center justify-center mx-auto mb-2">
+                            <span className="text-gray-300 dark:text-gray-600 font-black text-lg">{logo.nombre?.[0] || '?'}</span>
+                          </div>
+                        )}
+                        <p className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-tight truncate">{logo.nombre}</p>
+                      </div>
+                    ))}
+                    {logos.length === 0 && (
+                      <div className="col-span-full py-6 text-center border-2 border-dashed border-gray-100 dark:border-emerald-900/30 rounded-2xl">
+                        <p className="text-[10px] font-black text-gray-300 dark:text-gray-600 uppercase tracking-widest">No hay logos cargados</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
-                
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                  {logos.map(logo => (
-                    <div key={logo.id} className="bg-gray-50 dark:bg-[#0F2018] rounded-2xl p-4 text-center group border border-transparent hover:border-red-100 dark:hover:border-red-900/40 transition-all relative">
-                      <button 
-                        onClick={() => handleDeleteLogo(logo.id, logo.logotipo_url)}
-                        className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 hover:bg-red-600">
-                        <span className="text-[10px] font-bold">×</span>
-                      </button>
-                      {logo.logotipo_url ? (
-                        <img src={logo.logotipo_url} alt={logo.nombre} className="h-10 mx-auto object-contain mb-2 grayscale group-hover:grayscale-0 transition-all" />
-                      ) : (
-                        <div className="w-10 h-10 rounded-xl bg-white dark:bg-[#122A1C] border border-gray-200 dark:border-emerald-900/40 flex items-center justify-center mx-auto mb-2">
-                          <span className="text-gray-300 dark:text-gray-600 font-black text-lg">{logo.nombre?.[0] || '?'}</span>
-                        </div>
-                      )}
-                      <p className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-tight truncate">{logo.nombre}</p>
-                    </div>
-                  ))}
-                  {logos.length === 0 && (
-                    <div className="col-span-full py-8 text-center border-2 border-dashed border-gray-100 dark:border-emerald-900/30 rounded-2xl">
-                      <p className="text-[10px] font-black text-gray-300 dark:text-gray-600 uppercase tracking-widest">No hay logos cargados</p>
-                    </div>
-                  )}
-                </div>
-                <p className="mt-4 text-[10px] font-medium text-gray-400 dark:text-gray-500 italic">
-                  * Estos logos aparecerán automáticamente en el pie de página del reporte PDF.
-                </p>
               </div>
             </div>
 
@@ -1351,21 +1452,21 @@ const EXPORT_ROWS = [
 
                     {paginaPreview === 1 ? (
                       <div className="w-full h-full flex flex-col p-4" style={{ background: '#F9F7F2' }}>
-                        <div className="flex items-center justify-between border-b-2 border-[#1B4332] pb-2 mb-4">
+                        <div className="flex items-center justify-between border-b-2 border-[#163020] pb-2 mb-4">
                           <div className="w-12 h-8 flex items-center justify-center">
-                            {incluyeLogos && <img src="/images/logos/umb.png" alt="UMB" className="max-h-full object-contain opacity-40" onError={(e) => e.target.style.display='none'} />}
+                            {incluyeLogos && <img src={logosEncabezado[0]?.logotipo_url || "/images/logos/umb.png"} alt="UMB" className="max-h-full object-contain opacity-40" onError={(e) => e.target.style.display='none'} />}
                           </div>
-                          <p className="text-[8px] font-black text-[#1B4332] tracking-widest">UES SAN JOSÉ DEL RINCÓN</p>
+                          <p className="text-[8px] font-black text-[#163020] tracking-widest">UES SAN JOSÉ DEL RINCÓN</p>
                           <div className="w-12 h-8 flex items-center justify-center">
-                            {incluyeLogos && <img src="/images/logos/ues-sjr.png" alt="UES" className="max-h-full object-contain opacity-40" onError={(e) => e.target.style.display='none'} />}
+                            {incluyeLogos && <img src={logosEncabezado[1]?.logotipo_url || "/images/logos/ues-sjr.png"} alt="UES" className="max-h-full object-contain opacity-40" onError={(e) => e.target.style.display='none'} />}
                           </div>
                         </div>
                         <div className="flex-1 flex flex-col items-center justify-center text-center">
                           <div className="w-1 bg-[#D4A017] h-8 mb-4 rounded-full" />
-                          <h4 className="text-sm font-black text-[#1B4332] uppercase tracking-tighter leading-none">Jornada Académica</h4>
-                          <h4 className="text-sm font-black text-[#1B4332] uppercase tracking-tighter leading-none mb-2">y Cultural 2026</h4>
+                          <h4 className="text-sm font-black text-[#163020] uppercase tracking-tighter leading-none">Jornada Académica</h4>
+                          <h4 className="text-sm font-black text-[#163020] uppercase tracking-tighter leading-none mb-2">y Cultural 2026</h4>
                           <p className="text-[6px] font-black text-gray-400 tracking-[0.3em] mb-4">P R O G R A M A</p>
-                          <div className="px-3 py-1 bg-[#1B4332] text-white text-[7px] font-black rounded-lg">
+                          <div className="px-3 py-1 bg-[#163020] text-white text-[7px] font-black rounded-lg">
                             {jornada?.periodo || '4 al 8 de mayo'}
                           </div>
                         </div>
@@ -1390,11 +1491,11 @@ const EXPORT_ROWS = [
                       <div className="w-full h-full flex flex-col p-4" style={{ background: '#F9F7F2' }}>
                         <div className="flex items-start justify-between border-b-2 border-[#D4A017] pb-2 mb-4 relative">
                           <div className="w-10 h-6 flex items-center justify-center shrink-0">
-                            {incluyeLogos ? <img src="/images/logos/umb.png" alt="UMB" className="max-h-full object-contain opacity-80" onError={(e) => e.target.style.display='none'} /> : <div className="w-8 h-4 border border-dashed border-gray-300"></div>}
+                            {incluyeLogos ? <img src={logosEncabezado[0]?.logotipo_url || "/images/logos/umb.png"} alt="UMB" className="max-h-full object-contain opacity-80" onError={(e) => e.target.style.display='none'} /> : <div className="w-8 h-4 border border-dashed border-gray-300"></div>}
                           </div>
                           
                           <div className="flex-1 flex flex-col items-center text-center px-2">
-                            <h4 className="text-[8px] font-black text-[#1B4332] uppercase tracking-wider leading-none">UES SAN JOSÉ DEL RINCÓN</h4>
+                            <h4 className="text-[8px] font-black text-[#163020] uppercase tracking-wider leading-none">UES SAN JOSÉ DEL RINCÓN</h4>
                             <h5 className="text-[6px] font-black text-[#D4A017] uppercase tracking-widest leading-none mt-1">{jornada?.nombre}</h5>
                             <p className="text-[5px] font-bold text-gray-500 uppercase mt-1">
                               {diasParaPDF[paginaPreview - 2] ? new Date(diasParaPDF[paginaPreview - 2].fecha + 'T12:00:00').toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' }) : '—'}
@@ -1402,7 +1503,7 @@ const EXPORT_ROWS = [
                           </div>
 
                           <div className="w-10 h-6 flex items-center justify-center shrink-0 relative">
-                            {incluyeLogos ? <img src="/images/logos/ues-sjr.png" alt="UES" className="max-h-full object-contain opacity-80" onError={(e) => e.target.style.display='none'} /> : <div className="w-8 h-4 border border-dashed border-gray-300"></div>}
+                            {incluyeLogos ? <img src={logosEncabezado[1]?.logotipo_url || "/images/logos/ues-sjr.png"} alt="UES" className="max-h-full object-contain opacity-80" onError={(e) => e.target.style.display='none'} /> : <div className="w-8 h-4 border border-dashed border-gray-300"></div>}
                             <p className="absolute -top-2 -right-2 text-[4px] text-gray-400 font-bold">Pág. {paginaPreview - 1}</p>
                           </div>
                         </div>
@@ -1416,7 +1517,7 @@ const EXPORT_ROWS = [
                             <div className="space-y-3">
                               {sesionesPreview.length > 0 ? sesionesPreview.map((ses) => (
                                 <div key={ses.id} className="flex gap-4 items-start opacity-80 border-b border-gray-50 pb-2">
-                                  <span className="text-[6px] font-black text-[#1B4332] w-8">{ses.hora_inicio?.slice(0, 5)}</span>
+                                  <span className="text-[6px] font-black text-[#163020] w-8">{ses.hora_inicio?.slice(0, 5)}</span>
                                   <div className="flex-1">
                                     <p className="text-[7px] font-black text-gray-800 leading-tight mb-0.5">{ses.nombre.slice(0, 45)}...</p>
                                     {incluyePonentes && ses.ponente_nombre && (
@@ -1458,15 +1559,15 @@ const EXPORT_ROWS = [
                   <div className="flex items-center justify-between mt-6 bg-gray-50 dark:bg-[#0F2018] p-2 rounded-2xl border border-gray-100 dark:border-emerald-900/30">
                     <button type="button" disabled={paginaPreview <= 1}
                       onClick={() => setPaginaPreview(p => p - 1)}
-                      className="p-2 text-gray-400 dark:text-gray-500 hover:text-[#1B4332] dark:hover:text-emerald-400 disabled:opacity-20 transition-all">
+                      className="p-2 text-gray-400 dark:text-gray-500 hover:text-[#163020] dark:hover:text-emerald-400 disabled:opacity-20 transition-all">
                       <ChevronLeft className="w-5 h-5" strokeWidth={3} />
                     </button>
-                    <span className="text-[10px] font-black text-[#1B4332] dark:text-emerald-400 uppercase tracking-widest">
+                    <span className="text-[10px] font-black text-[#163020] dark:text-emerald-400 uppercase tracking-widest">
                       {paginaPreview === 1 ? 'Portada' : `Página ${paginaPreview - 1} / ${totalPages - 1}`}
                     </span>
                     <button type="button" disabled={paginaPreview >= totalPages}
                       onClick={() => setPaginaPreview(p => p + 1)}
-                      className="p-2 text-gray-400 dark:text-gray-500 hover:text-[#1B4332] dark:hover:text-emerald-400 disabled:opacity-20 transition-all">
+                      className="p-2 text-gray-400 dark:text-gray-500 hover:text-[#163020] dark:hover:text-emerald-400 disabled:opacity-20 transition-all">
                       <ChevronRight className="w-5 h-5" strokeWidth={3} />
                     </button>
                   </div>
@@ -1474,7 +1575,7 @@ const EXPORT_ROWS = [
 
                 {/* Info banner */}
                 {diasSeleccionados !== 'todos' && (
-                  <div className="bg-[#1B4332] rounded-2xl p-6 text-white shadow-xl shadow-emerald-900/10">
+                  <div className="bg-[#163020] rounded-2xl p-6 text-white shadow-xl shadow-emerald-900/10">
                     <div className="flex items-start gap-4">
                       <div className="p-2 bg-white/10 rounded-lg">
                         <Check className="w-4 h-4 text-emerald-300" strokeWidth={4} />
@@ -1498,7 +1599,7 @@ const EXPORT_ROWS = [
           <div className="bg-white dark:bg-[#122A1C] w-full max-w-2xl rounded-3xl shadow-2xl border border-emerald-100 dark:border-emerald-900/40 overflow-hidden scale-in-center">
             <div className="p-6 border-b border-gray-100 dark:border-emerald-900/40 flex items-center justify-between bg-gray-50/50 dark:bg-emerald-900/20">
               <div>
-                <h3 className="font-black text-lg text-[#1B4332] dark:text-emerald-400 uppercase tracking-tight">Imágenes del Programa</h3>
+                <h3 className="font-black text-lg text-[#163020] dark:text-emerald-400 uppercase tracking-tight">Imágenes del Programa</h3>
                 <p className="text-xs text-gray-500 font-bold">Personaliza la zona visual de cada día en el PDF.</p>
               </div>
               <button 
@@ -1519,7 +1620,7 @@ const EXPORT_ROWS = [
                     )}
                     {loadingImagen === dia.id && (
                       <div className="absolute inset-0 bg-white/60 dark:bg-black/60 flex items-center justify-center">
-                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-[#1B4332] border-b-transparent" />
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-[#163020] border-b-transparent" />
                       </div>
                     )}
                   </div>
@@ -1529,7 +1630,7 @@ const EXPORT_ROWS = [
                     <p className="text-[10px] font-bold text-gray-400">{new Date(dia.fecha + 'T12:00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'long' })}</p>
                   </div>
 
-                  <label className="cursor-pointer px-4 py-2 bg-white dark:bg-[#0F2018] border border-gray-200 dark:border-emerald-900/60 text-[#1B4332] dark:text-emerald-400 text-[10px] font-black uppercase tracking-widest rounded-xl hover:border-[#1B4332] transition-all flex items-center gap-2 shadow-sm">
+                  <label className="cursor-pointer px-4 py-2 bg-white dark:bg-[#0F2018] border border-gray-200 dark:border-emerald-900/60 text-[#163020] dark:text-emerald-400 text-[10px] font-black uppercase tracking-widest rounded-xl hover:border-[#163020] transition-all flex items-center gap-2 shadow-sm">
                     {dia.imagen_url ? 'Cambiar' : 'Subir'}
                     <input 
                       type="file" 
@@ -1546,7 +1647,7 @@ const EXPORT_ROWS = [
             <div className="p-6 bg-gray-50 dark:bg-emerald-900/20 text-right">
               <button 
                 onClick={() => setShowModalImagenes(false)}
-                className="px-8 py-3 bg-[#1B4332] text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-[#002F1D] shadow-lg shadow-emerald-900/10 transition-all">
+                className="px-8 py-3 bg-[#163020] text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-[#002F1D] shadow-lg shadow-emerald-900/10 transition-all">
                 Cerrar Panel
               </button>
             </div>
@@ -1564,14 +1665,62 @@ const EXPORT_ROWS = [
         />
       )}
 
-      {/* Toast Notificación */}
-      {toast && (
-        <div className={`fixed bottom-8 left-4 right-4 sm:left-auto sm:right-8 z-50 px-8 py-4 rounded-2xl shadow-2xl text-sm font-black text-white flex items-center gap-3 animate-slide-up
-          ${toast.tipo === 'error' ? 'bg-red-600' : 'bg-[#1B4332]'}`}>
-          {toast.tipo === 'error' ? '✗' : <Check className="w-4 h-4" strokeWidth={4} />}
-          {toast.msg}
+    {/* CONFIRMACIÓN DE ELIMINACIÓN DE LOGO */}
+    <AnimatePresence>
+      {deleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setDeleteConfirm(null)}
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+          />
+
+          {/* Modal Content */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 15 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 15 }}
+            transition={{ type: 'spring', duration: 0.3 }}
+            className="relative w-full max-w-md bg-white dark:bg-[#122A1C] rounded-2xl p-6 shadow-2xl border border-gray-100 dark:border-emerald-900/40 z-10 text-center"
+          >
+            {/* Warning icon container */}
+            <div className="w-12 h-12 rounded-full bg-red-50 dark:bg-red-950/40 text-red-500 dark:text-red-400 flex items-center justify-center mx-auto mb-4 border border-red-100 dark:border-red-900/30">
+              <AlertTriangle className="w-6 h-6 animate-pulse" />
+            </div>
+
+            {/* Typography */}
+            <h3 className="text-lg font-black text-gray-900 dark:text-white leading-tight">
+              ¿Eliminar este logotipo?
+            </h3>
+            
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 leading-relaxed">
+              Estás a punto de eliminar el logotipo <span className="font-bold text-gray-700 dark:text-gray-300">"{deleteConfirm.nombre}"</span>. Esta acción no se puede deshacer y el archivo se borrará permanentemente.
+            </p>
+
+            {/* Buttons */}
+            <div className="flex items-center gap-3 mt-6">
+              <button
+                type="button"
+                onClick={() => setDeleteConfirm(null)}
+                className="flex-1 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-[#1A3425] dark:hover:bg-emerald-900/50 text-gray-600 dark:text-gray-300 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={executeDeleteLogo}
+                className="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-sm hover:shadow cursor-pointer"
+              >
+                Eliminar
+              </button>
+            </div>
+          </motion.div>
         </div>
       )}
+    </AnimatePresence>
     </>
   )
 }

@@ -82,7 +82,7 @@ export default function Login() {
       <div className="mb-6">
         <Link 
           to="/" 
-          className="inline-flex items-center gap-2 text-xs font-bold text-gray-400 dark:text-gray-500 hover:text-[#1B4332] dark:hover:text-emerald-400 transition-colors uppercase tracking-widest"
+          className="inline-flex items-center gap-2 text-xs font-bold text-gray-400 dark:text-gray-500 hover:text-[#163020] dark:hover:text-emerald-400 transition-colors uppercase tracking-widest"
         >
           <ArrowLeft size={14} /> Volver al inicio
         </Link>
@@ -98,7 +98,7 @@ export default function Login() {
         <button
           onClick={toggleDark}
           type="button"
-          className="p-3 rounded-2xl bg-gray-50 dark:bg-[#0F2018] border border-gray-100 dark:border-emerald-900/50 text-gray-400 dark:text-gray-500 hover:text-[#1B4332] dark:hover:text-emerald-400 transition-all shadow-sm"
+          className="p-3 rounded-2xl bg-gray-50 dark:bg-[#0F2018] border border-gray-100 dark:border-emerald-900/50 text-gray-400 dark:text-gray-500 hover:text-[#163020] dark:hover:text-emerald-400 transition-all shadow-sm"
           title="Cambiar tema"
         >
           {darkMode ? <Sun size={20} /> : <Moon size={20} />}

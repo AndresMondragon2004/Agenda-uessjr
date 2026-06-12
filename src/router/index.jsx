@@ -34,6 +34,7 @@ import Reports from '../pages/admin/Reports'
 import AgendaSimple from '../pages/admin/AgendaSimple'
 import AdminsManagement from '../pages/admin/AdminsManagement'
 import AnunciosMensajes from '../pages/admin/AnunciosMensajes'
+import SystemCustomizer from '../pages/admin/SystemCustomizer'
 import { SuperAdminRoute } from './AdminRoutes'
 
 export const router = createBrowserRouter([
@@ -97,5 +98,13 @@ export const router = createBrowserRouter([
         ) 
       },
     ],
+  },
+  {
+    path: '/admin/configuracion',
+    element: (
+      <SuperAdminRoute>
+        <SystemCustomizer />
+      </SuperAdminRoute>
+    )
   },
 ])

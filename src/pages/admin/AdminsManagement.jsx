@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { X, Search, Shield, ShieldCheck, UserMinus, UserCheck, Plus, Loader2, Check, Eye, EyeOff, Pencil, KeyRound, Send } from 'lucide-react'
+import { toast } from 'react-hot-toast'
 import { supabase } from '../../services/supabase'
 import { useAuth } from '../../context/AuthContext'
 
@@ -10,7 +11,6 @@ export default function AdminsManagement() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [busqueda, setBusqueda] = useState('')
-  const [toast, setToast] = useState(null)
   const [updatingId, setUpdatingId] = useState(null)
 
   // Modal crear admin
@@ -40,8 +40,6 @@ export default function AdminsManagement() {
   // Reset de contraseña para otros
   const [enviandoReset, setEnviandoReset] = useState(null)
 
-  const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(null), 2500) }
-
   const cargarAdmins = async () => {
     try {
       setLoading(true)
@@ -70,9 +68,9 @@ export default function AdminsManagement() {
         .eq('id', admin.id)
       if (error) throw error
       setAdmins(prev => prev.map(a => a.id === admin.id ? { ...a, activo: !a.activo } : a))
-      showToast(admin.activo ? 'Acceso congelado' : 'Privilegios restaurados')
+      toast.success(admin.activo ? 'Acceso congelado' : 'Privilegios restaurados')
     } catch (err) {
-      alert(err.message)
+      toast.error(err.message)
     } finally {
       setUpdatingId(null)
     }
@@ -89,9 +87,9 @@ export default function AdminsManagement() {
         .eq('id', admin.id)
       if (error) throw error
       setAdmins(prev => prev.map(a => a.id === admin.id ? { ...a, rol } : a))
-      showToast(`Rol cambiado a ${rol}`)
+      toast.success(`Rol cambiado a ${rol}`)
     } catch (err) {
-      alert(err.message)
+      toast.error(err.message)
     } finally {
       setUpdatingId(null)
     }
@@ -116,7 +114,7 @@ export default function AdminsManagement() {
       if (error) throw error
       setAdmins(prev => prev.map(a => a.id === editModal.admin.id ? { ...a, nombre: editNombre.trim() } : a))
       setEditModal({ open: false, admin: null })
-      showToast('Nombre actualizado')
+      toast.success('Nombre actualizado')
     } catch (err) {
       setErrorEdit(err.message)
     } finally {
@@ -132,9 +130,9 @@ export default function AdminsManagement() {
         redirectTo: `${window.location.origin}/nueva-contrasena`,
       })
       if (error) throw error
-      showToast(`Correo de reset enviado a ${admin.correo}`)
+      toast.success(`Correo de reset enviado a ${admin.correo}`)
     } catch (err) {
-      alert(err.message)
+      toast.error(err.message)
     } finally {
       setEnviandoReset(null)
     }
@@ -158,7 +156,7 @@ export default function AdminsManagement() {
       const { error } = await supabase.auth.updateUser({ password: nuevaPass })
       if (error) throw error
       setPasswordModal(false)
-      showToast('Contraseña actualizada correctamente')
+      toast.success('Contraseña actualizada correctamente')
     } catch (err) {
       setErrorPassword(err.message)
     } finally {
@@ -219,7 +217,7 @@ export default function AdminsManagement() {
 
       setModalAbierto(false)
       await cargarAdmins()
-      showToast('Administrador creado exitosamente')
+      toast.success('Administrador creado exitosamente')
     } catch (err) {
       setErrorModal(err.message)
     } finally {
@@ -253,8 +251,8 @@ export default function AdminsManagement() {
             <p className="text-[10px] text-emerald-600 font-bold uppercase tracking-widest">Control de acceso institucional</p>
           </div>
           <div className="hidden sm:flex items-center gap-6 pl-8 border-l border-gray-100 dark:border-emerald-900/20">
-            <img src="https://sic.cultura.gob.mx/imagenes_cache/universidad_4260_g_74199.png" alt="Logo UMB" className="h-8 object-contain" />
-            <img src="/images/logos/ues-sjr.png" alt="Logo UES SJR" className="h-8 object-contain brightness-0 dark:invert opacity-80" />
+            <img src="https://sic.cultura.gob.mx/imagenes_cache/universidad_4260_g_74199.png" alt="Logo UMB" className="h-8 object-contain dark:brightness-0 dark:invert" />
+            <img src="/images/logos/ues-sjr.png" alt="Logo UES SJR" className="h-8 object-contain dark:brightness-0 dark:invert opacity-80" />
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -285,7 +283,7 @@ export default function AdminsManagement() {
 
         {loading ? (
           <div className="py-20 text-center">
-            <Loader2 className="w-10 h-10 animate-spin text-[#1B4332] mx-auto mb-4" />
+            <Loader2 className="w-10 h-10 animate-spin text-[#163020] mx-auto mb-4" />
             <p className="text-gray-400 text-xs font-black uppercase tracking-widest">Cargando equipo técnico...</p>
           </div>
         ) : (
@@ -435,7 +433,7 @@ export default function AdminsManagement() {
               </div>
               <div>
                 <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Correo (solo lectura)</label>
-                <div className="w-full px-4 py-3 rounded-2xl border border-gray-100 dark:border-emerald-900/20 bg-gray-50/50 dark:bg-[#0A1A11] text-sm font-bold text-gray-400 dark:text-gray-500 truncate">
+                <div className="w-full px-4 py-3 rounded-2xl border border-gray-100 dark:border-emerald-900/20 bg-gray-50/50 dark:bg-[#05140B] text-sm font-bold text-gray-400 dark:text-gray-500 truncate">
                   {editModal.admin?.correo}
                 </div>
               </div>
@@ -452,7 +450,7 @@ export default function AdminsManagement() {
               <button
                 onClick={handleEditarNombre}
                 disabled={editando}
-                className="flex-1 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest bg-[#1B4332] text-white hover:bg-emerald-800 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                className="flex-1 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest bg-[#163020] text-white hover:bg-emerald-800 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {editando ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
                 {editando ? 'Guardando...' : 'Guardar cambios'}
@@ -529,7 +527,7 @@ export default function AdminsManagement() {
               <button
                 onClick={handleCambiarPassword}
                 disabled={cambiandoPass}
-                className="flex-1 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest bg-[#1B4332] text-white hover:bg-emerald-800 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                className="flex-1 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest bg-[#163020] text-white hover:bg-emerald-800 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {cambiandoPass ? <Loader2 size={12} className="animate-spin" /> : <KeyRound size={12} />}
                 {cambiandoPass ? 'Actualizando...' : 'Actualizar contraseña'}
@@ -618,7 +616,7 @@ export default function AdminsManagement() {
                     disabled={creando}
                     className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2
                       ${nuevoRol === 'admin'
-                        ? 'bg-white dark:bg-[#1B4332] text-[#1B4332] dark:text-white shadow-sm'
+                        ? 'bg-white dark:bg-[#163020] text-[#163020] dark:text-white shadow-sm'
                         : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
                   >
                     <Shield size={12} /> Admin
@@ -629,7 +627,7 @@ export default function AdminsManagement() {
                     disabled={creando}
                     className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2
                       ${nuevoRol === 'superadmin'
-                        ? 'bg-white dark:bg-[#1B4332] text-[#1B4332] dark:text-white shadow-sm'
+                        ? 'bg-white dark:bg-[#163020] text-[#163020] dark:text-white shadow-sm'
                         : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
                   >
                     <ShieldCheck size={12} /> Superadmin
@@ -649,20 +647,13 @@ export default function AdminsManagement() {
               <button
                 onClick={handleCrearAdmin}
                 disabled={creando}
-                className="flex-1 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest bg-[#1B4332] text-white hover:bg-emerald-800 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                className="flex-1 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest bg-[#163020] text-white hover:bg-emerald-800 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {creando ? <Loader2 size={12} className="animate-spin" /> : <Plus size={12} />}
                 {creando ? 'Creando...' : 'Crear administrador'}
               </button>
             </div>
           </div>
-        </div>
-      )}
-
-      {toast && (
-        <div className="fixed bottom-8 left-4 right-4 sm:left-auto sm:right-8 z-50 bg-[#1B4332] text-white px-8 py-4 rounded-2xl shadow-2xl font-black text-sm flex items-center gap-3 animate-slide-up">
-          <Check className="w-5 h-5" strokeWidth={4} />
-          {toast}
         </div>
       )}
     </>

@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { actividadService } from './actividad.service'
 
 const NOMBRES_DIA = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
 
@@ -28,17 +29,33 @@ export const jornadaService = {
     return data
   },
 
-  async create(jornada) {
+  async create(jornada, adminName = 'Sistema') {
     const { data, error } = await supabase
       .from('jornadas')
       .insert([jornada])
       .select()
       .single()
     if (error) throw error
+    
+    await actividadService.logActividad(
+      'jornada',
+      'crear',
+      `${adminName} creó la jornada: ${jornada.nombre}`,
+      { nuevo: data },
+      adminName
+    )
+    
     return data
   },
 
-  async update(id, jornada) {
+  async update(id, jornada, adminName = 'Sistema') {
+    // Obtener estado anterior para el log detallado
+    const { data: oldData } = await supabase
+      .from('jornadas')
+      .select('*')
+      .eq('id', id)
+      .single()
+
     const { data, error } = await supabase
       .from('jornadas')
       .update(jornada)
@@ -46,18 +63,49 @@ export const jornadaService = {
       .select()
       .single()
     if (error) throw error
+
+    await actividadService.logActividad(
+      'jornada',
+      'modificar',
+      `${adminName} modificó la jornada: ${data.nombre}`,
+      { antes: oldData, despues: data },
+      adminName
+    )
+
     return data
   },
 
-  async delete(id) {
+  async delete(id, adminName = 'Sistema') {
+    // Obtener nombre antes de borrar
+    const { data: oldData } = await supabase
+      .from('jornadas')
+      .select('nombre')
+      .eq('id', id)
+      .single()
+
     const { error } = await supabase
       .from('jornadas')
       .delete()
       .eq('id', id)
     if (error) throw error
+
+    await actividadService.logActividad(
+      'jornada',
+      'eliminar',
+      `${adminName} eliminó la jornada: ${oldData?.nombre || id}`,
+      { eliminado: oldData },
+      adminName
+    )
   },
 
-  async setActiva(id) {
+  async setActiva(id, adminName = 'Sistema') {
+    // Obtener info de la jornada a activar
+    const { data: targetJornada } = await supabase
+      .from('jornadas')
+      .select('nombre')
+      .eq('id', id)
+      .single()
+
     await supabase
       .from('jornadas')
       .update({ estado: 'finalizada' })
@@ -69,6 +117,15 @@ export const jornadaService = {
       .select()
       .single()
     if (error) throw error
+
+    await actividadService.logActividad(
+      'jornada',
+      'activar',
+      `${adminName} activó la jornada: ${targetJornada?.nombre || id}`,
+      { jornada_id: id },
+      adminName
+    )
+
     return data
   },
 
