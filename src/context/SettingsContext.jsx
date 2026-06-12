@@ -102,9 +102,9 @@ export const SettingsProvider = ({ children }) => {
           feature_flags: finalSettings.feature_flags,
           interaction: finalSettings.interaction,
           comms: finalSettings.comms,
-          social: finalSettings.social,
-          typography: finalSettings.typography,
-          advanced_templates: finalSettings.advanced_templates,
+          // social: finalSettings.social, // Column does not exist
+          // typography: finalSettings.typography, // Column does not exist
+          // advanced_templates: finalSettings.advanced_templates, // Column does not exist
           draft_settings: null
         })
         .eq('id', 1)

@@ -216,7 +216,7 @@ export default function Navbar({ isPreview = false, forceDarkMode = null }) {
                 </Link>
                 <Link
                   to="/registro"
-                  className="px-6 py-2.5 rounded-full text-sm font-bold text-white bg-primary dark:bg-emerald-700 hover:opacity-90 dark:hover:bg-emerald-600 transition-all shadow-md shadow-primary/20 active:scale-95"
+                  className="px-6 py-2.5 rounded-full text-sm font-bold text-black dark:text-white bg-primary dark:bg-emerald-700 hover:opacity-90 dark:hover:bg-emerald-600 transition-all shadow-md shadow-primary/20 active:scale-95"
                 >
                   Registrarse
                 </Link>
@@ -345,7 +345,7 @@ export default function Navbar({ isPreview = false, forceDarkMode = null }) {
               </NavLink>
               <NavLink
                 to="/registro" onClick={closeDrawer}
-                className="flex items-center justify-center w-full py-2.5 rounded-xl text-sm font-semibold border-2 border-primary dark:border-emerald-700 text-primary dark:text-emerald-400 hover:bg-primary/10 dark:hover:bg-emerald-900/30 transition-colors"
+                className="flex items-center justify-center w-full py-2.5 rounded-xl text-sm font-semibold border-2 border-primary dark:border-emerald-700 text-black dark:text-emerald-400 hover:bg-primary/10 dark:hover:bg-emerald-900/30 transition-colors"
               >
                 Registrarse
               </NavLink>
