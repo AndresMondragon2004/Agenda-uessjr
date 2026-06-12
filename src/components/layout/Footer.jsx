@@ -14,7 +14,7 @@ const LINKS = [
 export default function Footer({ forceDarkMode = null }) {
   const { settings } = useSettings();
   const institution = settings?.event_info?.institution || 'UES SJR';
-  const contactEmail = settings?.event_info?.contact_email || 'uessanjosedelrincon@umb.edu.mx';
+  const contactEmail = settings?.event_info?.contact_email || 'uessanjosedelrincon@umb.mx';
   const contactPhone = settings?.event_info?.contact_phone || null;
   const footerAddress = settings?.event_info?.address || 'San José del Rincón, México';
 
@@ -62,10 +62,10 @@ export default function Footer({ forceDarkMode = null }) {
                   <Mail size={14} className="text-emerald-500/80" />
                   <span className="truncate">{contactEmail}</span>
                 </a>
-                <div className="flex items-start gap-2.5 text-[13px]">
+                <a href="https://www.google.com/maps/place/Unidad+de+Estudios+Superiores,+San+Jos%C3%A9+del+Rinc%C3%B3n/@19.666744,-100.141752,17z/data=!3m1!4b1!4m6!3m5!1s0x85d2eccbc758302b:0x6277bfbed3b52399!8m2!3d19.666744!4d-100.141752!16s%2Fg%2F11g_xvqy0?entry=ttu&g_ep=EgoyMDI2MDYxMC4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer" className="flex items-start gap-2.5 text-[13px] hover:text-white transition-colors">
                   <MapPin size={14} className="text-emerald-500/80 mt-0.5 shrink-0" />
                   <span>{footerAddress}</span>
-                </div>
+                </a>
                 {contactPhone && (
                   <a href={`tel:${contactPhone}`} className="flex items-center gap-2.5 hover:text-white transition-colors text-[13px]">
                     <Phone size={14} className="text-emerald-500/80" />
