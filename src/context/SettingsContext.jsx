@@ -34,12 +34,34 @@ export const SettingsProvider = ({ children }) => {
   }, []);
 
   /**
-   * Sincronización de estilos dinámica (DESHABILITADA TEMPORALMENTE)
-   * Se comenta este bloque para evitar conflictos con los estilos estáticos refinados.
+   * Sincronización de estilos dinámica — inyecta CSS variables desde branding y tipografía.
    */
   useEffect(() => {
-    // La lógica de inyección de CSS dinámico ha sido removida temporalmente
-    // para asegurar la estabilidad del nuevo diseño del Navbar.
+    if (!settings) return;
+    const root = document.documentElement;
+    const b = settings.branding || {};
+    if (b.primary_color)   root.style.setProperty('--color-primary',       b.primary_color);
+    if (b.secondary_color) root.style.setProperty('--color-secondary',     b.secondary_color);
+    if (b.bg_color_light)  root.style.setProperty('--color-bg-light',      b.bg_color_light);
+    if (b.bg_color_dark)   root.style.setProperty('--color-bg-dark',       b.bg_color_dark);
+    if (b.border_radius)   root.style.setProperty('--border-radius-global', b.border_radius);
+    // Tipografía dinámica
+    if (settings.typography?.font_family) {
+      const fontName = settings.typography.font_family;
+      // Cargar fuente de Google Fonts si no es la fuente por defecto
+      if (fontName !== 'Plus Jakarta Sans' && fontName !== 'system-ui') {
+        const linkId = 'dynamic-font-link';
+        let link = document.getElementById(linkId);
+        if (!link) {
+          link = document.createElement('link');
+          link.id = linkId;
+          link.rel = 'stylesheet';
+          document.head.appendChild(link);
+        }
+        link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(fontName)}:wght@400;500;600;700;800&display=swap`;
+        root.style.setProperty('--font-primary', `'${fontName}', sans-serif`);
+      }
+    }
   }, [settings]);
 
   useEffect(() => {
@@ -80,6 +102,8 @@ export const SettingsProvider = ({ children }) => {
           feature_flags: finalSettings.feature_flags,
           interaction: finalSettings.interaction,
           comms: finalSettings.comms,
+          social: finalSettings.social,
+          typography: finalSettings.typography,
           advanced_templates: finalSettings.advanced_templates,
           draft_settings: null
         })

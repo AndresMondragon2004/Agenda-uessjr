@@ -259,6 +259,16 @@ export default function SessionsManagement() {
   const [sesionAEliminar, setSesionAEliminar] = useState(null)
   const [deleting,        setDeleting]        = useState(false)
 
+  // Bloquear scroll del body cuando el modal está abierto
+  useEffect(() => {
+    if (showDeleteModal) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => { document.body.style.overflow = '' }
+  }, [showDeleteModal])
+
   // ── Carga ──────────────────────────────────────────────────────────────────
   const cargarDatos = async () => {
     try {

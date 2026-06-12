@@ -28,7 +28,14 @@ export function AuthProvider({ children }) {
 
     // Escuchar cambios de auth
     const { data: { subscription } } = supabase.auth
-      .onAuthStateChange((_event, session) => {
+      .onAuthStateChange((event, session) => {
+        if (event === 'PASSWORD_RECOVERY') {
+          // No cargamos perfil ni limpiamos nada, permitimos que ResetPassword maneje esto
+          setUser(session?.user ?? null)
+          setLoading(false)
+          return
+        }
+
         if (session?.user) {
           setLoading(true)
           setUser(session.user)

@@ -35,6 +35,12 @@ function drawerLinkClass({ isActive }) {
 export default function Navbar({ isPreview = false, forceDarkMode = null }) {
   const location                            = useLocation()
   const { isLoggedIn, estudiante, isAdmin, signOut } = useAuth()
+  const { settings } = useSettings()
+  const mostrarPonentes = settings?.feature_flags?.mostrar_ponentes !== false
+  const navLinks = NAV_LINKS.filter(link => {
+    if (link.to === '/conferencistas' && !mostrarPonentes) return false
+    return true
+  })
   const [drawerOpen, setDrawerOpen]         = useState(false)
   const [darkMode,   setDarkMode]           = useState(() => {
     if (forceDarkMode !== null) return forceDarkMode
@@ -102,7 +108,7 @@ export default function Navbar({ isPreview = false, forceDarkMode = null }) {
 
           {/* Desktop nav - Centered */}
           <nav className="hidden md:flex items-center gap-10 h-full flex-1 justify-center" aria-label="Navegación principal">
-            {NAV_LINKS.map(({ label, to }) => (
+            {navLinks.map(({ label, to }) => (
               <NavLink
                 key={to}
                 to={to}
@@ -259,7 +265,7 @@ export default function Navbar({ isPreview = false, forceDarkMode = null }) {
 
         {/* Links */}
         <nav className="flex-1 overflow-y-auto px-4 py-5 space-y-1">
-          {NAV_LINKS.map(({ label, to }) => (
+          {navLinks.map(({ label, to }) => (
             <NavLink
               key={to} to={to} end={to === '/'}
               className={drawerLinkClass}

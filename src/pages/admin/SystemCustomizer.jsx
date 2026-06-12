@@ -4,7 +4,7 @@ import {
   Palette, Rocket, MessageSquare, Mail, 
   ArrowLeft, Eye, Smartphone, Monitor, 
   Check, Save, X, Upload, Globe, Ticket,
-  Laptop, Sun, Moon
+  Laptop, Sun, Moon, Search, Share2, Type
 } from 'lucide-react';
 import { useSettings, SettingsContext } from '../../context/SettingsContext';
 import { useAuth } from '../../context/AuthContext';
@@ -13,7 +13,7 @@ import { jornadaService } from '../../services/jornada.service';
 
 // Componentes de Previsualización (Mockups)
 import ActiveEventView from '../public/landing/ActiveEventView';
-import QRTicket from '../../components/tickets/QRTicket';
+
 import AuthLayout from '../../components/layout/AuthLayout';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
@@ -22,6 +22,70 @@ import Footer from '../../components/layout/Footer';
  * SystemCustomizer: El "Shopify-style" editor para la Marca Blanca.
  * Panel lateral de controles + Vista previa en tiempo real.
  */
+
+const DEFAULT_SETTINGS = {
+  branding: {
+    primary_color: '#163020',
+    secondary_color: '#D97706',
+    bg_color_light: '#FAF9F6',
+    bg_color_dark: '#05140B',
+    border_radius: '0.5rem',
+  },
+  event_info: {
+    event_name: 'Jornada Académica y Cultural',
+    institution: 'UESSJR',
+    lema: 'Cultura que inspira, conocimiento que transforma.',
+    contact_email: '',
+    contact_phone: '',
+    start_date: '',
+    end_date: '',
+  },
+  feature_flags: {
+    modulo_reacciones: true,
+    mostrar_ponentes: true,
+    generador_constancias: false,
+    contador_regresivo: true,
+    encuestas_satisfaccion: false,
+  },
+  interaction: {
+    reaction_pack: ['👏','🔥','❤️','💡','🚀','💯'],
+    survey_q1: '', survey_q2: '', survey_q3: '', survey_q4: '',
+  },
+  comms: {
+    ticket_instructions: 'Presenta este código QR en la entrada de cada actividad.',
+    email_welcome_subject: '¡Bienvenido a {{event_name}}!',
+    email_welcome_body: 'Hola {{name}},\n\nTu registro ha sido confirmado para {{event_name}}.\n\n¡Nos vemos pronto!\n\nEl equipo organizador.',
+  },
+  social: {
+    instagram: '',
+    facebook: '',
+    twitter: '',
+    whatsapp: '',
+  },
+  typography: {
+    font_family: 'Plus Jakarta Sans',
+  },
+};
+
+function deepMergeDefaults(defaults, source) {
+  if (!source) return { ...defaults };
+  const result = { ...defaults };
+  for (const key of Object.keys(defaults)) {
+    if (source[key] !== undefined && source[key] !== null) {
+      if (typeof defaults[key] === 'object' && !Array.isArray(defaults[key])) {
+        result[key] = { ...defaults[key], ...source[key] };
+      } else {
+        result[key] = source[key];
+      }
+    }
+  }
+  // Copiar secciones del source que no existen en defaults
+  for (const key of Object.keys(source)) {
+    if (!(key in defaults)) result[key] = source[key];
+  }
+  return result;
+}
+
 const SystemCustomizer = () => {
   const navigate = useNavigate();
   const { settings, saveDraft, publishSettings, isLoadingSettings } = useSettings();
@@ -35,6 +99,7 @@ const SystemCustomizer = () => {
   const [activeJornada, setActiveJornada] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState({ type: '', content: '' });
+  const [showPublishModal, setShowPublishModal] = useState(false);
   
   const previewContainerRef = useRef(null);
 
@@ -55,7 +120,8 @@ const SystemCustomizer = () => {
   // Si hay draft_settings en la DB, los usamos. Si no, usamos settings.
   useEffect(() => {
     if (settings && !draftSettings) {
-      setDraftSettings(settings.draft_settings || settings);
+      const raw = settings.draft_settings || settings;
+      setDraftSettings(deepMergeDefaults(DEFAULT_SETTINGS, raw));
     }
   }, [settings, draftSettings]);
 
@@ -135,8 +201,11 @@ const SystemCustomizer = () => {
   };
 
   const handlePublish = async () => {
-    if (!window.confirm('¿Estás seguro de que quieres publicar estos cambios? Se aplicarán a todos los usuarios inmediatamente.')) return;
-    
+    setShowPublishModal(true);
+  };
+
+  const confirmPublish = async () => {
+    setShowPublishModal(false);
     setIsSaving(true);
     const result = await publishSettings(draftSettings);
     if (result.success) {
@@ -148,6 +217,20 @@ const SystemCustomizer = () => {
     setTimeout(() => setMessage({ type: '', content: '' }), 3000);
   };
 
+  const dirtyTabs = React.useMemo(() => {
+    if (!settings || !draftSettings) return new Set();
+    const base = settings.draft_settings || settings;
+    const dirty = new Set();
+    const sections = ['branding', 'event_info', 'feature_flags', 'interaction', 'comms', 'social', 'typography'];
+    const tabMap = { event_info: 'event', feature_flags: 'features' };
+    for (const s of sections) {
+      if (JSON.stringify(base[s]) !== JSON.stringify(draftSettings[s])) {
+        dirty.add(tabMap[s] || s);
+      }
+    }
+    return dirty;
+  }, [settings, draftSettings]);
+
   if (isLoadingSettings || !draftSettings) {
     return (
       <div className="h-screen w-screen flex items-center justify-center bg-gray-900 text-white">
@@ -157,12 +240,15 @@ const SystemCustomizer = () => {
   }
 
   const tabs = [
-    { id: 'branding', label: 'Identidad', icon: Palette },
-    { id: 'event', label: 'Información', icon: Globe },
-    { id: 'features', label: 'Módulos', icon: Rocket },
-    { id: 'interaction', label: 'Interacción', icon: MessageSquare },
-    { id: 'comms', label: 'Comunicación', icon: Mail },
+    { id: 'branding',    label: 'Identidad',    icon: Palette },
+    { id: 'event',       label: 'Información',  icon: Globe },
+    { id: 'features',   label: 'Módulos',      icon: Rocket },
+    { id: 'interaction', label: 'Interacción',  icon: MessageSquare },
+    { id: 'comms',       label: 'Comunicación', icon: Mail },
+    { id: 'social',      label: 'Social',        icon: Share2 },
+    { id: 'typography',  label: 'Fuentes',       icon: Type },
   ];
+
 
   const views = [
     { id: 'landing', label: 'Landing Page', icon: Monitor },
@@ -207,18 +293,23 @@ const SystemCustomizer = () => {
         </div>
 
         {/* Navegación de Pestañas */}
-        <div className="flex border-b border-white/5 bg-[#2a2a2a]/50">
+        <div className="flex border-b border-white/5 bg-[#2a2a2a]/50 overflow-x-auto">
           {tabs.map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 py-3 flex flex-col items-center gap-1 transition-all border-b-2 ${
+              className={`flex-shrink-0 flex-1 py-3 flex flex-col items-center gap-1 transition-all border-b-2 ${
                 activeTab === tab.id 
                   ? 'border-emerald-500 text-emerald-400 bg-white/5' 
                   : 'border-transparent text-gray-500 hover:text-gray-300 hover:bg-white/5'
               }`}
             >
-              <tab.icon size={18} />
+              <div className="relative">
+                <tab.icon size={18} />
+                {dirtyTabs.has(tab.id) && (
+                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-amber-500 rounded-full" />
+                )}
+              </div>
               <span className="text-[10px] font-bold uppercase tracking-tighter">{tab.label}</span>
             </button>
           ))}
@@ -412,6 +503,52 @@ const SystemCustomizer = () => {
             </div>
           )}
 
+          {activeTab === 'social' && (
+            <div className="space-y-6 animate-in slide-in-from-left-2 duration-200">
+              <h3 className="text-xs font-black text-emerald-500 uppercase tracking-[0.2em]">Redes Sociales</h3>
+              <div className="space-y-4">
+                <TextInput label="Instagram (usuario o URL)" value={draftSettings.social?.instagram || ''} onChange={(v) => handleInputChange('social', 'instagram', v)} />
+                <TextInput label="Facebook (usuario o URL)" value={draftSettings.social?.facebook || ''} onChange={(v) => handleInputChange('social', 'facebook', v)} />
+                <TextInput label="Twitter / X (usuario o URL)" value={draftSettings.social?.twitter || ''} onChange={(v) => handleInputChange('social', 'twitter', v)} />
+                <TextInput label="WhatsApp (número con código de país)" value={draftSettings.social?.whatsapp || ''} onChange={(v) => handleInputChange('social', 'whatsapp', v)} />
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'typography' && (
+            <div className="space-y-6 animate-in slide-in-from-left-2 duration-200">
+              <h3 className="text-xs font-black text-emerald-500 uppercase tracking-[0.2em]">Tipografía</h3>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest">Fuente Principal</label>
+                  <div className="grid grid-cols-1 gap-2">
+                    {[
+                      'Plus Jakarta Sans', 'Inter', 'Poppins', 'Outfit',
+                      'Nunito', 'Raleway', 'Montserrat', 'Source Sans 3',
+                      'DM Sans', 'Sora'
+                    ].map(font => (
+                      <button
+                        key={font}
+                        onClick={() => handleInputChange('typography', 'font_family', font)}
+                        className={`px-4 py-3 rounded-xl text-left text-sm border-2 transition-all ${
+                          draftSettings.typography?.font_family === font
+                            ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400'
+                            : 'border-white/5 bg-[#1a1a1a] text-gray-400 hover:border-white/10'
+                        }`}
+                        style={{ fontFamily: font }}
+                      >
+                        {font}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="p-3 bg-amber-900/20 border border-amber-500/20 rounded-lg text-[10px] text-amber-400">
+                  ⚠️ Los cambios de tipografía se aplican al publicar y requieren recarga de página.
+                </div>
+              </div>
+            </div>
+          )}
+
         </div>
       </aside>
 
@@ -519,6 +656,34 @@ const SystemCustomizer = () => {
           <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
         </div>
       </main>
+
+      {showPublishModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="bg-[#2a2a2a] border border-white/10 rounded-2xl p-8 max-w-sm w-full mx-4 shadow-2xl">
+            <div className="w-12 h-12 bg-emerald-500/10 rounded-full flex items-center justify-center mb-4">
+              <Rocket size={24} className="text-emerald-400" />
+            </div>
+            <h3 className="text-lg font-black text-white mb-2">Publicar cambios</h3>
+            <p className="text-gray-400 text-sm mb-6 leading-relaxed">
+              Los cambios se aplicarán a todos los usuarios inmediatamente. ¿Deseas continuar?
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowPublishModal(false)}
+                className="flex-1 py-3 rounded-xl border border-white/10 text-gray-400 text-sm font-bold hover:bg-white/5 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmPublish}
+                className="flex-1 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-black transition-colors shadow-lg shadow-emerald-900/30"
+              >
+                Publicar ahora
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -687,38 +852,119 @@ const PreviewRenderer = ({ mode, settings, activeJornada, previewDarkMode }) => 
       );
     case 'login':
       return (
-        <div className="h-full w-full overflow-y-auto">
-          <AuthLayout isPreview={true} forceDarkMode={previewDarkMode}>
-              <div className="p-8 border-2 border-dashed border-emerald-500/20 rounded-2xl text-center">
-                <p className="text-gray-400 font-bold uppercase tracking-tight">Pantalla de Acceso</p>
-                <p className="text-[10px] text-gray-500 mt-2 uppercase tracking-widest leading-relaxed">
-                  Aquí los usuarios verán tu logo y fondo personalizado.<br/>
-                  Los colores primarios se aplican a los botones y enlaces.
-                </p>
-                <div 
-                  className="mt-6 h-10 w-full rounded-xl flex items-center justify-center text-white text-xs font-bold shadow-lg"
-                  style={{ backgroundColor: 'var(--color-primary)' }}
+        <div className="h-full w-full overflow-hidden">
+          <AuthLayout isPreview={true} forceDarkMode={previewDarkMode} previewJornada={activeJornada}>
+            <div>
+              <div className="mb-6">
+                <span className="inline-flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-widest">← Volver al inicio</span>
+              </div>
+              <div className="mb-8">
+                <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2 tracking-tight">¡Te damos la bienvenida!</h2>
+                <p className="text-gray-500 dark:text-gray-400 text-sm">Ingresa tus credenciales para acceder a tu agenda personalizada.</p>
+              </div>
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 tracking-wider mb-2 uppercase">Matrícula o correo institucional</label>
+                  <div className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-gray-400 text-sm">13220024</div>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 tracking-wider mb-2 uppercase">Contraseña</label>
+                  <div className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-gray-400 text-sm">••••••••</div>
+                </div>
+                <div
+                  className="w-full py-3.5 text-white font-semibold rounded-xl mt-4 text-center shadow-lg"
+                  style={{ backgroundColor: settings?.branding?.primary_color || '#163020' }}
                 >
-                  BOTÓN DE EJEMPLO
+                  Iniciar sesión
                 </div>
               </div>
+            </div>
           </AuthLayout>
         </div>
       );
     case 'ticket':
       return (
-        <div className="flex flex-col h-full w-full relative">
-          <Navbar isPreview={true} />
-          <div className="flex-1 overflow-y-auto pt-16 flex flex-col justify-between">
-            <div className="flex-1 flex flex-col justify-between">
-              <div className="flex-1 flex items-center justify-center bg-gray-50 p-8">
-                <div className="scale-110">
-                  <QRTicket participant={mockParticipant} session={mockSession} />
+        <div className="h-full w-full bg-[#0d261a] overflow-y-auto flex flex-col items-center justify-center p-8">
+          <div className="w-full max-w-sm bg-white rounded-[2.5rem] overflow-hidden shadow-2xl relative">
+            {/* Círculos decorativos de ticket */}
+            <div className="absolute top-1/2 -left-4 w-8 h-8 bg-[#0d261a] rounded-full -translate-y-1/2 z-10" />
+            <div className="absolute top-1/2 -right-4 w-8 h-8 bg-[#0d261a] rounded-full -translate-y-1/2 z-10" />
+            <div className="absolute top-1/2 left-4 right-4 border-t-2 border-dashed border-gray-100 -translate-y-1/2" />
+
+            {/* Parte Superior */}
+            <div className="p-8 pb-12 text-center">
+              <div className="flex justify-center mb-6">
+                <div className="p-4 bg-emerald-50 rounded-3xl">
+                  {settings.branding.logo_url_light || settings.branding.logo_url ? (
+                    <img src={settings.branding.logo_url_light || settings.branding.logo_url} alt="Logo" className="h-12 object-contain" />
+                  ) : (
+                    <div className="h-12 w-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: settings.branding.primary_color || '#163020' }}>
+                      <span className="text-white font-black text-lg">J</span>
+                    </div>
+                  )}
                 </div>
               </div>
-              <Footer />
+              <h1 className="text-xl font-black text-gray-900 uppercase tracking-tight mb-1">Pase de Acceso</h1>
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: settings.branding.primary_color || '#163020' }}>
+                {settings.event_info.event_name}
+              </p>
+
+              <div className="mt-8 space-y-4">
+                <div className="flex flex-col items-center">
+                  <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Estudiante</span>
+                  <span className="text-lg font-bold text-gray-800 leading-tight">JUAN PÉREZ LÓPEZ</span>
+                </div>
+                <div className="flex justify-center gap-8">
+                  <div className="flex flex-col">
+                    <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Matrícula</span>
+                    <span className="text-sm font-black text-gray-800">13220024</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Programa</span>
+                    <span className="text-sm font-black text-gray-800 uppercase">ISC</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Parte Inferior - QR */}
+            <div className="p-10 pt-16 flex flex-col items-center bg-gray-50/50">
+              <div className="bg-white p-6 rounded-[2rem] shadow-xl shadow-emerald-900/5 mb-8 border border-gray-100">
+                {/* QR SVG mockeado */}
+                <svg width="140" height="140" viewBox="0 0 140 140" fill="none">
+                  <rect width="140" height="140" fill="white"/>
+                  <rect x="10" y="10" width="50" height="50" rx="4" fill={settings.branding.primary_color || '#163020'}/>
+                  <rect x="20" y="20" width="30" height="30" rx="2" fill="white"/>
+                  <rect x="27" y="27" width="16" height="16" rx="1" fill={settings.branding.primary_color || '#163020'}/>
+                  <rect x="80" y="10" width="50" height="50" rx="4" fill={settings.branding.primary_color || '#163020'}/>
+                  <rect x="90" y="20" width="30" height="30" rx="2" fill="white"/>
+                  <rect x="97" y="27" width="16" height="16" rx="1" fill={settings.branding.primary_color || '#163020'}/>
+                  <rect x="10" y="80" width="50" height="50" rx="4" fill={settings.branding.primary_color || '#163020'}/>
+                  <rect x="20" y="90" width="30" height="30" rx="2" fill="white"/>
+                  <rect x="27" y="97" width="16" height="16" rx="1" fill={settings.branding.primary_color || '#163020'}/>
+                  <rect x="80" y="80" width="8" height="8" fill={settings.branding.primary_color || '#163020'}/>
+                  <rect x="92" y="80" width="8" height="8" fill={settings.branding.primary_color || '#163020'}/>
+                  <rect x="104" y="80" width="8" height="8" fill={settings.branding.primary_color || '#163020'}/>
+                  <rect x="80" y="92" width="8" height="8" fill={settings.branding.primary_color || '#163020'}/>
+                  <rect x="92" y="104" width="8" height="8" fill={settings.branding.primary_color || '#163020'}/>
+                  <rect x="104" y="104" width="8" height="8" fill={settings.branding.primary_color || '#163020'}/>
+                  <rect x="80" y="116" width="8" height="8" fill={settings.branding.primary_color || '#163020'}/>
+                  <rect x="104" y="116" width="8" height="8" fill={settings.branding.primary_color || '#163020'}/>
+                  <rect x="116" y="80" width="8" height="8" fill={settings.branding.primary_color || '#163020'}/>
+                  <rect x="116" y="92" width="8" height="8" fill={settings.branding.primary_color || '#163020'}/>
+                  <rect x="116" y="116" width="8" height="8" fill={settings.branding.primary_color || '#163020'}/>
+                </svg>
+              </div>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mb-2">Escanea para asistencia</p>
+              <p className="text-xs font-black text-gray-700 uppercase tracking-widest">
+                {settings.event_info.start_date
+                  ? new Date(settings.event_info.start_date + 'T12:00:00').toLocaleDateString('es-MX', { month: 'long', year: 'numeric' })
+                  : 'Mayo 2026'}
+              </p>
             </div>
           </div>
+
+          <p className="mt-6 text-white/40 text-[10px] font-bold uppercase tracking-[0.2em]">Vista previa del ticket de acceso</p>
         </div>
       );
     case 'email':

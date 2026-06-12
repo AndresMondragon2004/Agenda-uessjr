@@ -40,6 +40,17 @@ export default function AdminsManagement() {
   // Reset de contraseña para otros
   const [enviandoReset, setEnviandoReset] = useState(null)
 
+  // Bloquear scroll del body cuando cualquier modal está abierto
+  useEffect(() => {
+    const isAnyModalOpen = modalAbierto || editModal.open || passwordModal
+    if (isAnyModalOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => { document.body.style.overflow = '' }
+  }, [modalAbierto, editModal.open, passwordModal])
+
   const cargarAdmins = async () => {
     try {
       setLoading(true)

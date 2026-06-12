@@ -55,6 +55,16 @@ export default function Speakers() {
 
   const [gridRef, gridVis] = useInView()
 
+  // Bloquear scroll del body cuando el modal está abierto
+  useEffect(() => {
+    if (selectedSpeaker) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => { document.body.style.overflow = '' }
+  }, [selectedSpeaker])
+
   useEffect(() => {
     setCurrentPage(1)
   }, [busqueda, programaFiltro])
@@ -317,7 +327,7 @@ export default function Speakers() {
     {/* MODAL DETALLES DEL CONFERENCISTA */}
     <AnimatePresence>
       {selectedSpeaker && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}

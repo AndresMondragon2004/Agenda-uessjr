@@ -8,6 +8,7 @@ import { votosService }    from '../../services/votos.service'
 import { generateAgendaPDF } from '../../utils/pdfGenerator'
 import { parseSafeDate } from '../../utils/dateHelper'
 import SEO from '../../components/SEO'
+import { useSettings } from '../../context/SettingsContext'
 
 const TIPO_COLORS = {
   inauguracion: 'bg-blue-100   text-blue-800   dark:bg-blue-900/40   dark:text-blue-300',
@@ -53,6 +54,8 @@ const IMAGENES_POR_DIA = {
 
 export default function Agenda() {
   const [searchParams, setSearchParams] = useSearchParams()
+  const { settings } = useSettings()
+  const mostrarReacciones = settings?.feature_flags?.modulo_reacciones !== false
 
   const [jornada,    setJornada]    = useState(null)
   const [sesiones,   setSesiones]   = useState([])
@@ -408,13 +411,13 @@ export default function Agenda() {
                           </div>
 
                           <div className="flex items-center gap-2 mb-2 flex-wrap">
-                            {/* Nivel de Interés */}
-                            {votosMap[ses.id]?.likes > 0 && (
-                              <div className="flex items-center gap-1 px-2 py-0.5 bg-pink-50 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 rounded-full text-[10px] font-black uppercase tracking-wider">
-                                <ThumbsUp size={10} className="fill-current" />
-                                {votosMap[ses.id].likes}
-                              </div>
-                            )}
+                             {/* Nivel de Interés */}
+                             {mostrarReacciones && votosMap[ses.id]?.likes > 0 && (
+                               <div className="flex items-center gap-1 px-2 py-0.5 bg-pink-50 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 rounded-full text-[10px] font-black uppercase tracking-wider">
+                                 <ThumbsUp size={10} className="fill-current" />
+                                 {votosMap[ses.id].likes}
+                               </div>
+                             )}
                             <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold uppercase ${TIPO_COLORS[ses.tipo] || 'bg-gray-100 dark:bg-gray-800/50 text-gray-600 dark:text-gray-300'}`}>
                               {TIPO_LABELS[ses.tipo] || ses.tipo}
                             </span>

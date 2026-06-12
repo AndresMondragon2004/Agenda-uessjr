@@ -6,7 +6,7 @@ import { useSettings } from '../../context/SettingsContext'
 import ScrollToTop from '../ui/ScrollToTop'
 import BrandedLogo from '../ui/BrandedLogo'
 
-export default function AuthLayout({ children, isPreview = false, forceDarkMode = null }) {
+export default function AuthLayout({ children, isPreview = false, forceDarkMode = null, previewJornada = null }) {
   const { settings } = useSettings()
   const location = useLocation()
 
@@ -27,7 +27,7 @@ export default function AuthLayout({ children, isPreview = false, forceDarkMode 
   }, [forceDarkMode])
 
   const [loadingSessions, setLoadingSessions] = useState(!isPreview)
-  const [jornada, setJornada] = useState(null)
+  const [jornada, setJornada] = useState(isPreview && previewJornada ? previewJornada : null)
   const [sessionCards, setSessionCards] = useState([
     { tipo: 'CONFERENCIA', nombre: 'Inteligencia Artificial' },
     { tipo: 'TALLER', nombre: 'Desarrollo Web Moderno' },
@@ -81,7 +81,7 @@ export default function AuthLayout({ children, isPreview = false, forceDarkMode 
   }
 
   return (
-    <div className={`h-screen w-full flex bg-bg-main dark:bg-bg-dark font-sans overflow-hidden ${isPreview ? 'absolute inset-0 z-0' : ''}`}>
+    <div className={`${isPreview ? 'h-full absolute inset-0 z-0' : 'h-screen'} w-full flex bg-bg-main dark:bg-bg-dark font-sans overflow-hidden`}>
       {!isPreview && <ScrollToTop />}
       
       {/* Left Panel - Branding (Hidden on small screens) */}

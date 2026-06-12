@@ -14,7 +14,9 @@ const LINKS = [
 export default function Footer({ forceDarkMode = null }) {
   const { settings } = useSettings();
   const institution = settings?.event_info?.institution || 'UES SJR';
-  const contactEmail = 'uessanjosedelrincon@umb.edu.mx';
+  const contactEmail = settings?.event_info?.contact_email || 'uessanjosedelrincon@umb.edu.mx';
+  const contactPhone = settings?.event_info?.contact_phone || null;
+  const footerAddress = settings?.event_info?.address || 'San José del Rincón, México';
 
   return (
     <footer className="bg-[#08120A] text-emerald-100/80 w-full mt-0 border-t border-emerald-900/50 text-sm">
@@ -62,8 +64,14 @@ export default function Footer({ forceDarkMode = null }) {
                 </a>
                 <div className="flex items-start gap-2.5 text-[13px]">
                   <MapPin size={14} className="text-emerald-500/80 mt-0.5 shrink-0" />
-                  <span>San José del Rincón, México</span>
+                  <span>{footerAddress}</span>
                 </div>
+                {contactPhone && (
+                  <a href={`tel:${contactPhone}`} className="flex items-center gap-2.5 hover:text-white transition-colors text-[13px]">
+                    <Phone size={14} className="text-emerald-500/80" />
+                    <span>{contactPhone}</span>
+                  </a>
+                )}
               </div>
             </div>
 
