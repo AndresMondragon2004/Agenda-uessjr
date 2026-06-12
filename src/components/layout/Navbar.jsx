@@ -339,13 +339,13 @@ export default function Navbar({ isPreview = false, forceDarkMode = null }) {
             <>
               <NavLink
                 to="/login" onClick={closeDrawer}
-                className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-semibold text-white bg-primary hover:opacity-90 transition-colors"
+                className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-semibold text-black dark:text-emerald-400 border-2 border-gray-200 dark:border-emerald-700/50 hover:bg-gray-50 dark:hover:bg-emerald-900/30 transition-colors"
               >
                 Iniciar sesión
               </NavLink>
               <NavLink
                 to="/registro" onClick={closeDrawer}
-                className="flex items-center justify-center w-full py-2.5 rounded-xl text-sm font-semibold border-2 border-primary dark:border-emerald-700 text-black dark:text-emerald-400 hover:bg-primary/10 dark:hover:bg-emerald-900/30 transition-colors"
+                className="flex items-center justify-center w-full py-2.5 rounded-xl text-sm font-semibold text-black dark:text-white bg-primary dark:bg-emerald-700 hover:opacity-90 dark:hover:bg-emerald-600 transition-colors"
               >
                 Registrarse
               </NavLink>

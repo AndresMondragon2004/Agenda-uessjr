@@ -53,7 +53,7 @@ function InterestRanking() {
             <p className="text-xs font-bold text-gray-400 dark:text-gray-600">Sin votos registrados</p>
           </div>
         ) : (
-          ranking.map((s, i) => (
+          ranking.slice(0, 2).map((s, i) => (
             <div key={s.id}>
               <div className="flex justify-between items-end mb-2">
                 <p className="text-xs font-black text-gray-800 dark:text-gray-200 truncate pr-4">{s.nombre}</p>
@@ -76,6 +76,10 @@ function InterestRanking() {
           ))
         )}
       </div>
+      
+      <button className="w-full mt-8 py-3 bg-gray-50/50 dark:bg-[#0F2018] border border-gray-100 dark:border-emerald-900/30 rounded-2xl text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em] hover:text-pink-500 transition-all">
+        Ver historial completo
+      </button>
     </div>
   )
 }
@@ -597,7 +601,7 @@ function RecentActivity() {
             <p className="text-xs font-bold text-gray-400 dark:text-gray-600">No hay actividad registrada aún</p>
           </div>
         ) : (
-          actividades.map((act) => {
+          actividades.slice(0, 2).map((act) => {
             const Icon = getIcon(act.entidad_tipo)
             const colorClass = getColor(act.entidad_tipo)
             const fecha = new Date(act.created_at)
