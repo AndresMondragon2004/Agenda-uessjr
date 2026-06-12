@@ -41,6 +41,8 @@ Sistema integral diseñado para la **Unidad de Estudios Superiores San José del
 ### 👨‍💻 Administración y Logística
 | Herramienta | Descripción |
 |:---|:---|
+| **White-Label & Branding** | Personalización total del sistema (colores, logotipos, lema e institución) desde un panel administrativo centralizado. |
+| **Gestión Dinámica de Jornadas** | Soporte para múltiples eventos. El sistema adapta automáticamente fechas, ediciones y sedes en toda la interfaz (Login, Landing, Certificados). |
 | **Asistencia Offline** | Escáner de Códigos QR para gafetes con soporte de registro sin conexión y sincronización posterior. |
 | **Constancias Automatizadas** | Generación de certificados en PDF basados en asistencias verificadas y firmas digitales. |
 | **Notificaciones Push** | Avisos masivos vía Telegram y correo electrónico para notificar sobre cupos liberados o cambios de sede. |
@@ -55,6 +57,7 @@ Sistema integral diseñado para la **Unidad de Estudios Superiores San José del
 ![React](https://img.shields.io/badge/React-61DAFB?style=flat-square&logo=react&logoColor=black)
 ![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white)
 ![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
+![Framer Motion](https://img.shields.io/badge/Framer_Motion-0055FF?style=flat-square&logo=framer&logoColor=white)
 ![Zustand](https://img.shields.io/badge/Zustand-764ABC?style=flat-square&logo=react&logoColor=white)
 ![Lucide](https://img.shields.io/badge/Lucide_Icons-F7DF1E?style=flat-square&logo=lucide&logoColor=black)
 

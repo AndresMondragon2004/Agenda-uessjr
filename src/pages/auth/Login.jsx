@@ -43,7 +43,7 @@ export default function Login() {
       if (isAdmin) {
         navigate('/admin/dashboard', { replace: true })
       } else {
-        navigate('/mi-agenda', { replace: true })
+        navigate('/', { replace: true })
       }
     }
   }, [pendingRedirect, loading, isLoggedIn, isAdmin, navigate])
