@@ -80,22 +80,49 @@ function drawPhotoPlaceholder(doc, imgTematica) {
 }
 
 async function tryLoadImage(url) {
-  return new Promise(resolve => {
+  if (!url) return null
+  return new Promise(async (resolve) => {
     try {
-      const img = new Image()
-      img.crossOrigin = 'anonymous'
-      img.onload = () => {
-        try {
-          const canvas = document.createElement('canvas')
-          canvas.width  = img.width
-          canvas.height = img.height
-          canvas.getContext('2d').drawImage(img, 0, 0)
-          resolve(canvas.toDataURL('image/png'))
-        } catch { resolve(null) }
+      // Si la URL es local (misma origen), usar fetch es más robusto
+      const isLocal = url.startsWith('/') || url.startsWith(window.location.origin)
+      
+      if (isLocal) {
+        const response = await fetch(url)
+        if (!response.ok) {
+          resolve(null)
+          return
+        }
+        const blob = await response.blob()
+        const reader = new FileReader()
+        reader.onloadend = () => resolve(reader.result)
+        reader.onerror = () => resolve(null)
+        reader.readAsDataURL(blob)
+      } else {
+        // Para URLs externas (Supabase), usamos el método tradicional con crossOrigin
+        const img = new Image()
+        img.crossOrigin = 'anonymous'
+        img.onload = () => {
+          try {
+            const canvas = document.createElement('canvas')
+            canvas.width  = img.width
+            canvas.height = img.height
+            canvas.getContext('2d').drawImage(img, 0, 0)
+            resolve(canvas.toDataURL('image/png'))
+          } catch (e) {
+            console.warn('Error al convertir imagen a canvas:', url, e)
+            resolve(null)
+          }
+        }
+        img.onerror = () => {
+          console.warn('Error al cargar imagen externa:', url)
+          resolve(null)
+        }
+        img.src = url
       }
-      img.onerror = () => resolve(null)
-      img.src = url
-    } catch { resolve(null) }
+    } catch (err) {
+      console.error('Error en tryLoadImage:', url, err)
+      resolve(null)
+    }
   })
 }
 
@@ -559,13 +586,18 @@ export async function generatePersonalAgendaPDF(estudiante, jornada, inscripcion
   const { jsPDF } = await import('jspdf')
   const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'landscape' })
   
+  const settings = await loadSettings()
+  const reportsLogoUrl = settings?.branding?.reports_logo_url
+  const instName = settings?.event_info?.institution?.toUpperCase() || 'UES SAN JOSÉ DEL RINCÓN'
+  const eventLema = settings?.event_info?.lema || 'Cultura que inspira, conocimiento que transforma'
+
   const origin = window.location.origin;
   const [imgUES, imgUMB] = await Promise.all([
-    tryLoadImage(`${origin}/images/logos/ues-sjr.png`),
+    tryLoadImage(reportsLogoUrl || `${origin}/images/logos/ues-sjr.png`),
     tryLoadImage(`${origin}/images/logos/umb.png`)
   ])
 
-  // Cargar instituciones para la portada
+  // Cargar instituciones para el footer
   const { data: instituciones } = await supabase.from('instituciones').select('*').order('orden')
   const subsetInst = (instituciones || []).slice(0, 5)
   const instLogos = await Promise.all(subsetInst.map(l => tryLoadImage(l.logotipo_url)))
@@ -582,7 +614,7 @@ export async function generatePersonalAgendaPDF(estudiante, jornada, inscripcion
     throw new Error('No tienes sesiones confirmadas para generar la agenda.')
   }
 
-  // Agrupar por día (usando fecha en lugar de id ya que no se consulta el id)
+  // Agrupar por día
   const agrupadas = misInscripciones.reduce((acc, insc) => {
     const dia = insc.sesiones?.dias_jornada || { fecha: 'sin-fecha', nombre_dia: 'Por definir' }
     const key = dia.fecha || 'sin-fecha'
@@ -600,13 +632,13 @@ export async function generatePersonalAgendaPDF(estudiante, jornada, inscripcion
     return new Date(agrupadas[a].dia.fecha) - new Date(agrupadas[b].dia.fecha)
   })
 
-  // Dibujar portada en la primera página
-  drawPDFPortada(doc, jornada, imgUES, imgUMB, logosConImagen)
+  // Dibujar portada
+  drawPDFPortada(doc, jornada, imgUES, imgUMB, logosConImagen, instName, eventLema)
 
   const totalPaginas = diasIds.length
   let pageNum = 1
 
-  diasIds.forEach((diaId) => {
+  for (const diaId of diasIds) {
     doc.addPage()
     
     const { dia, sesiones } = agrupadas[diaId]
@@ -615,6 +647,11 @@ export async function generatePersonalAgendaPDF(estudiante, jornada, inscripcion
     // Fondo
     doc.setFillColor(249, 247, 242)
     doc.rect(0, 0, PAGE_W, PAGE_H, 'F')
+
+    // Cargar imagen temática del día
+    const imgUrl = dia.imagen_url || IMAGENES_POR_DIA[dia.nombre_dia]
+    const absoluteImgUrl = imgUrl ? (imgUrl.startsWith('http') ? imgUrl : `${origin}${imgUrl}`) : null
+    const loadedImg = absoluteImgUrl ? await tryLoadImage(absoluteImgUrl) : null
 
     // Header Personalizado
     const cx = PAGE_W / 2
@@ -646,24 +683,14 @@ export async function generatePersonalAgendaPDF(estudiante, jornada, inscripcion
     // Columnas de sesiones
     drawSessionsColumn(doc, sesSorted, true)
     
+    // Foto temática (la que faltaba)
+    drawPhotoPlaceholder(doc, loadedImg)
+
     // Footer
-    const fy = FOOTER_Y
-    doc.setDrawColor(229, 231, 235)
-    doc.setLineWidth(0.6)
-    doc.line(MARGIN, fy, PAGE_W - MARGIN, fy)
-    
-    const raw = (jornada?.lema || 'Cultura que inspira, conocimiento que transforma').replace(/^"|"$/g, '')
-    doc.setFont('helvetica', 'italic')
-    doc.setFontSize(7)
-    doc.setTextColor(107, 114, 128)
-    doc.text(`"${raw}"`, cx, fy + 12, { align: 'center' })
-    
-    doc.setFont('helvetica', 'normal')
-    doc.setFontSize(6.5)
-    doc.text(`Página ${pageNum} de ${totalPaginas}`, PAGE_W - MARGIN, fy + 12, { align: 'right' })
+    drawPDFFooter(doc, logosConImagen, jornada, pageNum, totalPaginas, eventLema)
     
     pageNum++
-  })
+  }
 
   doc.save(`Mi-Agenda-${estudiante.nombre.replace(/\s+/g, '-')}.pdf`)
 }
