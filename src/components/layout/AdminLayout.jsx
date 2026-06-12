@@ -250,7 +250,7 @@ export default function AdminLayout() {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#F5F4F0] dark:bg-[#05140B]">
+    <div className="flex min-h-screen bg-[#F5F4F0] dark:bg-[#05140B] overflow-x-hidden">
       <ScrollToTop />
       {/* Mobile topbar */}
       <div className="fixed top-0 left-0 right-0 h-14 bg-[#001F12] z-40 flex items-center justify-between px-4 lg:hidden border-b border-white/5">
