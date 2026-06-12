@@ -292,7 +292,7 @@ export default function AdminLayout() {
         isSuperAdmin={isSuperAdmin}
       />
 
-      <div className="flex-1 lg:ml-64 pt-14 lg:pt-0 min-w-0">
+      <div className="flex-1 w-full lg:w-[calc(100%-16rem)] lg:ml-64 pt-14 lg:pt-0 min-w-0">
         <Outlet />
       </div>
 
