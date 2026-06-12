@@ -213,7 +213,12 @@ export default function Register() {
               type="tel"
               name="telefono"
               value={form.telefono}
-              onChange={handleChange}
+              onChange={(e) => {
+                const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                handleChange({ target: { name: 'telefono', value: val } });
+              }}
+              pattern="[0-9]{10}"
+              maxLength={10}
               placeholder="Ej. 7121234567"
               className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-[#0F2018] border border-gray-100 dark:border-emerald-900/50 rounded-xl focus:bg-white dark:focus:bg-[#0F2018] focus:ring-2 focus:ring-[#1a3b2b] focus:border-transparent outline-none text-gray-900 dark:text-gray-300 text-sm transition-all"
             />
@@ -223,7 +228,7 @@ export default function Register() {
 
         {/* Correo */}
         <div>
-          <label className="block text-xs font-bold text-gray-500 tracking-wider mb-2 uppercase">Correo institucional *</label>
+          <label className="block text-xs font-bold text-gray-500 tracking-wider mb-2 uppercase">Correo electrónico *</label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
               <Mail size={16} />
@@ -233,7 +238,7 @@ export default function Register() {
               name="correo"
               value={form.correo}
               onChange={handleChange}
-              placeholder="tumatricula@umb.edu.mx"
+              placeholder="correo@gmail.com"
               className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-[#0F2018] border border-gray-100 dark:border-emerald-900/50 rounded-xl focus:bg-white dark:focus:bg-[#0F2018] focus:ring-2 focus:ring-[#1a3b2b] focus:border-transparent outline-none text-gray-900 dark:text-gray-300 text-sm transition-all"
             />
           </div>

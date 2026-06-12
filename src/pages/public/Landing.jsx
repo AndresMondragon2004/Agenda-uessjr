@@ -30,7 +30,7 @@ export default function Landing() {
             .maybeSingle()
           
           if (lastJor && lastJor.dias_jornada) {
-            lastJor.dias_jornada.sort((a, b) => new Date(a.fecha) - new Date(b.fecha))
+            lastJor.dias_jornada.sort((a, b) => parseSafeDate(a.fecha) - parseSafeDate(b.fecha))
           }
           j = lastJor
         }

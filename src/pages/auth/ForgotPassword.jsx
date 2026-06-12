@@ -112,7 +112,7 @@ export default function ForgotPassword() {
       <form onSubmit={handleSubmit} className="space-y-8">
         <div>
           <label className="block text-[10px] font-black text-gray-400 dark:text-gray-500 tracking-[0.2em] mb-3 uppercase">
-            Correo Institucional
+            Correo Electrónico
           </label>
           <div className="relative group">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-[#0d261a] dark:group-focus-within:text-emerald-500 transition-colors">
@@ -122,7 +122,7 @@ export default function ForgotPassword() {
               type="email"
               value={correo}
               onChange={e => setCorreo(e.target.value)}
-              placeholder="nombre@umb.edu.mx"
+              placeholder="correo@gmail.com"
               className="w-full pl-12 pr-4 py-4 bg-gray-50 dark:bg-[#0F2018] border border-gray-100 dark:border-emerald-900/50 rounded-2xl focus:bg-white dark:focus:bg-[#0F2018] focus:ring-4 focus:ring-[#0d261a]/5 dark:focus:ring-emerald-500/5 focus:border-[#0d261a] dark:focus:border-emerald-500 outline-none text-gray-900 dark:text-gray-200 text-sm font-bold transition-all placeholder:text-gray-300 dark:placeholder:text-gray-600"
             />
           </div>

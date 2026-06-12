@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { ArrowRight, Check, ChevronRight, Rocket } from 'lucide-react'
 import { jornadaService }    from '../../services/jornada.service'
 import { propuestasService } from '../../services/propuestas.service'
+import { parseSafeDate } from '../../utils/dateHelper'
 import PublicLayout from '../../components/layout/PublicLayout'
 import SEO from '../../components/SEO'
 
@@ -133,7 +134,7 @@ export default function ProposeActivity() {
         setJornada(j)
         if (j) {
           const diasOrdenados = (j.dias_jornada || [])
-            .sort((a, b) => new Date(a.fecha) - new Date(b.fecha))
+            .sort((a, b) => parseSafeDate(a.fecha) - parseSafeDate(b.fecha))
           setDias(diasOrdenados)
           setForm(prev => ({ ...prev, jornada_id: j.id }))
 
@@ -439,10 +440,16 @@ export default function ProposeActivity() {
 
                 <Field label="Teléfono" hint="(opcional)">
                   <input
+                    type="tel"
                     name="telefono"
                     value={form.telefono}
-                    onChange={handleChange}
-                    placeholder="712 123 4567"
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                      handleChange({ target: { name: 'telefono', value: val } });
+                    }}
+                    maxLength={10}
+                    pattern="[0-9]{10}"
+                    placeholder="7121234567"
                     className={INPUT_CLASS}
                   />
                 </Field>

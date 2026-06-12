@@ -115,7 +115,7 @@ export default function Login() {
       <form onSubmit={handleLogin} className="space-y-6">
         <div>
           <label htmlFor="input-correo" className="block text-xs font-bold text-gray-500 dark:text-gray-400 tracking-wider mb-2 uppercase">
-            Matrícula o correo institucional
+            Matrícula o correo electrónico
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
