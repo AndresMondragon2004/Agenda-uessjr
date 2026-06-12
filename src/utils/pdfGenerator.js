@@ -83,42 +83,27 @@ async function tryLoadImage(url) {
   if (!url) return null
   return new Promise(async (resolve) => {
     try {
-      // Si la URL es local (misma origen), usar fetch es más robusto
-      const isLocal = url.startsWith('/') || url.startsWith(window.location.origin)
+      // Usar fetch para TODAS las imágenes (locales y externas)
+      // Agregamos un timestamp a las URLs externas para evitar que el navegador
+      // devuelva una versión en caché (sin headers CORS) que fue cargada por etiquetas <img> normales
+      const isExternal = url.startsWith('http') && !url.startsWith(window.location.origin);
+      const fetchUrl = isExternal ? `${url}${url.includes('?') ? '&' : '?'}cb=${new Date().getTime()}` : url;
+
+      const response = await fetch(fetchUrl, {
+        cache: 'no-cache'
+      })
       
-      if (isLocal) {
-        const response = await fetch(url)
-        if (!response.ok) {
-          resolve(null)
-          return
-        }
-        const blob = await response.blob()
-        const reader = new FileReader()
-        reader.onloadend = () => resolve(reader.result)
-        reader.onerror = () => resolve(null)
-        reader.readAsDataURL(blob)
-      } else {
-        // Para URLs externas (Supabase), usamos el método tradicional con crossOrigin
-        const img = new Image()
-        img.crossOrigin = 'anonymous'
-        img.onload = () => {
-          try {
-            const canvas = document.createElement('canvas')
-            canvas.width  = img.width
-            canvas.height = img.height
-            canvas.getContext('2d').drawImage(img, 0, 0)
-            resolve(canvas.toDataURL('image/png'))
-          } catch (e) {
-            console.warn('Error al convertir imagen a canvas:', url, e)
-            resolve(null)
-          }
-        }
-        img.onerror = () => {
-          console.warn('Error al cargar imagen externa:', url)
-          resolve(null)
-        }
-        img.src = url
+      if (!response.ok) {
+        console.warn('tryLoadImage: response not ok for', url)
+        resolve(null)
+        return
       }
+      
+      const blob = await response.blob()
+      const reader = new FileReader()
+      reader.onloadend = () => resolve(reader.result)
+      reader.onerror = () => resolve(null)
+      reader.readAsDataURL(blob)
     } catch (err) {
       console.error('Error en tryLoadImage:', url, err)
       resolve(null)
