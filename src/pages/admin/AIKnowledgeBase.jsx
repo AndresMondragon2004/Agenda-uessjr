@@ -13,6 +13,16 @@ export default function AIKnowledgeBase() {
   const [form, setForm] = useState({ pregunta: '', respuesta: '', categoria: 'general' })
   const [guardando, setGuardando] = useState(false)
 
+  // Bloquear scroll del body cuando el modal está abierto
+  useEffect(() => {
+    if (showModal) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => { document.body.style.overflow = '' }
+  }, [showModal])
+
   useEffect(() => {
     fetchData()
   }, [])

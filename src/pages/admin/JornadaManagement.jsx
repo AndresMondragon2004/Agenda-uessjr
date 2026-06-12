@@ -518,6 +518,17 @@ export default function JornadaManagement() {
   const [showInfoBanner,   setShowInfoBanner]   = useState(true)
   const [sesionesCountByDia, setSesionesCountByDia] = useState({})
 
+  // Bloquear scroll del body cuando cualquier modal está abierto
+  useEffect(() => {
+    const isAnyModalOpen = showModal || showDeleteModal
+    if (isAnyModalOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => { document.body.style.overflow = '' }
+  }, [showModal, showDeleteModal])
+
   const cargarJornadas = async () => {
     try {
       setLoading(true)

@@ -338,9 +338,10 @@ export async function generateAgendaPDF(jornada, sesiones, options = {}) {
 
   if (!jornada) throw new Error('No hay jornada activa')
 
+  const origin = window.location.origin;
   const [imgUES, imgUMB] = await Promise.all([
-    tryLoadImage(reportsLogoUrl || '/images/logos/ues-sjr.png'),
-    tryLoadImage('/images/logos/umb.png')
+    tryLoadImage(reportsLogoUrl || `${origin}/images/logos/ues-sjr.png`),
+    tryLoadImage(`${origin}/images/logos/umb.png`)
   ])
 
   // Cargar instituciones
@@ -379,7 +380,8 @@ export async function generateAgendaPDF(jornada, sesiones, options = {}) {
     
     // Cargar imagen temática del día
     const imgUrl = dia.imagen_url || IMAGENES_POR_DIA[dia.nombre_dia]
-    const loadedImg = imgUrl ? await tryLoadImage(imgUrl) : null
+    const absoluteImgUrl = imgUrl ? (imgUrl.startsWith('http') ? imgUrl : `${origin}${imgUrl}`) : null
+    const loadedImg = absoluteImgUrl ? await tryLoadImage(absoluteImgUrl) : null
 
     drawPDFHeader(doc, jornada, dia, false, imgUES, imgUMB, instName)
     drawSessionsColumn(doc, sesDia, incluyePonentes)
@@ -400,11 +402,13 @@ export async function generateConstanciaPDF(estudiante, jornada) {
   const verifyUrl = `${window.location.origin}/verificar/${validCode}`
   const qrImgUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(verifyUrl)}&margin=1&format=png`
 
+  const origin = window.location.origin;
   const [imgUES, imgUMB, imgQR] = await Promise.all([
-    tryLoadImage('/images/logos/ues-sjr.png'),
-    tryLoadImage('/images/logos/umb.png'),
+    tryLoadImage(`${origin}/images/logos/ues-sjr.png`),
+    tryLoadImage(`${origin}/images/logos/umb.png`),
     tryLoadImage(qrImgUrl)
   ])
+
 
   const cx = 297 / 2
   const cy = 210 / 2
@@ -555,9 +559,10 @@ export async function generatePersonalAgendaPDF(estudiante, jornada, inscripcion
   const { jsPDF } = await import('jspdf')
   const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'landscape' })
   
+  const origin = window.location.origin;
   const [imgUES, imgUMB] = await Promise.all([
-    tryLoadImage('/images/logos/ues-sjr.png'),
-    tryLoadImage('/images/logos/umb.png')
+    tryLoadImage(`${origin}/images/logos/ues-sjr.png`),
+    tryLoadImage(`${origin}/images/logos/umb.png`)
   ])
 
   // Cargar instituciones para la portada
@@ -667,9 +672,10 @@ export async function generateConstanciasPonentesMasivoPDF(sesiones, jornada) {
   const { jsPDF } = await import('jspdf')
   const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'landscape' })
   
+  const origin = window.location.origin;
   const [imgUES, imgUMB] = await Promise.all([
-    tryLoadImage('/images/logos/ues-sjr.png'),
-    tryLoadImage('/images/logos/umb.png')
+    tryLoadImage(`${origin}/images/logos/ues-sjr.png`),
+    tryLoadImage(`${origin}/images/logos/umb.png`)
   ])
 
   const cx = 297 / 2
