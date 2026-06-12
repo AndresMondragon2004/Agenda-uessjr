@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { sesionesService } from '../../services/sesiones.service'
+import { jornadaService } from '../../services/jornada.service'
 import { useSettings } from '../../context/SettingsContext'
 import ScrollToTop from '../ui/ScrollToTop'
 import BrandedLogo from '../ui/BrandedLogo'
@@ -26,21 +27,26 @@ export default function AuthLayout({ children, isPreview = false, forceDarkMode 
   }, [forceDarkMode])
 
   const [loadingSessions, setLoadingSessions] = useState(!isPreview)
+  const [jornada, setJornada] = useState(null)
   const [sessionCards, setSessionCards] = useState([
     { tipo: 'CONFERENCIA', nombre: 'Inteligencia Artificial' },
     { tipo: 'TALLER', nombre: 'Desarrollo Web Moderno' },
     { tipo: 'CHARLA', nombre: 'Ciberseguridad' },
   ])
 
-  const eventName = settings?.event_info?.event_name || 'Agenda'
   const institution = settings?.event_info?.institution || 'UESSJR'
-  const bgImage = settings?.branding?.background_image_login || settings?.branding?.background_image
+  const bgImage = settings?.branding?.background_image_hero || settings?.branding?.background_image || "/images/campus/aula-magna-1.jpg"
 
   useEffect(() => {
     if (isPreview) return;
-    const loadSessions = async () => {
+    const loadData = async () => {
       try {
         setLoadingSessions(true)
+        // Cargar jornada activa
+        const jActiva = await jornadaService.getActiva().catch(() => null)
+        if (jActiva) setJornada(jActiva)
+
+        // Cargar sesiones para las cards
         const data = await sesionesService.getAll()
         if (data && data.length >= 3) {
           setSessionCards([
@@ -50,27 +56,47 @@ export default function AuthLayout({ children, isPreview = false, forceDarkMode 
           ])
         }
       } catch (err) {
-        console.error('Error cargando sesiones para AuthLayout', err)
+        console.error('Error cargando datos para AuthLayout', err)
       } finally {
         setLoadingSessions(false)
       }
     }
-    loadSessions()
+    loadData()
   }, [isPreview])
+
+  // Formatear fechas para mostrar "11 — 15 de mayo de 2026"
+  const formatDateRange = (inicio, fin) => {
+    if (!inicio || !fin) return "Fecha por confirmar"
+    const d1 = new Date(inicio + 'T12:00:00')
+    const d2 = new Date(fin + 'T12:00:00')
+    const options1 = { day: 'numeric' }
+    const options2 = { day: 'numeric', month: 'long', year: 'numeric' }
+    
+    // Si son del mismo mes y año
+    if (d1.getMonth() === d2.getMonth() && d1.getFullYear() === d2.getFullYear()) {
+      return `${d1.toLocaleDateString('es-MX', options1)} — ${d2.toLocaleDateString('es-MX', options2)}`
+    }
+    // Si son de diferentes meses
+    return `${d1.toLocaleDateString('es-MX', {day:'numeric', month:'short'})} — ${d2.toLocaleDateString('es-MX', options2)}`
+  }
 
   return (
     <div className={`h-screen w-full flex bg-bg-main dark:bg-bg-dark font-sans overflow-hidden ${isPreview ? 'absolute inset-0 z-0' : ''}`}>
       {!isPreview && <ScrollToTop />}
       
       {/* Left Panel - Branding (Hidden on small screens) */}
-      <div className="hidden lg:flex lg:w-1/2 bg-primary flex-col justify-between p-8 xl:p-12 relative h-full">
+      <div className="hidden lg:flex lg:w-1/2 bg-gray-950 flex-col justify-between p-8 xl:p-12 relative h-full">
         
         {bgImage && (
-          <img 
-            src={bgImage} 
-            alt="Background" 
-            className="absolute inset-0 w-full h-full object-cover opacity-20 mix-blend-overlay"
-          />
+          <>
+            <img 
+              src={bgImage} 
+              alt="Background" 
+              className="absolute inset-0 w-full h-full object-cover opacity-40"
+            />
+            {/* Gradiente para asegurar legibilidad del texto blanco */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/60" />
+          </>
         )}
 
         {/* Logo */}
@@ -122,12 +148,11 @@ export default function AuthLayout({ children, isPreview = false, forceDarkMode 
 
         {/* Bottom Info */}
         <div className="z-10 flex-shrink-0">
-          <p className="text-white font-medium text-sm xl:text-base">{settings?.event_info?.event_name || "Cargando..."}</p>
-          <p className="text-white/60 text-xs xl:text-sm mt-1">
-            {settings?.event_info?.start_date && new Date(settings.event_info.start_date + 'T12:00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'long' })} 
-            {" — "}
-            {settings?.event_info?.end_date && new Date(settings.event_info.end_date + 'T12:00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' })} 
-            {` · ${settings?.event_info?.sede || "Sede por confirmar"}`}
+          <p className="text-white font-black text-lg xl:text-xl tracking-tight uppercase leading-tight">
+            {jornada ? `${jornada.edicion || ''} ${jornada.nombre}` : 'Jornada Académica y Cultural'}
+          </p>
+          <p className="text-white/70 text-xs xl:text-sm mt-1 font-bold">
+            {formatDateRange(jornada?.fecha_inicio, jornada?.fecha_fin)} · {jornada?.sede || institution}
           </p>
         </div>
         
@@ -137,7 +162,7 @@ export default function AuthLayout({ children, isPreview = false, forceDarkMode 
       {/* Right Panel - Form Area */}
       <div className="w-full lg:w-1/2 flex flex-col relative h-full bg-bg-main dark:bg-bg-dark">
         {/* Top Navigation */}
-        <nav className="absolute top-0 left-0 right-0 p-8 flex justify-end gap-6 text-sm font-medium text-primary/60 dark:text-primary/50 hidden sm:flex z-10 bg-bg-main/80 dark:bg-bg-dark/90 backdrop-blur-md">
+        <nav className="absolute top-0 left-0 right-4 p-8 flex justify-end gap-6 text-sm font-medium text-primary/60 dark:text-primary/50 hidden sm:flex z-10 bg-bg-main/80 dark:bg-bg-dark/90 backdrop-blur-md">
           <Link to="/" className="hover:text-primary transition-colors">Inicio</Link>
           <Link to="/agenda" className="hover:text-primary transition-colors">Agenda</Link>
           <Link to="/conferencistas" className="hover:text-primary transition-colors">Conferencistas</Link>

@@ -1,5 +1,4 @@
 import { Outlet, useLocation } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
 import Navbar from './Navbar'
 import Footer from './Footer'
 import ScrollToTop from '../ui/ScrollToTop'
@@ -11,14 +10,13 @@ export default function PublicLayout() {
       <ScrollToTop />
       <Navbar />
       <main className="flex-1">
-        <motion.div
+        {/* Usamos key para re-montar en cada ruta y disparar la animación CSS */}
+        <div
           key={location.pathname}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, ease: 'easeOut' }}
+          className="page-enter"
         >
           <Outlet />
-        </motion.div>
+        </div>
       </main>
       <Footer />
     </div>

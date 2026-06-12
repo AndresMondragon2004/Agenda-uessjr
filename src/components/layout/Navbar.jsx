@@ -84,31 +84,33 @@ export default function Navbar({ isPreview = false, forceDarkMode = null }) {
     <>
       {/* ━━━━━━━━━━━  NAVBAR  ━━━━━━━━━━━ */}
       <header
-        className={`${isPreview ? 'absolute' : 'fixed'} top-0 inset-x-0 z-50 transition-all duration-300 ${
+        className={`${isPreview ? 'absolute' : 'fixed'} top-0 left-0 right-0 z-50 transition-all duration-300 ${
           scrolled
             ? 'bg-bg-main/98 dark:bg-bg-dark/98 backdrop-blur-md shadow-md border-b border-gray-100 dark:border-emerald-900/40'
             : 'bg-bg-main dark:bg-bg-dark shadow-sm border-b border-gray-100/80 dark:border-emerald-900/30'
         }`}
-        style={{ height: 64 }}
+        style={{ height: 72 }}
       >
 
-        <div className="mx-auto h-full flex items-center justify-between px-4 sm:px-6 lg:px-8 max-w-7xl">
+        <div className="mx-auto h-full flex items-center justify-between px-4 sm:px-6 lg:px-8 max-w-7xl gap-4">
 
-          <NavLink to="/" aria-label="Inicio">
-            <BrandedLogo isDarkTheme={darkMode} />
-          </NavLink>
+          <div className="flex-shrink-0">
+            <NavLink to="/" aria-label="Inicio">
+              <BrandedLogo isDarkTheme={darkMode} />
+            </NavLink>
+          </div>
 
-          {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-8 h-full" aria-label="Navegación principal">
+          {/* Desktop nav - Centered */}
+          <nav className="hidden md:flex items-center gap-10 h-full flex-1 justify-center" aria-label="Navegación principal">
             {NAV_LINKS.map(({ label, to }) => (
               <NavLink
                 key={to}
                 to={to}
                 end={to === '/'}
                 className={({ isActive }) =>
-                  `relative h-full flex items-center text-sm font-medium transition-colors duration-150 whitespace-nowrap pb-1 ${
+                  `relative h-full flex items-center text-[15px] font-medium transition-colors duration-150 whitespace-nowrap pt-1 ${
                     isActive
-                      ? 'font-bold text-primary dark:text-emerald-400'
+                      ? 'font-bold text-gray-900 dark:text-emerald-400'
                       : 'text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-emerald-400'
                   }`
                 }
@@ -119,7 +121,7 @@ export default function Navbar({ isPreview = false, forceDarkMode = null }) {
                     {isActive && (
                       <motion.div
                         layoutId={isPreview ? undefined : "activeUnderline"}
-                        className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary dark:bg-emerald-400 rounded-full"
+                        className="absolute bottom-0 left-0 right-0 h-[3px] bg-primary dark:bg-emerald-400 rounded-t-full"
                         transition={isPreview ? { duration: 0 } : { type: 'spring', stiffness: 380, damping: 30 }}
                       />
                     )}
@@ -130,39 +132,39 @@ export default function Navbar({ isPreview = false, forceDarkMode = null }) {
           </nav>
 
           {/* Right actions */}
-          <div className="flex items-center gap-2">
-
-            {/* Notifications (Pro) */}
-            {isLoggedIn && !isAdmin && <NotificationBell />}
+          <div className="flex items-center gap-3 flex-shrink-0">
 
             {/* Dark mode toggle */}
             <button
               onClick={toggleDark}
               aria-label={darkMode ? 'Modo claro' : 'Modo oscuro'}
-              className="p-2 rounded-lg text-gray-400 dark:text-gray-500 hover:text-primary dark:hover:text-emerald-400 hover:bg-primary/10 dark:hover:bg-emerald-900/30 transition-colors"
+              className="p-2.5 rounded-full text-gray-400 dark:text-gray-500 hover:text-primary dark:hover:text-emerald-400 hover:bg-gray-100 dark:hover:bg-emerald-900/20 transition-all active:scale-95 mr-1"
             >
-              {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+              {darkMode ? <Sun size={20} /> : <Moon size={20} />}
             </button>
 
             {/* Auth desktop */}
             {isLoggedIn ? (
-              <div className="hidden md:flex items-center gap-2">
+              <div className="hidden md:flex items-center gap-3">
+                {/* Notifications (Pro) */}
+                {!isAdmin && <NotificationBell />}
+                
                 <Link
                   to={isAdmin ? "/admin/dashboard" : "/mi-agenda"}
-                  className="text-sm font-semibold text-primary dark:text-emerald-400 hover:underline px-3 py-1.5"
+                  className="px-6 py-2.5 rounded-full text-sm font-bold text-primary dark:text-emerald-400 border-2 border-primary/20 dark:border-emerald-700/50 hover:bg-primary/5 dark:hover:bg-emerald-900/30 transition-all active:scale-95"
                 >
                   {isAdmin ? "Panel Admin" : "Mi agenda"}
                 </Link>
                 <div className="relative group">
-                  <button className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm shadow-sm hover:shadow-md hover:scale-105 transition-all">
+                  <button className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm shadow-md hover:shadow-lg hover:scale-105 transition-all">
                     {isAdmin ? 'A' : (estudiante?.nombre?.charAt(0)?.toUpperCase() || 'U')}
                   </button>
-                  <div className="absolute right-0 top-full mt-2 w-52 bg-white dark:bg-[#122A1C] rounded-xl shadow-xl border border-gray-100 dark:border-emerald-900/50 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                  <div className="absolute right-0 top-full mt-2 w-52 bg-white dark:bg-[#122A1C] rounded-2xl shadow-2xl border border-gray-100 dark:border-emerald-900/50 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
                     <div className="px-4 py-2.5 border-b border-gray-100 dark:border-emerald-900/40">
                       <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 truncate">
                         {isAdmin ? 'Administrador' : `${estudiante?.nombre} ${estudiante?.apellidos}`}
                       </p>
-                      <p className="text-xs text-gray-400 dark:text-gray-500 truncate mt-0.5">
+                      <p className="text-[10px] text-gray-400 dark:text-gray-500 truncate mt-0.5 uppercase tracking-widest font-bold">
                         {isAdmin ? 'Admin' : estudiante?.correo}
                       </p>
                     </div>
@@ -198,16 +200,16 @@ export default function Navbar({ isPreview = false, forceDarkMode = null }) {
                 </div>
               </div>
             ) : (
-              <div className="hidden md:flex items-center gap-2">
+              <div className="hidden md:flex items-center gap-3">
                 <Link
                   to="/login"
-                  className="px-4 py-2 rounded-xl text-sm font-semibold text-primary dark:text-emerald-400 border border-primary/30 dark:border-emerald-700/50 hover:bg-primary/10 dark:hover:bg-emerald-900/30 transition-colors"
+                  className="px-6 py-2.5 rounded-full text-sm font-bold text-gray-700 dark:text-emerald-400 border-2 border-gray-200 dark:border-emerald-700/50 hover:bg-gray-50 dark:hover:bg-emerald-900/30 transition-all active:scale-95"
                 >
                   Iniciar sesión
                 </Link>
                 <Link
                   to="/registro"
-                  className="px-4 py-2 rounded-xl text-sm font-semibold text-white bg-primary dark:bg-emerald-700 hover:opacity-90 dark:hover:bg-emerald-600 transition-colors shadow-sm"
+                  className="px-6 py-2.5 rounded-full text-sm font-bold text-white bg-primary dark:bg-emerald-700 hover:opacity-90 dark:hover:bg-emerald-600 transition-all shadow-md shadow-primary/20 active:scale-95"
                 >
                   Registrarse
                 </Link>

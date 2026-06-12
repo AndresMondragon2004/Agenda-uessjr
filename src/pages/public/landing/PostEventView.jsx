@@ -9,19 +9,19 @@ import { generateConstanciaPDF } from '../../../utils/pdfGenerator'
 
 /* ─── CSS de animaciones (Unificado con ActiveEventView) ─────────────────── */
 const ANIM_CSS = `
-  @keyframes fadeUp    { from { opacity:0; transform:translateY(24px) } to { opacity:1; transform:translateY(0) } }
-  @keyframes scaleIn   { from { opacity:0; transform:scale(.93)       } to { opacity:1; transform:scale(1)     } }
+  @keyframes fadeUp    { from { opacity:0; transform:translateY(16px) } to { opacity:1; transform:translateY(0) } }
+  @keyframes scaleIn   { from { opacity:0; transform:scale(.96)       } to { opacity:1; transform:scale(1)     } }
   @keyframes floatSlow { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-18px)} }
   @keyframes floatMed  { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
   @keyframes shimmer   { from{background-position:200% 0} to{background-position:-200% 0} }
 
-  .anim-fade-up   { animation: fadeUp  .6s ease both }
-  .anim-scale-in  { animation: scaleIn .6s ease both }
-  .anim-delay-100 { animation-delay:.10s }
-  .anim-delay-200 { animation-delay:.20s }
-  .anim-delay-300 { animation-delay:.30s }
-  .anim-delay-400 { animation-delay:.40s }
-  .anim-delay-800 { animation-delay:.80s }
+  .anim-fade-up   { animation: fadeUp  .35s ease both }
+  .anim-scale-in  { animation: scaleIn .35s ease both }
+  .anim-delay-100 { animation-delay:.06s }
+  .anim-delay-200 { animation-delay:.12s }
+  .anim-delay-300 { animation-delay:.18s }
+  .anim-delay-400 { animation-delay:.24s }
+  .anim-delay-800 { animation-delay:.48s }
 `
 
 /* ─── Intersection Observer Hook ────────────────────────────────────────── */
