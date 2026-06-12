@@ -314,11 +314,9 @@ export default function SessionForm() {
         const path = `fotos/${Date.now()}.${ext}`
         const { data: up, error: upErr } = await supabase
           .storage.from('ponentes').upload(path, fotoFile)
-        if (!upErr) {
-          const { data: urlData } = supabase
-            .storage.from('ponentes').getPublicUrl(up.path)
-          payload.ponente_foto_url = urlData.publicUrl
-        }
+        if (upErr) throw new Error('Error subiendo foto de ponente: ' + upErr.message)
+        const { data: urlData } = supabase.storage.from('ponentes').getPublicUrl(up.path)
+        payload.ponente_foto_url = urlData.publicUrl
       }
 
       // Subir logo de la institución y guardarlo globalmente
@@ -327,16 +325,15 @@ export default function SessionForm() {
         const path = `instituciones/${Date.now()}.${ext}`
         const { data: up, error: upErr } = await supabase
           .storage.from('logos').upload(path, logoFile)
-        if (!upErr) {
-          const { data: urlData } = supabase
-            .storage.from('logos').getPublicUrl(up.path)
-          // Insertar en la tabla instituciones para reportes
-          await supabase.from('instituciones').insert([{
-            nombre: formData.ponente_institucion || 'Institución',
-            logotipo_url: urlData.publicUrl,
-            orden: 99
-          }])
-        }
+        if (upErr) throw new Error('Error subiendo logo de institución: ' + upErr.message)
+        const { data: urlData } = supabase.storage.from('logos').getPublicUrl(up.path)
+        
+        // Insertar en la tabla instituciones para reportes
+        await supabase.from('instituciones').insert([{
+          nombre: formData.ponente_institucion || 'Institución',
+          logotipo_url: urlData.publicUrl,
+          orden: 99
+        }])
       }
 
       if (id) {
@@ -348,7 +345,8 @@ export default function SessionForm() {
       setSuccess(true)
       setTimeout(() => navigate('/admin/sesiones'), 2000)
     } catch (err) {
-      setError(err.message)
+      console.error(err)
+      setError(err.message || 'Error al guardar la sesión')
     } finally {
       setLoading(false)
     }
