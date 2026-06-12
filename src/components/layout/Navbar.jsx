@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { NavLink, Link, useLocation } from 'react-router-dom'
+import { NavLink, Link, useLocation, useNavigate } from 'react-router-dom'
 import { Moon, Sun, Menu, X, GraduationCap } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useAuth } from '../../context/AuthContext'
@@ -34,6 +34,7 @@ function drawerLinkClass({ isActive }) {
 
 export default function Navbar({ isPreview = false, forceDarkMode = null }) {
   const location                            = useLocation()
+  const navigate                            = useNavigate()
   const { isLoggedIn, estudiante, isAdmin, signOut } = useAuth()
   const { settings } = useSettings()
   const mostrarPonentes = settings?.feature_flags?.mostrar_ponentes !== false
@@ -162,7 +163,7 @@ export default function Navbar({ isPreview = false, forceDarkMode = null }) {
                   {isAdmin ? "Panel Admin" : "Mi agenda"}
                 </Link>
                 <div className="relative group">
-                  <button className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm shadow-md hover:shadow-lg hover:scale-105 transition-all">
+                  <button className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-[#05140B] dark:text-white font-bold text-sm shadow-md hover:shadow-lg hover:scale-105 transition-all">
                     {isAdmin ? 'A' : (estudiante?.nombre?.charAt(0)?.toUpperCase() || 'U')}
                   </button>
                   <div className="absolute right-0 top-full mt-2 w-52 bg-white dark:bg-[#122A1C] rounded-2xl shadow-2xl border border-gray-100 dark:border-emerald-900/50 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
@@ -197,7 +198,7 @@ export default function Navbar({ isPreview = false, forceDarkMode = null }) {
                       </>
                     )}
                     <button
-                      onClick={async () => { try { await signOut() } catch (e) {} }}
+                      onClick={async () => { try { await signOut(); navigate('/'); } catch (e) {} }}
                       className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors border-t border-gray-100 dark:border-emerald-900/40 mt-1"
                     >
                       Cerrar sesión
@@ -328,7 +329,7 @@ export default function Navbar({ isPreview = false, forceDarkMode = null }) {
                 </>
               )}
               <button
-                onClick={async () => { try { await signOut() } catch (e) {} closeDrawer() }}
+                onClick={async () => { try { await signOut(); navigate('/'); } catch (e) {} closeDrawer() }}
                 className="w-full py-2.5 rounded-xl text-sm font-semibold text-red-500 dark:text-red-400 border border-red-200 dark:border-red-900/40 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
               >
                 Cerrar sesión

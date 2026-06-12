@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
+import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import { Search, Mic2, ChevronRight, ChevronLeft, X, BookOpen, Building } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -325,7 +326,8 @@ export default function Speakers() {
     </div>
 
     {/* MODAL DETALLES DEL CONFERENCISTA */}
-    <AnimatePresence>
+    {createPortal(
+      <AnimatePresence>
       {selectedSpeaker && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
           {/* Backdrop */}
@@ -451,7 +453,9 @@ export default function Speakers() {
           </motion.div>
         </div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
+    )}
     </>
   )
 }
