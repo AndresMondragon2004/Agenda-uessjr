@@ -51,27 +51,14 @@ export default function Login() {
   const handleLogin = async e => {
     e.preventDefault()
     if (!correo || !password) {
-      setError('Ingresa tu correo o matrícula y contraseña.')
+      setError('Ingresa tu correo electrónico y contraseña.')
       return
-    }
-    
-    // Si es una matrícula de 8 a 10 dígitos, buscamos su correo real
-    let emailToLogin = correo.trim()
-    if (/^\d{8,10}$/.test(emailToLogin)) {
-      try {
-        const { data: realEmail, error: rpcErr } = await supabase.rpc('get_email_by_matricula', { p_matricula: emailToLogin })
-        if (!rpcErr && realEmail) {
-          emailToLogin = realEmail
-        }
-      } catch (err) {
-        console.error("Error buscando correo por matrícula:", err)
-      }
     }
 
     try {
       setSubmitting(true)
       setError(null)
-      await signIn(emailToLogin, password)
+      await signIn(correo.trim(), password)
       setPendingRedirect(true)
       // No redirigimos aquí — dejamos que el useEffect detecte el cambio de rol
     } catch (err) {
@@ -122,7 +109,7 @@ export default function Login() {
       <form onSubmit={handleLogin} className="space-y-6">
         <div>
           <label htmlFor="input-correo" className="block text-xs font-bold text-gray-500 dark:text-gray-400 tracking-wider mb-2 uppercase">
-            Matrícula o correo electrónico
+            Correo electrónico
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
@@ -133,7 +120,7 @@ export default function Login() {
               type="text"
               value={correo}
               onChange={e => setCorreo(e.target.value)}
-              placeholder="Ej. 13220024"
+              placeholder="Ej. estudiante@umb.edu.mx"
               className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-[#0F2018] border border-gray-100 dark:border-emerald-900/50 rounded-xl focus:bg-white dark:focus:bg-[#0F2018] focus:ring-2 focus:ring-[#1a3b2b] focus:border-transparent outline-none text-gray-900 dark:text-gray-300 text-sm transition-all"
             />
           </div>
