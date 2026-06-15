@@ -55,10 +55,17 @@ export default function Login() {
       return
     }
     
-    // Si es una matrícula de 8 a 10 dígitos, la convertimos en correo institucional
-    let emailToLogin = correo
-    if (/^\d{8,10}$/.test(correo.trim())) {
-      emailToLogin = `${correo.trim()}@umb.edu.mx`
+    // Si es una matrícula de 8 a 10 dígitos, buscamos su correo real
+    let emailToLogin = correo.trim()
+    if (/^\d{8,10}$/.test(emailToLogin)) {
+      try {
+        const { data: realEmail, error: rpcErr } = await supabase.rpc('get_email_by_matricula', { p_matricula: emailToLogin })
+        if (!rpcErr && realEmail) {
+          emailToLogin = realEmail
+        }
+      } catch (err) {
+        console.error("Error buscando correo por matrícula:", err)
+      }
     }
 
     try {
